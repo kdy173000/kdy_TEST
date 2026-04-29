@@ -423,7 +423,6 @@ button { font-family: inherit; cursor: pointer; }
   <div class="sb-footer">
     관리자 : 조상덕 과장, 박철완 과장<br>
     페이지 제작자 : 김다영 대리
-    <button class="sb-admin-btn" onclick="openAdmin()" title="관리자 설정">🔒</button>
   </div>
 </nav>
 
@@ -489,9 +488,13 @@ button { font-family: inherit; cursor: pointer; }
       <div class="trip-sub">04.28 → 05.02</div>
     </div>
     <div>
-      <div class="rp-label">🕐 세계 시계</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <span class="rp-label" style="margin-bottom:0">🕐 세계 시계</span>
+        <button class="sb-admin-btn" onclick="openAdmin()" title="관리자 설정" style="float:none;opacity:0.45;font-size:13px">🔒</button>
+      </div>
       <div class="clock-wrapper">
-        <select class="clock-tz-select" id="tzSel"></select>
+        <select id="tzSel" style="display:none"></select>
+        <div id="tzLabelDisplay" style="font-size:12px;color:var(--text2);text-align:center;letter-spacing:0.02em;padding:2px 0"></div>
         <div class="clock-face" id="clockFace">
           <div class="c-digital-block">
             <div class="c-time-str" id="timeStr">00:00:00</div>
@@ -548,7 +551,7 @@ const KEY_DEFAULT  = 'admin_tz_default';
 const KEY_ENABLED  = 'admin_tz_enabled';
 const KEY_SESSION  = 'admin_session';
 const KEY_TZ       = 'tz';
-const DEFAULT_PW   = 'fireball2024';
+const DEFAULT_PW   = 'kdy17300';
 const DEFAULT_TZ   = 'Asia/Kolkata';
 
 function getAdminPw()      { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
@@ -574,6 +577,12 @@ function buildTzDropdown() {
   // 저장된 타임존이 표시 목록에 있으면 유지, 아니면 기본값
   if ([...sel.options].some(o => o.value === current)) sel.value = current;
   else sel.value = sel.options[0]?.value || '';
+  // 메인 화면 라벨 업데이트 (드롭다운 대신 텍스트로 표시)
+  const lbl = document.getElementById('tzLabelDisplay');
+  if (lbl) {
+    const found = ALL_TZ.find(t => t.v === sel.value);
+    lbl.textContent = found ? found.l : sel.value;
+  }
 }
 
 // ============================================================
