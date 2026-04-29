@@ -43,7 +43,6 @@ button { font-family: inherit; cursor: pointer; }
 
 .layout { display: flex; min-height: 100vh; }
 
-/* 사이드바 */
 .sidebar {
   width: 236px; flex-shrink: 0; background: var(--bg2);
   border-right: 1px solid var(--border);
@@ -52,9 +51,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 .sb-logo { display: flex; align-items: center; gap: 9px; padding: 16px 12px 12px; }
 .sb-logo-icon {
-  width: 26px; height: 26px; background: #e03131; border-radius: 5px;
+  width: 26px; height: 26px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 900; color: #fff; flex-shrink: 0;
 }
 .sb-logo-name { font-size: 14px; font-weight: 700; }
 .sb-group-label {
@@ -82,7 +80,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .sb-admin-btn:hover { opacity: 1; }
 
-/* 메인 */
 .main { flex: 1; display: flex; overflow: hidden; }
 .center { flex: 1; padding: 44px 52px 60px; overflow-y: auto; min-width: 0; }
 .page-h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
@@ -94,7 +91,6 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 13.5px; font-weight: 600; margin-bottom: 10px; color: var(--text);
 }
 
-/* 공지 테이블 */
 .tbl { width: 100%; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .tbl-head {
   display: grid; grid-template-columns: 22px 92px 1fr 60px;
@@ -129,7 +125,6 @@ button { font-family: inherit; cursor: pointer; }
 .row-sum   { font-size: 12px; color: var(--text2); margin-top: 1px; }
 .row-auth  { font-size: 12px; color: var(--text3); text-align: right; padding-top: 2px; }
 
-/* 캘린더 */
 .cal-wrap { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .cal-nav {
   display: flex; align-items: center; justify-content: space-between;
@@ -181,7 +176,6 @@ button { font-family: inherit; cursor: pointer; }
 .ev-h { background: rgba(200,160,60,.2);  color: #c89a3c; }
 .ev-p { background: rgba(210,80,80,.15);  color: #cc6060; }
 
-/* 우측 패널 */
 .rp {
   width: 220px; flex-shrink: 0;
   border-left: 1px solid var(--border); background: var(--bg2);
@@ -202,7 +196,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .trip-sub { font-size: 11.5px; color: var(--text3); margin-bottom: 2px; }
 
-/* 세계 시계 */
 .clock-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .clock-tz-select {
   width: 100%; padding: 6px 10px;
@@ -240,7 +233,6 @@ button { font-family: inherit; cursor: pointer; }
 .c-time-str { font-size: 19px; font-weight: 500; color: var(--text); letter-spacing: 0.04em; line-height: 1; }
 .c-date-str { margin-top: 5px; font-size: 11px; color: var(--text2); font-weight: 400; }
 
-/* 테마 버튼 */
 .theme-btn {
   position: fixed; top: 13px; right: 14px; z-index: 999;
   display: flex; align-items: center; gap: 5px;
@@ -250,7 +242,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 .theme-btn:hover { color: var(--text); }
 
-/* 어드민 모달 */
 .admin-overlay {
   position: fixed; inset: 0; z-index: 2000;
   background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
@@ -342,11 +333,8 @@ button { font-family: inherit; cursor: pointer; }
   <span id="t-ico">☀️</span><span id="t-lbl">라이트</span>
 </button>
 
-<!-- 어드민 모달 -->
 <div class="admin-overlay" id="adminOverlay" style="display:none" onclick="overlayClick(event)">
   <div class="admin-modal" id="adminModal">
-
-    <!-- 로그인 화면 -->
     <div id="adminLoginView">
       <div class="admin-title">🔒 관리자 로그인</div>
       <div class="admin-label">비밀번호</div>
@@ -360,46 +348,43 @@ button { font-family: inherit; cursor: pointer; }
         <button class="admin-btn secondary" onclick="closeAdmin()">취소</button>
       </div>
     </div>
-
-    <!-- 설정 화면 -->
     <div id="adminSettingsView" style="display:none">
       <div class="admin-title">⚙️ 시계 설정</div>
-
       <div class="admin-label">기본 타임존 (페이지 로드 시 기본 선택값)</div>
       <select id="adminDefaultTzSel" class="admin-select"></select>
-
       <hr class="admin-divider">
-
       <div class="admin-label">표시할 타임존 선택</div>
       <div class="admin-info" style="margin-bottom:8px">체크한 항목만 드롭다운에 표시됩니다.</div>
       <div class="admin-tz-list" id="adminTzList"></div>
-
       <hr class="admin-divider">
-
       <div class="admin-label">비밀번호 변경</div>
       <div style="display:flex;gap:8px;margin-bottom:4px">
         <input type="password" id="newPw1" class="admin-input" placeholder="새 비밀번호">
         <input type="password" id="newPw2" class="admin-input" placeholder="확인">
       </div>
       <div class="admin-err" id="pwErr"></div>
-
       <div class="admin-actions">
         <button class="admin-btn" onclick="saveAdminSettings()">저장</button>
         <button class="admin-btn secondary" onclick="adminLogout()">로그아웃</button>
-        <button class="admin-btn secondary" onclick="closeAdmin()">달a기</button>
+        <button class="admin-btn secondary" onclick="closeAdmin()">닫기</button>
       </div>
       <div class="admin-success" id="saveSuccess" style="display:none">✅ 설정이 저장되었습니다.</div>
     </div>
-
   </div>
 </div>
 
 <div class="layout">
-
-<!-- 사이드바 -->
 <nav class="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-icon">F</div>
+    <div class="sb-logo-icon">
+      <svg viewBox="0 0 120 120" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="58" fill="#9b1b30"/>
+        <circle cx="60" cy="60" r="42" fill="white"/>
+        <rect x="33" y="32" width="14" height="56" fill="#9b1b30" rx="2"/>
+        <rect x="33" y="32" width="42" height="14" fill="#9b1b30" rx="2"/>
+        <circle cx="85" cy="73" r="11" fill="#9b1b30"/>
+      </svg>
+    </div>
     <span class="sb-logo-name">파이어볼</span>
   </div>
   <div class="sb-group-label">사내 운영 관리</div>
@@ -407,11 +392,11 @@ button { font-family: inherit; cursor: pointer; }
   <div class="sb-item" onclick="go('org')"><span class="ico">👥</span>조직도</div>
   <div class="sb-item" onclick="go('calendar')"><span class="ico">📅</span>연차 및 출장</div>
   <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
-  <div class="sb-item sb-indent"><span class="ico">📦</span>제품 관리</div>
-  <div class="sb-item sb-indent"><span class="ico">🔄</span>제품 입고/출고/조정</div>
-  <div class="sb-item sb-indent"><span class="ico">📋</span>제품 신고 관리</div>
+  <div class="sb-item sb-indent" data-perm="재고조회"><span class="ico">📦</span>제품 관리</div>
+  <div class="sb-item sb-indent" data-perm="입출고관리"><span class="ico">🔄</span>제품 입고/출고/조정</div>
+  <div class="sb-item sb-indent" data-perm="제품 신고 관리"><span class="ico">📋</span>제품 신고 관리</div>
   <div class="sb-item sb-indent"><span class="ico">🚚</span>발주 진행 현황</div>
-  <div class="sb-item sb-indent"><span class="ico">🧪</span>원료 관리</div>
+  <div class="sb-item sb-indent" data-perm="원료관리"><span class="ico">🧪</span>원료 관리</div>
   <div class="sb-item sb-indent"><span class="ico">🏷️</span>제품 포장 및 정보</div>
   <div class="sb-group-label" style="margin-top:6px">디자인팀</div>
   <div class="sb-item sb-indent"><span class="ico">🎨</span>디자인 업무분배</div>
@@ -426,7 +411,6 @@ button { font-family: inherit; cursor: pointer; }
   </div>
 </nav>
 
-<!-- 메인 -->
 <div class="main">
   <div class="center">
     <h1 class="page-h1">파이어볼</h1>
@@ -508,9 +492,6 @@ button { font-family: inherit; cursor: pointer; }
 </div>
 
 <script>
-// ============================================================
-// 전체 타임존 목록
-// ============================================================
 const ALL_TZ = [
   {v:'Asia/Seoul',      l:'대한민국 / 서울'},
   {v:'Asia/Tokyo',      l:'일본 / 도쿄'},
@@ -543,214 +524,130 @@ const ALL_TZ = [
   {v:'Pacific/Auckland',l:'뉴질랜드 / 오클랜드'},
 ];
 
-// ============================================================
-// 어드민 / localStorage 키
-// ============================================================
-const KEY_PW       = 'admin_pw';
-const KEY_DEFAULT  = 'admin_tz_default';
-const KEY_ENABLED  = 'admin_tz_enabled';
-const KEY_SESSION  = 'admin_session';
-const KEY_TZ       = 'tz';
-const DEFAULT_PW   = 'kdy17300';
-const DEFAULT_TZ   = 'Asia/Kolkata';
+const KEY_PW='admin_pw', KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
+const KEY_SESSION='admin_session', KEY_TZ='tz';
+const DEFAULT_PW='kdy17300', DEFAULT_TZ='Asia/Kolkata';
 
-function getAdminPw()      { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
-function getDefaultTz()    { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
-function getEnabledList()  {
-  const s = localStorage.getItem(KEY_ENABLED);
-  return s ? JSON.parse(s) : ALL_TZ.map(t=>t.v);
-}
+function getAdminPw()    { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
+function getDefaultTz()  { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
+function getEnabledList(){ const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
 
-// ============================================================
-// 시계 드롭다운 세팅
-// ============================================================
-function buildTzDropdown() {
-  const sel = document.getElementById('tzSel');
-  const enabled = getEnabledList();
-  const current = sel.value || localStorage.getItem(KEY_TZ) || getDefaultTz();
-  sel.innerHTML = '';
-  ALL_TZ.filter(t => enabled.includes(t.v)).forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.v; opt.textContent = t.l;
-    sel.appendChild(opt);
+function buildTzDropdown(){
+  const sel=document.getElementById('tzSel');
+  const enabled=getEnabledList();
+  const current=sel.value||localStorage.getItem(KEY_TZ)||getDefaultTz();
+  sel.innerHTML='';
+  ALL_TZ.filter(t=>enabled.includes(t.v)).forEach(t=>{
+    const opt=document.createElement('option');
+    opt.value=t.v; opt.textContent=t.l; sel.appendChild(opt);
   });
-  // 저장된 타임존이 표시 목록에 있으면 유지, 아니면 기본값
-  if ([...sel.options].some(o => o.value === current)) sel.value = current;
-  else sel.value = sel.options[0]?.value || '';
-  // 메인 화면 라벨 업데이트 (드롭다운 대신 텍스트로 표시)
-  const lbl = document.getElementById('tzLabelDisplay');
-  if (lbl) {
-    const found = ALL_TZ.find(t => t.v === sel.value);
-    lbl.textContent = found ? found.l : sel.value;
-  }
+  if([...sel.options].some(o=>o.value===current)) sel.value=current;
+  else sel.value=sel.options[0]?.value||'';
+  const lbl=document.getElementById('tzLabelDisplay');
+  if(lbl){ const found=ALL_TZ.find(t=>t.v===sel.value); lbl.textContent=found?found.l:sel.value; }
 }
 
-// ============================================================
-// 테마
-// ============================================================
 function toggleTheme(){
-  const h=document.documentElement, dark=h.dataset.theme==='dark';
+  const h=document.documentElement,dark=h.dataset.theme==='dark';
   h.dataset.theme=dark?'light':'dark';
   document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
   document.getElementById('t-lbl').textContent=dark?'다크':'라이트';
   if(window._applyTickColors) window._applyTickColors();
 }
-
 function go(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
 
-// ============================================================
-// 어드민 모달
-// ============================================================
-function openAdmin() {
-  document.getElementById('adminOverlay').style.display = 'flex';
-  document.getElementById('adminPwInput').value = '';
-  document.getElementById('adminErr').textContent = '';
-  if (sessionStorage.getItem(KEY_SESSION) === '1') {
-    showSettings();
-  } else {
-    document.getElementById('adminLoginView').style.display = '';
-    document.getElementById('adminSettingsView').style.display = 'none';
-    setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
+function openAdmin(){
+  document.getElementById('adminOverlay').style.display='flex';
+  document.getElementById('adminPwInput').value='';
+  document.getElementById('adminErr').textContent='';
+  if(sessionStorage.getItem(KEY_SESSION)==='1') showSettings();
+  else{
+    document.getElementById('adminLoginView').style.display='';
+    document.getElementById('adminSettingsView').style.display='none';
+    setTimeout(()=>document.getElementById('adminPwInput').focus(),100);
   }
 }
-
-function closeAdmin() {
-  document.getElementById('adminOverlay').style.display = 'none';
+function closeAdmin(){ document.getElementById('adminOverlay').style.display='none'; }
+function overlayClick(e){ if(e.target===document.getElementById('adminOverlay')) closeAdmin(); }
+function adminLogin(){
+  const pw=document.getElementById('adminPwInput').value;
+  if(pw===getAdminPw()){ sessionStorage.setItem(KEY_SESSION,'1'); showSettings(); }
+  else document.getElementById('adminErr').textContent='비밀번호가 일치하지 않습니다.';
 }
-
-function overlayClick(e) {
-  if (e.target === document.getElementById('adminOverlay')) closeAdmin();
-}
-
-function adminLogin() {
-  const pw = document.getElementById('adminPwInput').value;
-  if (pw === getAdminPw()) {
-    sessionStorage.setItem(KEY_SESSION, '1');
-    showSettings();
-  } else {
-    document.getElementById('adminErr').textContent = '비밀번호가 일치하지 않습니다.';
-  }
-}
-
-function adminLogout() {
+function adminLogout(){
   sessionStorage.removeItem(KEY_SESSION);
-  document.getElementById('adminLoginView').style.display = '';
-  document.getElementById('adminSettingsView').style.display = 'none';
-  document.getElementById('adminPwInput').value = '';
-  document.getElementById('adminErr').textContent = '';
+  document.getElementById('adminLoginView').style.display='';
+  document.getElementById('adminSettingsView').style.display='none';
+  document.getElementById('adminPwInput').value='';
+  document.getElementById('adminErr').textContent='';
 }
-
-function showSettings() {
-  document.getElementById('adminLoginView').style.display = 'none';
-  document.getElementById('adminSettingsView').style.display = '';
-  document.getElementById('saveSuccess').style.display = 'none';
-  document.getElementById('pwErr').textContent = '';
-  document.getElementById('newPw1').value = '';
-  document.getElementById('newPw2').value = '';
-
-  // 기본타임존 셀렉트 채우기
-  const defSel = document.getElementById('adminDefaultTzSel');
-  defSel.innerHTML = '';
-  ALL_TZ.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.v; opt.textContent = t.l;
-    defSel.appendChild(opt);
-  });
-  defSel.value = getDefaultTz();
-
-  // 체크박스 리스트
-  const enabled = getEnabledList();
-  const list = document.getElementById('adminTzList');
-  list.innerHTML = '';
-  ALL_TZ.forEach(t => {
-    const item = document.createElement('div');
-    item.className = 'admin-tz-item';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.value = t.v;
-    cb.checked = enabled.includes(t.v);
-    const lbl = document.createElement('span');
-    lbl.textContent = t.l;
-    if (cb.checked) lbl.className = 'checked';
-    cb.addEventListener('change', () => {
-      lbl.className = cb.checked ? 'checked' : '';
-    });
+function showSettings(){
+  document.getElementById('adminLoginView').style.display='none';
+  document.getElementById('adminSettingsView').style.display='';
+  document.getElementById('saveSuccess').style.display='none';
+  document.getElementById('pwErr').textContent='';
+  document.getElementById('newPw1').value='';
+  document.getElementById('newPw2').value='';
+  const defSel=document.getElementById('adminDefaultTzSel');
+  defSel.innerHTML='';
+  ALL_TZ.forEach(t=>{ const opt=document.createElement('option'); opt.value=t.v; opt.textContent=t.l; defSel.appendChild(opt); });
+  defSel.value=getDefaultTz();
+  const enabled=getEnabledList();
+  const list=document.getElementById('adminTzList');
+  list.innerHTML='';
+  ALL_TZ.forEach(t=>{
+    const item=document.createElement('div'); item.className='admin-tz-item';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=t.v; cb.checked=enabled.includes(t.v);
+    const lbl=document.createElement('span'); lbl.textContent=t.l;
+    if(cb.checked) lbl.className='checked';
+    cb.addEventListener('change',()=>{ lbl.className=cb.checked?'checked':''; });
     item.appendChild(cb); item.appendChild(lbl);
-    item.addEventListener('click', e => { if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
+    item.addEventListener('click',e=>{ if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
     list.appendChild(item);
   });
 }
-
-function saveAdminSettings() {
-  // 비밀번호 변경 (입력한 경우)
-  const p1 = document.getElementById('newPw1').value;
-  const p2 = document.getElementById('newPw2').value;
-  if (p1 || p2) {
-    if (p1.length < 6) {
-      document.getElementById('pwErr').textContent = '비밀번호는 6자 이상이어야 합니다.';
-      return;
-    }
-    if (p1 !== p2) {
-      document.getElementById('pwErr').textContent = '비밀번호가 일치하지 않습니다.';
-      return;
-    }
-    localStorage.setItem(KEY_PW, p1);
-    document.getElementById('pwErr').textContent = '';
+function saveAdminSettings(){
+  const p1=document.getElementById('newPw1').value;
+  const p2=document.getElementById('newPw2').value;
+  if(p1||p2){
+    if(p1.length<6){ document.getElementById('pwErr').textContent='비밀번호는 6자 이상이어야 합니다.'; return; }
+    if(p1!==p2){ document.getElementById('pwErr').textContent='비밀번호가 일치하지 않습니다.'; return; }
+    localStorage.setItem(KEY_PW,p1);
+    document.getElementById('pwErr').textContent='';
   }
-
-  // 기본 타임존 저장
-  const def = document.getElementById('adminDefaultTzSel').value;
-  localStorage.setItem(KEY_DEFAULT, def);
-
-  // 활성화 타임존 저장
-  const checked = [...document.querySelectorAll('#adminTzList input[type=checkbox]')]
-    .filter(cb => cb.checked).map(cb => cb.value);
-  if (checked.length === 0) {
-    alert('타임존을 하나 이상 선택해주세요.');
-    return;
-  }
-  localStorage.setItem(KEY_ENABLED, JSON.stringify(checked));
-
-  // 드롭다운 업데이트
+  const def=document.getElementById('adminDefaultTzSel').value;
+  localStorage.setItem(KEY_DEFAULT,def);
+  const checked=[...document.querySelectorAll('#adminTzList input[type=checkbox]')].filter(cb=>cb.checked).map(cb=>cb.value);
+  if(checked.length===0){ alert('타임존을 하나 이상 선택해주세요.'); return; }
+  localStorage.setItem(KEY_ENABLED,JSON.stringify(checked));
   buildTzDropdown();
-  // 현재 선택된 타임존이 활성화 목록에 없으면 기본값으로 변경
-  const sel = document.getElementById('tzSel');
-  if (![...sel.options].some(o=>o.value===sel.value)) sel.value = def;
-  localStorage.setItem(KEY_TZ, sel.value);
-
-  const suc = document.getElementById('saveSuccess');
-  suc.style.display = 'flex';
-  setTimeout(() => suc.style.display='none', 3000);
+  const sel=document.getElementById('tzSel');
+  if(![...sel.options].some(o=>o.value===sel.value)) sel.value=def;
+  localStorage.setItem(KEY_TZ,sel.value);
+  const suc=document.getElementById('saveSuccess');
+  suc.style.display='flex';
+  setTimeout(()=>suc.style.display='none',3000);
 }
 
-// ============================================================
-// 세계 시계
-// ============================================================
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded',function(){
   buildTzDropdown();
-
-  const face    = document.getElementById('clockFace');
-  const tzSel   = document.getElementById('tzSel');
-  const timeStr = document.getElementById('timeStr');
-  const dateStr = document.getElementById('dateStr');
-
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+  const face=document.getElementById('clockFace');
+  const tzSel=document.getElementById('tzSel');
+  const timeStr=document.getElementById('timeStr');
+  const dateStr=document.getElementById('dateStr');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;';
   face.appendChild(svg);
-
   function applyTickColors(){
-    const styles = getComputedStyle(document.documentElement);
-    const major = styles.getPropertyValue('--tick-major').trim();
-    const minor = styles.getPropertyValue('--tick-minor').trim();
-    [...svg.querySelectorAll('line')].forEach((line,i)=>{
-      line.setAttribute('stroke', i%3===0 ? major : minor);
-    });
+    const styles=getComputedStyle(document.documentElement);
+    const major=styles.getPropertyValue('--tick-major').trim();
+    const minor=styles.getPropertyValue('--tick-minor').trim();
+    [...svg.querySelectorAll('line')].forEach((line,i)=>{ line.setAttribute('stroke',i%3===0?major:minor); });
   }
-  window._applyTickColors = applyTickColors;
-
+  window._applyTickColors=applyTickColors;
   function drawTicks(){
-    const SIZE=face.clientWidth, CX=SIZE/2, CY=SIZE/2;
-    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE);
-    svg.innerHTML='';
+    const SIZE=face.clientWidth,CX=SIZE/2,CY=SIZE/2;
+    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE); svg.innerHTML='';
     for(let i=0;i<12;i++){
       const rad=(i*30-90)*Math.PI/180;
       const outerR=CX-(SIZE*0.033);
@@ -767,13 +664,10 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     applyTickColors();
   }
-
   ['hour','minute','second'].forEach(cls=>{
-    const d=document.createElement('div');
-    d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
+    const d=document.createElement('div'); d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
   });
   face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
-
   function getTimeParts(tz){
     const now=new Date();
     const fmt=new Intl.DateTimeFormat('ko-KR',{
@@ -782,18 +676,12 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     const map={};
     fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
-    return {
-      month:Number(map.month),day:Number(map.day),weekday:map.weekday,
-      hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),
-      ms:now.getMilliseconds()
-    };
+    return { month:Number(map.month),day:Number(map.day),weekday:map.weekday,
+      hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds() };
   }
-
   function tick(){
     const t=getTimeParts(tzSel.value||getDefaultTz());
-    const ss=t.second+(t.ms/1000);
-    const mm=t.minute+(ss/60);
-    const hh=(t.hour%12)+(mm/60);
+    const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
     face._hour.style.transform=`rotate(${hh*30}deg)`;
     face._minute.style.transform=`rotate(${mm*6}deg)`;
     face._second.style.transform=`rotate(${ss*6}deg)`;
@@ -801,15 +689,11 @@ document.addEventListener('DOMContentLoaded', function(){
     dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
     requestAnimationFrame(tick);
   }
-
-  tzSel.addEventListener('change',()=>{ localStorage.setItem(KEY_TZ, tzSel.value); });
-  window.addEventListener('resize', drawTicks);
+  tzSel.addEventListener('change',()=>{ localStorage.setItem(KEY_TZ,tzSel.value); });
+  window.addEventListener('resize',drawTicks);
   drawTicks(); tick();
 });
 
-// ============================================================
-// 캘린더
-// ============================================================
 let cY,cM2;
 const HOL={
   '2026-01-01':'신정','2026-01-28':'설날 연휴','2026-01-29':'설날','2026-01-30':'설날 연휴',
@@ -848,9 +732,7 @@ const EVS=[
   {s:'2026-05-04',t:'l',l:'연차',w:'조수빈'},
   {s:'2026-05-04',t:'l',l:'연차',w:'박철완'},
 ];
-
 function dk(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
-
 function evForDate(y,m,d){
   const key=dk(y,m,d),res=[];
   for(const ev of EVS){
@@ -859,7 +741,6 @@ function evForDate(y,m,d){
   }
   return res;
 }
-
 function renderCal(){
   const now=new Date();
   if(cY===undefined){cY=now.getFullYear();cM2=now.getMonth()+1;}
@@ -891,9 +772,49 @@ function renderCal(){
   }
   document.getElementById('cal-body').innerHTML=html;
 }
-
 function chMon(d){cM2+=d;if(cM2>12){cM2=1;cY++;}if(cM2<1){cM2=12;cY--;}renderCal();}
 function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;renderCal();}
+
+// ============================================================
+// 로그인 체크 및 권한 기반 사이드바 제어
+// ============================================================
+(function(){
+  const fbUser = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+  if (!fbUser) { window.location.href = 'index.html'; return; }
+  if (fbUser.role === 'admin') { window.location.href = 'admin.html'; return; }
+
+  // 사용자 이름 표시
+  const footer = document.querySelector('.sb-footer');
+  if (footer) {
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text2);';
+    nameEl.textContent = '로그인: ' + (fbUser.name || fbUser.id);
+    footer.appendChild(nameEl);
+  }
+
+  const permLinks = JSON.parse(localStorage.getItem('fb_perm_links') || '{}');
+  const userPerms = fbUser.perms || [];
+  const isAdmin = fbUser.role === 'admin' || userPerms.includes('관리자');
+
+  document.querySelectorAll('.sb-item[data-perm]').forEach(item => {
+    const perm = item.dataset.perm;
+    const hasAccess = isAdmin || userPerms.includes(perm);
+    const url = permLinks[perm];
+    if (hasAccess) {
+      item.style.opacity = '1';
+      if (url) {
+        item.style.cursor = 'pointer';
+        item.onclick = (e) => { e.stopPropagation(); window.open(url, '_blank'); };
+        item.title = url;
+      }
+    } else {
+      item.style.opacity = '0.3';
+      item.style.pointerEvents = 'none';
+      item.title = '접근 권한이 없습니다.';
+    }
+  });
+})();
+
 renderCal();
 </script>
 </body>
