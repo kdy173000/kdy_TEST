@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>직원 계정 관리</title>
+<title>직원 관리</title>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
@@ -12,7 +12,6 @@
   --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
   --hover:#222222; --shadow:rgba(0,0,0,.5);
   --input-bg:#242424; --input-border:#333;
-  --sel-border:#555; --opt-bg:#1e1e1e; --opt-text:#fff;
 }
 [data-theme="light"] {
   --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
@@ -20,7 +19,6 @@
   --text:#111111; --text2:#666666; --text3:#b0b0b0;
   --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
   --input-bg:#f7f7f7; --input-border:#d8d8d8;
-  --sel-border:#cfcfcf; --opt-bg:#fff; --opt-text:#111;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -42,20 +40,18 @@ body {
   font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
 }
 .tb-btn:hover { background:rgba(255,255,255,.22); }
-.container { max-width:860px; margin:0 auto; padding:36px 24px 60px; }
+.container { max-width:900px; margin:0 auto; padding:36px 24px 60px; }
 .page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
 .page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
-
-/* 추가 폼 */
 .add-card {
   background:var(--bg2); border:1px solid var(--border);
   border-radius:12px; padding:22px 20px; margin-bottom:24px;
 }
 .add-title { font-size:13.5px; font-weight:700; margin-bottom:16px; }
-.add-grid { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; }
+.add-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px; }
 .field { display:flex; flex-direction:column; gap:5px; }
 .field label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; }
-.field input, .field select {
+.field input {
   padding:8px 11px; border-radius:7px;
   border:1px solid var(--input-border);
   background:var(--input-bg); color:var(--text);
@@ -63,28 +59,36 @@ body {
   transition:border-color .15s;
 }
 .field input:focus { border-color:#9b1b30; }
-.field select { appearance:none; -webkit-appearance:none; cursor:pointer; }
-.field select option { background:var(--opt-bg); color:var(--opt-text); }
+.perm-label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; margin-bottom:8px; }
+.perm-group { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.perm-btn {
+  padding:5px 14px; border-radius:20px;
+  border:1.5px solid var(--border2);
+  background:none; color:var(--text2);
+  font-size:12.5px; font-family:inherit; cursor:pointer;
+  transition:all .15s;
+}
+.perm-btn:hover { border-color:#9b1b30; color:var(--text); }
+.perm-btn.on { border-color:transparent; color:#fff; background:#9b1b30; }
 .add-btn {
-  padding:8px 18px; border-radius:7px; border:none;
+  padding:9px 22px; border-radius:7px; border:none;
   background:#9b1b30; color:#fff;
   font-size:13.5px; font-weight:700; font-family:inherit;
-  cursor:pointer; transition:background .15s; white-space:nowrap;
-  align-self:end;
+  cursor:pointer; transition:background .15s;
 }
 .add-btn:hover { background:#7e1627; }
-.add-err { font-size:12px; color:#d95f5f; margin-top:8px; min-height:16px; }
-
-/* 테이블 */
+.add-err { font-size:12px; color:#d95f5f; margin-top:10px; min-height:16px; }
+.count-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.count-text { font-size:12px; color:var(--text2); }
 .tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
 .tbl-head {
-  display:grid; grid-template-columns:40px 1fr 1fr 80px 90px 100px;
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 1fr 100px;
   gap:8px; padding:8px 14px;
   background:var(--bg2); border-bottom:1px solid var(--border);
   font-size:11.5px; font-weight:600; color:var(--text3);
 }
 .tbl-row {
-  display:grid; grid-template-columns:40px 1fr 1fr 80px 90px 100px;
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 1fr 100px;
   gap:8px; padding:9px 14px; align-items:center;
   border-bottom:1px solid var(--border);
   font-size:13.5px; transition:background .1s;
@@ -94,18 +98,14 @@ body {
 .num { color:var(--text3); font-size:12px; }
 .pw-cell { display:flex; align-items:center; gap:6px; }
 .pw-text { font-family:monospace; font-size:12px; color:var(--text2); }
-.eye-btn {
-  background:none; border:none; cursor:pointer;
-  font-size:13px; opacity:.5; transition:opacity .1s; padding:0;
-}
+.eye-btn { background:none; border:none; cursor:pointer; font-size:13px; opacity:.5; transition:opacity .1s; padding:0; }
 .eye-btn:hover { opacity:1; }
-.role-badge {
+.perm-tags { display:flex; flex-wrap:wrap; gap:3px; }
+.perm-tag {
   display:inline-flex; align-items:center;
   padding:2px 8px; border-radius:20px;
-  font-size:11.5px; font-weight:600;
+  font-size:11px; font-weight:600;
 }
-.role-admin { background:rgba(155,27,48,.15); color:#c0354f; }
-.role-user  { background:rgba(74,138,244,.12); color:#4a8af4; }
 .actions { display:flex; gap:5px; }
 .act-btn {
   padding:3px 10px; border-radius:5px; border:1px solid var(--border);
@@ -114,17 +114,7 @@ body {
 }
 .act-btn:hover { background:var(--hover); color:var(--text); }
 .act-btn.del:hover { background:rgba(220,80,80,.12); color:#d95f5f; border-color:#d95f5f; }
-.empty-row {
-  padding:32px; text-align:center;
-  font-size:13px; color:var(--text3);
-}
-.count-bar {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:10px;
-}
-.count-text { font-size:12px; color:var(--text2); }
-
-/* 편집 모달 */
+.empty-row { padding:32px; text-align:center; font-size:13px; color:var(--text3); }
 .modal-overlay {
   position:fixed; inset:0; z-index:2000;
   background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
@@ -133,7 +123,7 @@ body {
 .modal {
   background:var(--bg2); border:1px solid var(--border);
   border-radius:12px; padding:26px 24px;
-  width:360px; max-width:95vw;
+  width:400px; max-width:95vw;
   box-shadow:0 20px 60px rgba(0,0,0,.4);
 }
 .modal-title { font-size:15px; font-weight:700; margin-bottom:18px; }
@@ -156,39 +146,31 @@ body {
 <body>
 
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <span class="topbar-title">직원 계정 관리</span>
-  </div>
+  <span class="topbar-title">직원 관리</span>
   <div class="topbar-right">
     <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
+    <button class="tb-btn" onclick="window.location.href='PermLinks.html'">🔗 권한 링크</button>
     <button class="tb-btn" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
 
 <div class="container">
-  <div class="page-title">직원 계정 관리</div>
-  <div class="page-sub">직원 로그인 아이디와 비밀번호를 등록하고 관리합니다.</div>
+  <div class="page-title">직원 관리</div>
+  <div class="page-sub">직원 계정을 등록하고 페이지 접근 권한을 설정합니다. 권한별 접근 URL은 <a href="PermLinks.html" style="color:#9b1b30;text-decoration:underline">권한 링크 설정</a>에서 관리하세요.</div>
 
-  <!-- 추가 폼 -->
   <div class="add-card">
     <div class="add-title">신규 직원 추가</div>
-    <div class="add-grid">
-      <div class="field"><label>DISPLAY NAME</label><input id="newName" placeholder="이름 (ex: 김다영)"></div>
-      <div class="field"><label>ACCOUNT ID</label><input id="newId" placeholder="아이디 (ex: dayoung)"></div>
-      <div class="field"><label>PASSWORD</label><input id="newPw" type="text" placeholder="비밀번호"></div>
-      <div class="field">
-        <label>ROLE</label>
-        <select id="newRole">
-          <option value="user">일반 직원</option>
-          <option value="admin">관리자</option>
-        </select>
-      </div>
-      <button class="add-btn" onclick="addUser()">추가</button>
+    <div class="add-row">
+      <div class="field"><label>이름</label><input id="newName" placeholder="예: 김다영"></div>
+      <div class="field"><label>아이디</label><input id="newId" placeholder="예: dayoung"></div>
+      <div class="field"><label>비밀번호</label><input id="newPw" type="text" placeholder="비밀번호"></div>
     </div>
+    <div class="perm-label">접근 권한 (복수 선택 가능)</div>
+    <div class="perm-group" id="newPerms"></div>
+    <button class="add-btn" onclick="addUser()">직원 추가</button>
     <div class="add-err" id="addErr"></div>
   </div>
 
-  <!-- 목록 -->
   <div class="count-bar">
     <span class="count-text" id="countText">전체 0명</span>
   </div>
@@ -201,20 +183,16 @@ body {
   </div>
 </div>
 
-<!-- 편집 모달 -->
 <div class="modal-overlay" id="editOverlay" style="display:none" onclick="if(event.target===this)closeEdit()">
   <div class="modal">
     <div class="modal-title">직원 정보 수정</div>
     <div class="modal-fields">
-      <div class="field"><label>DISPLAY NAME</label><input id="eName" placeholder="이름"></div>
-      <div class="field"><label>ACCOUNT ID</label><input id="eId" placeholder="아이디"></div>
-      <div class="field"><label>PASSWORD</label><input id="ePw" type="text" placeholder="비밀번호"></div>
-      <div class="field">
-        <label>ROLE</label>
-        <select id="eRole">
-          <option value="user">일반 직원</option>
-          <option value="admin">관리자</option>
-        </select>
+      <div class="field"><label>이름</label><input id="eName" placeholder="이름"></div>
+      <div class="field"><label>아이디</label><input id="eId" placeholder="아이디"></div>
+      <div class="field"><label>비밀번호</label><input id="ePw" type="text" placeholder="비밀번호"></div>
+      <div>
+        <div class="perm-label" style="margin-top:4px">접근 권한</div>
+        <div class="perm-group" id="editPerms"></div>
       </div>
     </div>
     <div class="modal-actions">
@@ -225,17 +203,36 @@ body {
 </div>
 
 <script>
-// 세션 확인
 const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
-if (!me || me.role !== 'admin') { window.location.href = 'index.html'; }
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
 
 const KEY_USERS = 'fb_accounts';
+const PERMS = ['관리자','재고조회','입출고관리','제품 신고 관리','원료관리'];
+const PERM_STYLE = {
+  '관리자':        { color:'#d95f5f', bg:'rgba(220,80,80,.15)',   border:'rgba(220,80,80,.35)' },
+  '재고조회':      { color:'#52a874', bg:'rgba(82,168,116,.15)',  border:'rgba(82,168,116,.35)' },
+  '입출고관리':    { color:'#6488e0', bg:'rgba(100,136,224,.15)', border:'rgba(100,136,224,.35)' },
+  '제품 신고 관리':{ color:'#c89a3c', bg:'rgba(200,154,60,.15)',  border:'rgba(200,154,60,.35)' },
+  '원료관리':      { color:'#b06ed6', bg:'rgba(176,110,214,.15)', border:'rgba(176,110,214,.35)' },
+};
 
-function getUsers() {
-  return JSON.parse(localStorage.getItem(KEY_USERS) || '[]');
+function getUsers()       { return JSON.parse(localStorage.getItem(KEY_USERS) || '[]'); }
+function saveUsers(list)  { localStorage.setItem(KEY_USERS, JSON.stringify(list)); }
+
+function renderPermBtns(containerId, selected = []) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  PERMS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'perm-btn' + (selected.includes(p) ? ' on' : '');
+    btn.textContent = p;
+    btn.onclick = () => btn.classList.toggle('on');
+    el.appendChild(btn);
+  });
 }
-function saveUsers(list) {
-  localStorage.setItem(KEY_USERS, JSON.stringify(list));
+
+function getSelectedPerms(containerId) {
+  return [...document.querySelectorAll(`#${containerId} .perm-btn.on`)].map(b => b.textContent);
 }
 
 function renderList() {
@@ -246,22 +243,28 @@ function renderList() {
     el.innerHTML = '<div class="empty-row">등록된 직원이 없습니다.</div>';
     return;
   }
-  el.innerHTML = users.map((u, i) => `
+  el.innerHTML = users.map((u, i) => {
+    const perms = u.perms || [];
+    const tags = perms.map(p => {
+      const s = PERM_STYLE[p] || { color:'#9b1b30', bg:'rgba(155,27,48,.15)', border:'rgba(155,27,48,.35)' };
+      return `<span class="perm-tag" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${p}</span>`;
+    }).join('');
+    return `
     <div class="tbl-row">
       <div class="num">${i+1}</div>
       <div>${u.name || '-'}</div>
       <div style="font-weight:600">${u.id}</div>
       <div class="pw-cell">
         <span class="pw-text" id="pw-${i}">••••••</span>
-        <button class="eye-btn" onclick="togglePw(${i}, '${u.pw}')">👁</button>
+        <button class="eye-btn" onclick="togglePw(${i},'${u.pw}')">👁</button>
       </div>
-      <div><span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role==='admin'?'관리자':'직원'}</span></div>
+      <div class="perm-tags">${tags || '<span style="color:var(--text3);font-size:12px">없음</span>'}</div>
       <div class="actions">
         <button class="act-btn" onclick="openEdit(${i})">수정</button>
         <button class="act-btn del" onclick="deleteUser(${i})">삭제</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function togglePw(i, pw) {
@@ -270,28 +273,24 @@ function togglePw(i, pw) {
 }
 
 function addUser() {
-  const name = document.getElementById('newName').value.trim();
-  const id   = document.getElementById('newId').value.trim();
-  const pw   = document.getElementById('newPw').value.trim();
-  const role = document.getElementById('newRole').value;
-  const err  = document.getElementById('addErr');
-
+  const name  = document.getElementById('newName').value.trim();
+  const id    = document.getElementById('newId').value.trim();
+  const pw    = document.getElementById('newPw').value.trim();
+  const perms = getSelectedPerms('newPerms');
+  const err   = document.getElementById('addErr');
   if (!name) { err.textContent = '이름을 입력해 주세요.'; return; }
   if (!id)   { err.textContent = '아이디를 입력해 주세요.'; return; }
   if (!pw)   { err.textContent = '비밀번호를 입력해 주세요.'; return; }
-
   const users = getUsers();
-  if (users.some(u => u.id === id)) {
-    err.textContent = '이미 사용 중인 아이디입니다.'; return;
-  }
-
-  users.push({ name, id, pw, role, redirect: role === 'admin' ? 'admin.html' : 'main.html' });
+  if (users.some(u => u.id === id)) { err.textContent = '이미 사용 중인 아이디입니다.'; return; }
+  const isAdmin = perms.includes('관리자');
+  users.push({ name, id, pw, role: isAdmin ? 'admin' : 'user', perms, redirect: isAdmin ? '../admin.html' : '../main.html' });
   saveUsers(users);
   err.textContent = '';
   document.getElementById('newName').value = '';
   document.getElementById('newId').value = '';
   document.getElementById('newPw').value = '';
-  document.getElementById('newRole').value = 'user';
+  renderPermBtns('newPerms');
   renderList();
 }
 
@@ -302,25 +301,21 @@ function openEdit(i) {
   document.getElementById('eName').value = u.name || '';
   document.getElementById('eId').value   = u.id;
   document.getElementById('ePw').value   = u.pw;
-  document.getElementById('eRole').value = u.role;
+  renderPermBtns('editPerms', u.perms || []);
   document.getElementById('editOverlay').style.display = 'flex';
 }
-function closeEdit() {
-  document.getElementById('editOverlay').style.display = 'none';
-  editIdx = -1;
-}
+function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; editIdx = -1; }
 function saveEdit() {
   if (editIdx < 0) return;
-  const name = document.getElementById('eName').value.trim();
-  const id   = document.getElementById('eId').value.trim();
-  const pw   = document.getElementById('ePw').value.trim();
-  const role = document.getElementById('eRole').value;
+  const name  = document.getElementById('eName').value.trim();
+  const id    = document.getElementById('eId').value.trim();
+  const pw    = document.getElementById('ePw').value.trim();
+  const perms = getSelectedPerms('editPerms');
   if (!name || !id || !pw) { alert('모든 항목을 입력해 주세요.'); return; }
   const users = getUsers();
-  if (users.some((u, i) => u.id === id && i !== editIdx)) {
-    alert('이미 사용 중인 아이디입니다.'); return;
-  }
-  users[editIdx] = { name, id, pw, role, redirect: role === 'admin' ? 'admin.html' : 'main.html' };
+  if (users.some((u, i) => u.id === id && i !== editIdx)) { alert('이미 사용 중인 아이디입니다.'); return; }
+  const isAdmin = perms.includes('관리자');
+  users[editIdx] = { name, id, pw, role: isAdmin ? 'admin' : 'user', perms, redirect: isAdmin ? '../admin.html' : '../main.html' };
   saveUsers(users);
   closeEdit();
   renderList();
@@ -328,16 +323,11 @@ function saveEdit() {
 function deleteUser(i) {
   const u = getUsers()[i];
   if (!confirm(`'${u.name || u.id}' 계정을 삭제하시겠습니까?`)) return;
-  const users = getUsers();
-  users.splice(i, 1);
-  saveUsers(users);
-  renderList();
+  const users = getUsers(); users.splice(i, 1); saveUsers(users); renderList();
 }
-function doLogout() {
-  sessionStorage.removeItem('fb_user');
-  window.location.href = 'index.html';
-}
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = '../index.html'; }
 
+renderPermBtns('newPerms');
 renderList();
 </script>
 </body>
