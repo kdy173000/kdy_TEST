@@ -89,13 +89,13 @@ body {
 .count-text { font-size:12px; color:var(--text2); }
 .tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
 .tbl-head {
-  display:grid; grid-template-columns:40px 1fr 1fr 90px 1fr 100px;
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 72px 1fr 100px;
   gap:8px; padding:8px 14px;
   background:var(--bg2); border-bottom:1px solid var(--border);
   font-size:11.5px; font-weight:600; color:var(--text3);
 }
 .tbl-row {
-  display:grid; grid-template-columns:40px 1fr 1fr 90px 1fr 100px;
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 72px 1fr 100px;
   gap:8px; padding:9px 14px; align-items:center;
   border-bottom:1px solid var(--border);
   font-size:13.5px; transition:background .1s;
@@ -153,7 +153,7 @@ body {
 <body>
 
 <div class="topbar">
-  <span class="topbar-title">직원 관리</span>
+  <span class="topbar-title">계정 관리</span>
   <div class="topbar-right">
     <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
@@ -162,15 +162,16 @@ body {
 </div>
 
 <div class="container">
-  <div class="page-title">직원 관리</div>
-  <div class="page-sub">직원 계정을 등록하고 페이지 접근 권한을 설정합니다. 권한별 접근 URL은 관리자 홈의 권한 링크 설정에서 관리하세요.</div>
+  <div class="page-title">계정 관리</div>
+  <div class="page-sub">직원 계정을 등록하고 역할 및 접근 권한을 설정합니다.<br>역할: <b>관리자</b>(어드민 전용) | <b>관리부</b>(메인 전체 접근) | <b>직원</b>(권한 제한)</div>
 
   <div class="add-card">
     <div class="add-title">신규 직원 추가</div>
-    <div class="add-row">
+    <div class="add-row" style="grid-template-columns:1fr 1fr 1fr 110px">
       <div class="field"><label>이름</label><input id="newName" placeholder="예: 김다영"></div>
       <div class="field"><label>아이디</label><input id="newId" placeholder="예: dayoung"></div>
       <div class="field"><label>비밀번호</label><input id="newPw" type="text" placeholder="비밀번호"></div>
+      <div class="field"><label>역할</label><select id="newRole" style="padding:8px 10px;border-radius:7px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;cursor:pointer"><option value="user">직원</option><option value="manager">관리부</option><option value="admin">관리자</option></select></div>
     </div>
     <div class="perm-label">접근 권한 (복수 선택 가능)</div>
     <div class="perm-group" id="newPerms"></div>
@@ -184,7 +185,7 @@ body {
   <div class="tbl-wrap">
     <div class="tbl-head">
       <div>#</div><div>이름</div><div>아이디</div>
-      <div>비밀번호</div><div>권한</div><div>관리</div>
+      <div>비밀번호</div><div>역할</div><div>권한</div><div>관리</div>
     </div>
     <div id="userList"></div>
   </div>
@@ -197,6 +198,7 @@ body {
       <div class="field"><label>이름</label><input id="eName" placeholder="이름"></div>
       <div class="field"><label>아이디</label><input id="eId" placeholder="아이디"></div>
       <div class="field"><label>비밀번호</label><input id="ePw" type="text" placeholder="비밀번호"></div>
+      <div class="field"><label>역할</label><select id="eRole" style="padding:8px 10px;border-radius:7px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;cursor:pointer"><option value="user">직원</option><option value="manager">관리부</option><option value="admin">관리자</option></select></div>
       <div>
         <div class="perm-label" style="margin-top:4px">접근 권한</div>
         <div class="perm-group" id="editPerms"></div>
@@ -265,6 +267,7 @@ function renderList() {
         <span class="pw-text" id="pw-${i}">••••••</span>
         <button class="eye-btn" onclick="togglePw(${i},'${u.pw}')">👁</button>
       </div>
+      <div style="font-size:12px;color:var(--text2)">${roleLabelMap[u.role] || '직원'}</div>
       <div class="perm-tags">${tags || '<span style="color:var(--text3);font-size:12px">없음</span>'}</div>
       <div class="actions">
         <button class="act-btn" onclick="openEdit(${i})">수정</button>
@@ -279,10 +282,14 @@ function togglePw(i, pw) {
   el.textContent = el.textContent === '••••••' ? pw : '••••••';
 }
 
+const roleLabelMap = { admin:'관리자', manager:'관리부', user:'직원' };
+const roleRedirectMap = { admin:'../admin.html', manager:'../main.html', user:'../main.html' };
+
 function addUser() {
   const name  = document.getElementById('newName').value.trim();
   const id    = document.getElementById('newId').value.trim();
   const pw    = document.getElementById('newPw').value.trim();
+  const role  = document.getElementById('newRole').value;
   const perms = getSelectedPerms('newPerms');
   const err   = document.getElementById('addErr');
   if (!name) { err.textContent = '이름을 입력해 주세요.'; return; }
@@ -290,13 +297,13 @@ function addUser() {
   if (!pw)   { err.textContent = '비밀번호를 입력해 주세요.'; return; }
   const users = getUsers();
   if (users.some(u => u.id === id)) { err.textContent = '이미 사용 중인 아이디입니다.'; return; }
-  const isAdmin = perms.includes('관리자');
-  users.push({ name, id, pw, role: isAdmin ? 'admin' : 'user', perms, redirect: isAdmin ? '../admin.html' : '../main.html' });
+  users.push({ name, id, pw, role, perms, redirect: roleRedirectMap[role] });
   saveUsers(users);
   err.textContent = '';
   document.getElementById('newName').value = '';
   document.getElementById('newId').value = '';
   document.getElementById('newPw').value = '';
+  document.getElementById('newRole').value = 'user';
   renderPermBtns('newPerms');
   renderList();
 }
@@ -308,6 +315,7 @@ function openEdit(i) {
   document.getElementById('eName').value = u.name || '';
   document.getElementById('eId').value   = u.id;
   document.getElementById('ePw').value   = u.pw;
+  document.getElementById('eRole').value = u.role || 'user';
   renderPermBtns('editPerms', u.perms || []);
   document.getElementById('editOverlay').style.display = 'flex';
 }
@@ -317,12 +325,12 @@ function saveEdit() {
   const name  = document.getElementById('eName').value.trim();
   const id    = document.getElementById('eId').value.trim();
   const pw    = document.getElementById('ePw').value.trim();
+  const role  = document.getElementById('eRole').value;
   const perms = getSelectedPerms('editPerms');
   if (!name || !id || !pw) { alert('모든 항목을 입력해 주세요.'); return; }
   const users = getUsers();
   if (users.some((u, i) => u.id === id && i !== editIdx)) { alert('이미 사용 중인 아이디입니다.'); return; }
-  const isAdmin = perms.includes('관리자');
-  users[editIdx] = { name, id, pw, role: isAdmin ? 'admin' : 'user', perms, redirect: isAdmin ? '../admin.html' : '../main.html' };
+  users[editIdx] = { name, id, pw, role, perms, redirect: roleRedirectMap[role] };
   saveUsers(users);
   closeEdit();
   renderList();
