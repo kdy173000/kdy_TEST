@@ -100,12 +100,17 @@ body {
   <div class="page-title">관리자 대시보드</div>
   <div class="page-sub" id="adminGreet">파이어볼 사내 포털 관리 메뉴입니다.</div>
 
-  <div class="section-label">계정 관리</div>
+  <div class="section-label">직원 관리</div>
   <div class="grid">
     <a class="card" href="admin/Staff.html">
       <div class="card-icon">👥</div>
-      <div class="card-title">직원 계정 관리</div>
-      <div class="card-desc">직원 아이디 / 비밀번호 생성, 수정, 삭제</div>
+      <div class="card-title">직원 관리</div>
+      <div class="card-desc">직원 계정 생성 · 수정 · 권한 설정</div>
+    </a>
+    <a class="card" href="admin/PermLinks.html">
+      <div class="card-icon">🔗</div>
+      <div class="card-title">권한 링크 설정</div>
+      <div class="card-desc">권한별 접근 가능 페이지 URL 설정</div>
     </a>
   </div>
 
@@ -130,20 +135,15 @@ body {
 </div>
 
 <script>
-// 세션 확인
 const user = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
 if (!user || user.role !== 'admin') { window.location.href = 'index.html'; }
 else { document.getElementById('adminGreet').textContent = user.id + ' 님, 환영합니다.'; }
-
 function toggleTheme() {
   const h = document.documentElement, dark = h.dataset.theme === 'dark';
   h.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('t-ico').textContent = dark ? '🌙' : '☀️';
 }
-function doLogout() {
-  sessionStorage.removeItem('fb_user');
-  window.location.href = 'index.html';
-}
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = 'index.html'; }
 function goMain() { window.location.href = 'main.html'; }
 </script>
 </body>
