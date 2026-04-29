@@ -1,1 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직원 관리</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727; --bg4:#1e1e1e;
+  --border:#2e2e2e; --border2:#3a3a3a;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --card-bg:#242424; --col-bg:#1a1a1a;
+}
+[data-theme="light"] {
+  --bg:#f5f5f4; --bg2:#ffffff; --bg3:#efefed; --bg4:#f0f0ee;
+  --border:#e0e0e0; --border2:#d0d0d0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --card-bg:#ffffff; --col-bg:#f7f7f5;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; transition:background .2s,color .2s;
+}
+.topbar {
+  background:#9b1b30; padding:0 28px; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:200;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
+.tb-btn {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:6px; padding:5px 12px;
+  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
+}
+.tb-btn:hover { background:rgba(255,255,255,.22); }
+.theme-btn {
+  background:none; border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px;
+  font-size:12px; font-family:inherit; cursor:pointer;
+}
 
+/* page layout */
+.page-wrap { padding:36px 32px 60px; }
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; gap:16px; }
+.page-title { font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.page-sub { font-size:13px; color:var(--text2); margin-top:4px; }
+.header-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+
+.add-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 16px; border-radius:7px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:background .15s; white-space:nowrap;
+}
+.add-btn:hover { background:#7e1627; }
+
+/* board */
+.board {
+  display:flex; gap:14px;
+  overflow-x:auto; align-items:flex-start;
+  padding-bottom:20px;
+}
+.board::-webkit-scrollbar { height:6px; }
+.board::-webkit-scrollbar-track { background:transparent; }
+.board::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+.col {
+  flex-shrink:0; width:240px;
+  background:var(--col-bg); border:1px solid var(--border);
+  border-radius:10px; display:flex; flex-direction:column;
+  transition:background .1s;
+}
+.col.drag-over { border-color:#9b1b30; background:rgba(155,27,48,.06); }
+
+.col-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px 10px;
+  border-bottom:1px solid var(--border);
+}
+.col-title-row { display:flex; align-items:center; gap:7px; }
+.col-title { font-size:13px; font-weight:700; }
+.col-count {
+  font-size:11px; padding:1px 7px; border-radius:20px;
+  background:var(--bg3); color:var(--text3); font-weight:600;
+}
+.col-add-btn {
+  width:22px; height:22px; border-radius:4px; border:none;
+  background:none; color:var(--text3); font-size:16px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .1s, color .1s; line-height:1;
+}
+.col-add-btn:hover { background:var(--hover); color:var(--text); }
+
+.col-body {
+  padding:8px; flex:1;
+  min-height:60px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.col-empty {
+  padding:18px 10px; text-align:center;
+  font-size:12px; color:var(--text3);
+  border:2px dashed var(--border); border-radius:7px;
+  margin:2px;
+}
+
+/* employee card */
+.emp-card {
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:8px; padding:12px 13px;
+  cursor:grab; transition:box-shadow .15s, border-color .15s, opacity .15s;
+  position:relative;
+}
+.emp-card:hover { box-shadow:0 3px 12px var(--shadow); border-color:var(--border2); }
+.emp-card.dragging { opacity:.45; cursor:grabbing; }
+
+.emp-name { font-size:13.5px; font-weight:700; margin-bottom:5px; }
+.emp-rank {
+  display:inline-flex; align-items:center;
+  padding:2px 9px; border-radius:20px;
+  font-size:11px; font-weight:600; margin-bottom:7px;
+}
+.emp-work {
+  font-size:12px; color:var(--text2); line-height:1.55;
+  display:-webkit-box; -webkit-line-clamp:3;
+  -webkit-box-orient:vertical; overflow:hidden;
+}
+.emp-join {
+  font-size:11px; color:var(--text3); margin-top:8px;
+  display:flex; align-items:center; gap:4px;
+}
+.emp-actions {
+  position:absolute; top:8px; right:8px;
+  display:none; gap:3px;
+}
+.emp-card:hover .emp-actions { display:flex; }
+.emp-act {
+  width:22px; height:22px; border-radius:4px; border:none;
+  background:var(--bg3); color:var(--text2); font-size:11px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .1s, color .1s;
+}
+.emp-act:hover { background:var(--hover); color:var(--text); }
+.emp-act.del:hover { background:rgba(220,80,80,.15); color:#d95f5f; }
+
+/* add team col */
+.col-add {
+  flex-shrink:0; width:240px;
+  border:2px dashed var(--border); border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  min-height:60px; cursor:pointer;
+  color:var(--text3); font-size:13px; gap:7px;
+  transition:border-color .15s, color .15s;
+  padding:20px;
+}
+.col-add:hover { border-color:#9b1b30; color:var(--text); }
+
+/* modal */
+.modal-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center;
+}
+.modal {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:14px; padding:28px 26px;
+  width:420px; max-width:95vw; max-height:90vh; overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,.45);
+}
+.modal-title { font-size:16px; font-weight:700; margin-bottom:6px; }
+.modal-sub { font-size:12px; color:var(--text2); margin-bottom:20px; }
+.modal-fields { display:flex; flex-direction:column; gap:13px; }
+.mfield { display:flex; flex-direction:column; gap:5px; }
+.mfield label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.mfield input, .mfield select, .mfield textarea {
+  padding:9px 12px; border-radius:8px;
+  border:1px solid var(--border2);
+  background:var(--bg3); color:var(--text);
+  font-size:13.5px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color:#9b1b30; }
+.mfield textarea { resize:vertical; min-height:72px; line-height:1.55; }
+.modal-actions { display:flex; gap:8px; margin-top:22px; }
+.m-btn {
+  flex:1; padding:10px; border-radius:8px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  transition:background .15s;
+}
+.m-btn:hover { background:#7e1627; }
+.m-btn.sec {
+  background:var(--bg3); color:var(--text2);
+  border:1px solid var(--border);
+}
+.m-btn.sec:hover { background:var(--hover); color:var(--text); }
+
+/* rank colors */
+.rank-이사    { color:#d95f5f; background:rgba(220,80,80,.14); }
+.rank-과장    { color:#c89a3c; background:rgba(200,154,60,.14); }
+.rank-대리    { color:#6488e0; background:rgba(100,136,224,.14); }
+.rank-사원    { color:#52a874; background:rgba(82,168,116,.14); }
+.rank-인턴    { color:#b06ed6; background:rgba(176,110,214,.14); }
+.rank-기타    { color:#9090a0; background:rgba(144,144,160,.14); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">직원 관리</span>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
+    <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <div class="page-title">👥 직원 관리</div>
+      <div class="page-sub">팀별 직원 현황을 관리합니다. 카드를 드래그하여 팀을 이동할 수 있습니다.</div>
+    </div>
+    <div class="header-actions">
+      <button class="add-btn" onclick="openAddModal()">＋ 직원 추가</button>
+    </div>
+  </div>
+  <div class="board" id="board"></div>
+</div>
+
+<!-- 직원 추가/수정 모달 -->
+<div class="modal-overlay" id="empModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">직원 추가</div>
+    <div class="modal-sub" id="modalSub">새 직원 정보를 입력하세요.</div>
+    <div class="modal-fields">
+      <div class="mfield">
+        <label>이름</label>
+        <input id="mName" placeholder="예: 김다영">
+      </div>
+      <div class="mfield">
+        <label>직급</label>
+        <select id="mRank">
+          <option value="이사">이사</option>
+          <option value="과장">과장</option>
+          <option value="대리" selected>대리</option>
+          <option value="사원">사원</option>
+          <option value="인턴">인턴</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div class="mfield">
+        <label>팀</label>
+        <select id="mTeam"></select>
+      </div>
+      <div class="mfield">
+        <label>입사일자</label>
+        <input id="mJoin" type="date">
+      </div>
+      <div class="mfield">
+        <label>하는 일</label>
+        <textarea id="mWork" placeholder="담당 업무를 입력하세요"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="m-btn" onclick="saveEmployee()">저장</button>
+      <button class="m-btn sec" onclick="closeModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 팀 추가 모달 -->
+<div class="modal-overlay" id="teamModal" style="display:none" onclick="if(event.target===this)closeTeamModal()">
+  <div class="modal" style="width:340px">
+    <div class="modal-title">팀 추가</div>
+    <div class="modal-sub">새 팀 이름을 입력하세요.</div>
+    <div class="modal-fields">
+      <div class="mfield">
+        <label>팀 이름</label>
+        <input id="tName" placeholder="예: 영업팀" onkeydown="if(event.key==='Enter')saveTeam()">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="m-btn" onclick="saveTeam()">추가</button>
+      <button class="m-btn sec" onclick="closeTeamModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const fbUser = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!fbUser || fbUser.role !== 'admin') { window.location.href = '../index.html'; }
+
+const KEY_EMP   = 'fb_employees';
+const KEY_TEAMS = 'fb_teams';
+const DEFAULT_TEAMS = ['관리팀','해외소통팀','디자인팀','국내홍보팀','연구팀'];
+
+function getEmployees() { return JSON.parse(localStorage.getItem(KEY_EMP)   || '[]'); }
+function getTeams()     { const s = localStorage.getItem(KEY_TEAMS); return s ? JSON.parse(s) : [...DEFAULT_TEAMS]; }
+function saveEmployees(list) { localStorage.setItem(KEY_EMP, JSON.stringify(list)); }
+function saveTeams(list)     { localStorage.setItem(KEY_TEAMS, JSON.stringify(list)); }
+
+let dragCard = null, dragIdx = null, dragTeam = null;
+
+function rankClass(r) {
+  const map = {'이사':'rank-이사','과장':'rank-과장','대리':'rank-대리','사원':'rank-사원','인턴':'rank-인턴'};
+  return map[r] || 'rank-기타';
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const [y,m,dd] = d.split('-');
+  return `${y}.${m}.${dd}`;
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  const teams = getTeams();
+  const emps  = getEmployees();
+  board.innerHTML = '';
+
+  teams.forEach(team => {
+    const members = emps.filter(e => e.team === team);
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.dataset.team = team;
+
+    col.innerHTML = `
+      <div class="col-header">
+        <div class="col-title-row">
+          <span class="col-title">${team}</span>
+          <span class="col-count">${members.length}</span>
+        </div>
+        <button class="col-add-btn" onclick="openAddModal('${team.replace(/'/g,"\\'")}')">＋</button>
+      </div>
+      <div class="col-body" id="col-${team.replace(/[^a-zA-Z0-9가-힣]/g,'_')}"></div>
+    `;
+    board.appendChild(col);
+
+    const body = col.querySelector('.col-body');
+
+    if (members.length === 0) {
+      body.innerHTML = '<div class="col-empty">직원을 여기에 끌어다 놓으세요</div>';
+    } else {
+      members.forEach((emp, localIdx) => {
+        const globalIdx = emps.indexOf(emp);
+        const card = document.createElement('div');
+        card.className = 'emp-card';
+        card.draggable = true;
+        card.dataset.idx = globalIdx;
+        card.innerHTML = `
+          <div class="emp-actions">
+            <button class="emp-act" onclick="openEditModal(${globalIdx})">✏️</button>
+            <button class="emp-act del" onclick="deleteEmp(${globalIdx})">🗑</button>
+          </div>
+          <div class="emp-name">${emp.name}</div>
+          <span class="emp-rank ${rankClass(emp.rank)}">${emp.rank || '사원'}</span>
+          <div class="emp-work">${(emp.work || '').replace(/\n/g,'<br>')}</div>
+          ${emp.join ? `<div class="emp-join">📅 ${formatDate(emp.join)} 입사</div>` : ''}
+        `;
+        card.addEventListener('dragstart', e => {
+          dragCard = card;
+          dragIdx  = globalIdx;
+          dragTeam = team;
+          setTimeout(() => card.classList.add('dragging'), 0);
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          dragCard = null; dragIdx = null; dragTeam = null;
+          document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+        });
+        body.appendChild(card);
+      });
+    }
+
+    // drop zone
+    col.addEventListener('dragover', e => {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', e => {
+      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault(); col.classList.remove('drag-over');
+      if (dragIdx === null) return;
+      if (dragTeam === team) return;
+      const emps2 = getEmployees();
+      emps2[dragIdx].team = team;
+      saveEmployees(emps2);
+      renderBoard();
+    });
+  });
+
+  // add team button
+  const addCol = document.createElement('div');
+  addCol.className = 'col-add';
+  addCol.innerHTML = '＋ 팀 추가';
+  addCol.onclick = () => openTeamModal();
+  board.appendChild(addCol);
+}
+
+// ── modal state ──
+let editIdx = -1, preTeam = '';
+
+function populateTeamSelect(selected) {
+  const sel = document.getElementById('mTeam');
+  sel.innerHTML = '';
+  getTeams().forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    if (t === selected) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function openAddModal(team) {
+  editIdx = -1;
+  document.getElementById('modalTitle').textContent = '직원 추가';
+  document.getElementById('modalSub').textContent   = '새 직원 정보를 입력하세요.';
+  document.getElementById('mName').value = '';
+  document.getElementById('mRank').value = '사원';
+  document.getElementById('mJoin').value = '';
+  document.getElementById('mWork').value = '';
+  populateTeamSelect(team || getTeams()[0]);
+  document.getElementById('empModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('mName').focus(), 80);
+}
+
+function openEditModal(idx) {
+  const emp = getEmployees()[idx];
+  editIdx = idx;
+  document.getElementById('modalTitle').textContent = '직원 정보 수정';
+  document.getElementById('modalSub').textContent   = emp.name + ' 님의 정보를 수정합니다.';
+  document.getElementById('mName').value = emp.name || '';
+  document.getElementById('mRank').value = emp.rank || '사원';
+  document.getElementById('mJoin').value = emp.join || '';
+  document.getElementById('mWork').value = emp.work || '';
+  populateTeamSelect(emp.team);
+  document.getElementById('empModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('empModal').style.display = 'none'; editIdx = -1; }
+
+function saveEmployee() {
+  const name = document.getElementById('mName').value.trim();
+  const rank = document.getElementById('mRank').value;
+  const team = document.getElementById('mTeam').value;
+  const join = document.getElementById('mJoin').value;
+  const work = document.getElementById('mWork').value.trim();
+  if (!name) { document.getElementById('mName').focus(); return; }
+  const emps = getEmployees();
+  const obj  = { name, rank, team, join, work };
+  if (editIdx >= 0) emps[editIdx] = obj;
+  else emps.push(obj);
+  saveEmployees(emps);
+  closeModal();
+  renderBoard();
+}
+
+function deleteEmp(idx) {
+  const emp = getEmployees()[idx];
+  if (!confirm(`'${emp.name}' 님을 삭제하시겠습니까?`)) return;
+  const emps = getEmployees(); emps.splice(idx, 1); saveEmployees(emps); renderBoard();
+}
+
+// ── team modal ──
+function openTeamModal() {
+  document.getElementById('tName').value = '';
+  document.getElementById('teamModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('tName').focus(), 80);
+}
+function closeTeamModal() { document.getElementById('teamModal').style.display = 'none'; }
+function saveTeam() {
+  const name = document.getElementById('tName').value.trim();
+  if (!name) { document.getElementById('tName').focus(); return; }
+  const teams = getTeams();
+  if (teams.includes(name)) { alert('이미 존재하는 팀입니다.'); return; }
+  teams.push(name); saveTeams(teams); closeTeamModal(); renderBoard();
+}
+
+function toggleTheme() {
+  const h = document.documentElement, dark = h.dataset.theme === 'dark';
+  h.dataset.theme = dark ? 'light' : 'dark';
+  document.getElementById('t-ico').textContent = dark ? '🌙' : '☀️';
+}
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = '../index.html'; }
+
+renderBoard();
+</script>
+</body>
+</html>
