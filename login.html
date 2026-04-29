@@ -216,14 +216,25 @@ function toggleTheme() {
   document.getElementById('t-lbl').textContent = dark ? '다크' : '라이트';
 }
 
+// 계정 목록
+const ACCOUNTS = [
+  { id: 'fireballadmin', pw: 'adminfireball', role: 'admin', redirect: 'admin.html' },
+];
+
 function doLogin() {
   const id = document.getElementById('userId').value.trim();
   const pw = document.getElementById('userPw').value;
   const err = document.getElementById('errMsg');
   if (!id) { err.textContent = '아이디를 입력해 주세요.'; return; }
   if (!pw) { err.textContent = '비밀번호를 입력해 주세요.'; return; }
-  // 실제 인증 로직 연결 위치
-  err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+
+  const account = ACCOUNTS.find(a => a.id === id && a.pw === pw);
+  if (account) {
+    sessionStorage.setItem('fb_user', JSON.stringify({ id: account.id, role: account.role }));
+    window.location.href = account.redirect;
+  } else {
+    err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+  }
 }
 </script>
 </body>
