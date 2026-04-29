@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이어볼 사내 운영 포털</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:        #111111;
+  --card-bg:   #1c1c1c;
+  --border:    #2e2e2e;
+  --text:      #e8e8e8;
+  --text2:     #888888;
+  --text3:     #4a4a4a;
+  --input-bg:  #242424;
+  --input-border: #333333;
+  --input-border-focus: #666666;
+  --input-text: #e8e8e8;
+  --placeholder: #555555;
+  --btn-bg:    #9b1b30;
+  --btn-hover: #7e1627;
+  --divider:   #2a2a2a;
+  --shadow:    rgba(0,0,0,0.5);
+}
+[data-theme="light"] {
+  --bg:        #f2f2f2;
+  --card-bg:   #ffffff;
+  --border:    #e0e0e0;
+  --text:      #111111;
+  --text2:     #666666;
+  --text3:     #b0b0b0;
+  --input-bg:  #f7f7f7;
+  --input-border: #d8d8d8;
+  --input-border-focus: #aaaaaa;
+  --input-text: #111111;
+  --placeholder: #b8b8b8;
+  --btn-bg:    #9b1b30;
+  --btn-hover: #7e1627;
+  --divider:   #ebebeb;
+  --shadow:    rgba(0,0,0,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, color .2s;
+}
+
+/* 테마 토글 */
+.theme-btn {
+  position: fixed; top: 16px; right: 18px;
+  display: flex; align-items: center; gap: 5px;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; color: var(--text2);
+  cursor: pointer; font-family: inherit;
+  transition: all .15s; user-select: none;
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.theme-btn:hover { color: var(--text); }
+
+/* 카드 */
+.card {
+  width: 340px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: 0 8px 32px var(--shadow);
+  overflow: hidden;
+}
+
+/* 헤더 배너 */
+.card-header {
+  background: #9b1b30;
+  padding: 28px 32px 24px;
+  text-align: center;
+}
+.card-header-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.card-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+.card-header-sub {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* 폼 영역 */
+.card-body {
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.05em;
+}
+.field input {
+  padding: 10px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .18s, background .18s;
+}
+.field input::placeholder { color: var(--placeholder); }
+.field input:focus {
+  border-color: var(--input-border-focus);
+  background: var(--card-bg);
+}
+
+.login-btn {
+  margin-top: 4px;
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  border: none;
+  background: var(--btn-bg);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background .15s, transform .1s;
+}
+.login-btn:hover  { background: var(--btn-hover); }
+.login-btn:active { transform: scale(0.985); }
+
+.err-msg {
+  font-size: 12px;
+  color: #d95f5f;
+  min-height: 16px;
+  text-align: center;
+  margin-top: -4px;
+}
+
+/* 하단 */
+.card-footer {
+  padding: 14px 28px 20px;
+  border-top: 1px solid var(--divider);
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text3);
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<button class="theme-btn" onclick="toggleTheme()">
+  <span id="t-ico">☀️</span><span id="t-lbl">라이트</span>
+</button>
+
+<div class="card">
+
+  <div class="card-header">
+    <div class="card-header-logo">
+      <svg viewBox="0 0 120 120" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+        <!-- 흰색 링 -->
+        <circle cx="60" cy="60" r="52" fill="none" stroke="white" stroke-width="14"/>
+        <!-- 흰색 심볼 -->
+        <rect x="33" y="32" width="13" height="55" fill="white" rx="2"/>
+        <rect x="33" y="32" width="41" height="13" fill="white" rx="2"/>
+        <circle cx="84" cy="72" r="10.5" fill="white"/>
+      </svg>
+    </div>
+    <div class="card-header-title">파이어볼 사내 운영 포털</div>
+    <div class="card-header-sub">FIREBALL Internal Portal</div>
+  </div>
+
+  <div class="card-body">
+    <div class="field">
+      <label for="userId">ID</label>
+      <input type="text" id="userId" placeholder="아이디 입력" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('userPw').focus()">
+    </div>
+    <div class="field">
+      <label for="userPw">PW</label>
+      <input type="password" id="userPw" placeholder="비밀번호 입력" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="err-msg" id="errMsg"></div>
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+  </div>
+
+  <div class="card-footer">
+    파이어볼 주식회사 &copy; 2026<br>
+    문의 : 관리자에게 연락해 주세요
+  </div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const h = document.documentElement;
+  const dark = h.dataset.theme === 'dark';
+  h.dataset.theme = dark ? 'light' : 'dark';
+  document.getElementById('t-ico').textContent = dark ? '🌙' : '☀️';
+  document.getElementById('t-lbl').textContent = dark ? '다크' : '라이트';
+}
+
+function doLogin() {
+  const id = document.getElementById('userId').value.trim();
+  const pw = document.getElementById('userPw').value;
+  const err = document.getElementById('errMsg');
+  if (!id) { err.textContent = '아이디를 입력해 주세요.'; return; }
+  if (!pw) { err.textContent = '비밀번호를 입력해 주세요.'; return; }
+  // 실제 인증 로직 연결 위치
+  err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+}
+</script>
+</body>
+</html>
