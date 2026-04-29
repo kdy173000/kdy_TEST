@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이어볼</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg: #191919;
+  --bg2: #202020;
+  --bg3: #272727;
+  --border: #2e2e2e;
+  --border2: #3a3a3a;
+  --text: #E8E8E8;
+  --text2: #9B9B9B;
+  --text3: #5a5a5a;
+  --hover: #252525;
+  --tag-bg: #2a2a2a;
+  --cal-head: #1e1e1e;
+  --today-bg: #2d2d2d;
+  --hand: #f5f5f5;
+  --center-dot: #f5f5f5;
+  --tick-major: rgba(245,245,245,0.9);
+  --tick-minor: rgba(245,245,245,0.5);
+  --sel-border: #555;
+  --sel-border-h: #7a7a7a;
+  --opt-bg: #1e1e1e;
+  --opt-text: #fff;
+}
+[data-theme="light"] {
+  --bg: #FFFFFF;
+  --bg2: #F7F7F5;
+  --bg3: #EFEFED;
+  --border: #E8E8E5;
+  --border2: #D5D5D2;
+  --text: #1A1A1A;
+  --text2: #787774;
+  --text3: #AFAFAC;
+  --hover: #F0F0EE;
+  --tag-bg: #EFEFED;
+  --cal-head: #F5F5F3;
+  --today-bg: #F0F0EE;
+  --hand: #111111;
+  --center-dot: #111111;
+  --tick-major: rgba(17,17,17,0.9);
+  --tick-minor: rgba(17,17,17,0.5);
+  --sel-border: #cfcfcf;
+  --sel-border-h: #b8b8b8;
+  --opt-bg: #ffffff;
+  --opt-text: #111111;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  transition: background .18s, color .18s;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+
+/* 전체 레이아웃 */
+.layout { display: flex; min-height: 100vh; }
+
+/* 사이드바 */
+.sidebar {
+  width: 236px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sb-logo { display: flex; align-items: center; gap: 9px; padding: 16px 12px 12px; }
+.sb-logo-icon {
+  width: 26px; height: 26px; background: #e03131; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; color: #fff; flex-shrink: 0;
+}
+.sb-logo-name { font-size: 14px; font-weight: 700; }
+.sb-group-label {
+  font-size: 11.5px; font-weight: 600; color: var(--text3);
+  padding: 10px 12px 3px; letter-spacing: 0.01em;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 12px; font-size: 13.5px; color: var(--text2);
+  border-radius: 4px; margin: 1px 5px; cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.sb-item:hover, .sb-item.active { background: var(--hover); color: var(--text); }
+.sb-item .ico { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+.sb-indent { padding-left: 22px; }
+.sb-footer {
+  margin-top: auto; padding: 12px;
+  font-size: 11.5px; color: var(--text3);
+  border-top: 1px solid var(--border); line-height: 1.8;
+}
+
+/* 메인 */
+.main { flex: 1; display: flex; overflow: hidden; }
+.center { flex: 1; padding: 44px 52px 60px; overflow-y: auto; min-width: 0; }
+.page-h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.page-desc { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
+
+/* 섹션 */
+.sec { margin-bottom: 40px; }
+.sec-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13.5px; font-weight: 600; margin-bottom: 10px; color: var(--text);
+}
+
+/* 공지 테이블 */
+.tbl { width: 100%; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.tbl-head {
+  display: grid; grid-template-columns: 22px 92px 1fr 60px;
+  gap: 8px; padding: 6px 12px;
+  background: var(--cal-head); border-bottom: 1px solid var(--border);
+  font-size: 11.5px; font-weight: 600; color: var(--text3);
+}
+.tbl-row {
+  display: grid; grid-template-columns: 22px 92px 1fr 60px;
+  gap: 8px; padding: 8px 12px; align-items: start;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .1s;
+}
+.tbl-row:last-child { border-bottom: none; }
+.tbl-row:hover { background: var(--hover); }
+.chk {
+  width: 15px; height: 15px; margin-top: 2px;
+  border: 1.5px solid var(--border2); border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; flex-shrink: 0;
+}
+.chk.on { background: #4a8af4; border-color: #4a8af4; color: #fff; }
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 3px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+.tp { background: rgba(220,80,80,.14); color: #d95f5f; }
+.ti { background: rgba(80,120,220,.14); color: #6488e0; }
+.tg { background: rgba(70,190,110,.14); color: #52a874; }
+.row-title { font-size: 13.5px; color: var(--text); }
+.row-sum   { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.row-auth  { font-size: 12px; color: var(--text3); text-align: right; padding-top: 2px; }
+
+/* 캘린더 */
+.cal-wrap { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.cal-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px; background: var(--cal-head); border-bottom: 1px solid var(--border);
+}
+.cal-nav-title { font-size: 13.5px; font-weight: 600; }
+.cal-nav-right { display: flex; gap: 4px; align-items: center; }
+.cal-btn {
+  height: 26px; padding: 0 8px;
+  border: 1px solid var(--border); background: var(--bg);
+  border-radius: 4px; font-size: 12px; color: var(--text2); transition: background .1s;
+}
+.cal-btn:hover { background: var(--hover); }
+.cal-legend { display: flex; gap: 12px; align-items: center; font-size: 11px; color: var(--text3); }
+.leg { display: flex; align-items: center; gap: 3px; }
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); }
+.cal-dh {
+  padding: 5px; text-align: center;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  background: var(--cal-head); border-bottom: 1px solid var(--border);
+}
+.cal-dh:first-child { color: #d95f5f; }
+.cal-dh:last-child  { color: #4a8af4; }
+.cal-cell {
+  min-height: 76px;
+  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 4px 4px 3px; vertical-align: top;
+}
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell.today-cell { background: var(--today-bg); }
+.cal-num {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 12px; font-weight: 500;
+  color: var(--text2); margin-bottom: 2px;
+}
+.cal-num.today { background: #e03131; color: #fff; font-weight: 700; }
+.cal-num.sun   { color: #d95f5f; }
+.cal-num.sat   { color: #4a8af4; }
+.cal-num.dim   { color: var(--text3); }
+.ev {
+  font-size: 10.5px; padding: 1px 5px; border-radius: 3px;
+  margin-bottom: 2px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; cursor: default;
+}
+.ev-l { background: rgba(82,168,116,.2);  color: #52a874; }
+.ev-t { background: rgba(74,138,244,.2);  color: #4a8af4; }
+.ev-h { background: rgba(200,160,60,.2);  color: #c89a3c; }
+.ev-p { background: rgba(210,80,80,.15);  color: #cc6060; }
+
+/* 우측 패널 */
+.rp {
+  width: 220px; flex-shrink: 0;
+  border-left: 1px solid var(--border); background: var(--bg2);
+  padding: 20px 14px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto;
+}
+.rp-label { font-size: 11.5px; font-weight: 700; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 7px; }
+.rp-link {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 7px; border-radius: 5px; font-size: 13px; color: var(--text2);
+  cursor: pointer; transition: background .1s; margin: 0 -3px;
+}
+.rp-link:hover { background: var(--hover); color: var(--text); }
+.trip-now {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 5px;
+  background: rgba(74,138,244,.1); border: 1px solid rgba(74,138,244,.2);
+  font-size: 12px; color: #4a8af4; margin-bottom: 4px;
+}
+.trip-sub { font-size: 11.5px; color: var(--text3); margin-bottom: 2px; }
+
+/* 세계 시계 */
+.clock-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.clock-tz-select {
+  width: 100%; padding: 6px 10px;
+  border-radius: 6px; border: 1px solid var(--sel-border);
+  background: var(--bg3); color: var(--text);
+  font-size: 12px; font-family: inherit;
+  appearance: none; -webkit-appearance: none;
+  cursor: pointer; outline: none;
+  transition: border-color 0.2s;
+}
+.clock-tz-select:hover { border-color: var(--sel-border-h); }
+.clock-tz-select option { background: var(--opt-bg); color: var(--opt-text); }
+.clock-face {
+  position: relative;
+  width: 170px; height: 170px;
+  border-radius: 50%; background: transparent;
+}
+.c-hand {
+  position: absolute; left: 50%; bottom: 50%;
+  transform-origin: bottom center;
+  border-radius: 999px; background: var(--hand);
+  will-change: transform; backface-visibility: hidden;
+}
+.c-hand.hour   { width: 3px; height: 48px; margin-left: -1.5px; }
+.c-hand.minute { width: 2px; height: 70px; margin-left: -1px; }
+.c-hand.second { width: 1px; height: 78px; margin-left: -0.5px; }
+.c-center-dot {
+  position: absolute; left: 50%; top: 50%;
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: var(--center-dot); z-index: 5;
+}
+.c-digital-block {
+  position: absolute; left: 50%; top: 62%;
+  transform: translateX(-50%);
+  text-align: center; pointer-events: none; white-space: nowrap;
+}
+.c-time-str { font-size: 19px; font-weight: 500; color: var(--text); letter-spacing: 0.04em; line-height: 1; }
+.c-date-str { margin-top: 5px; font-size: 11px; color: var(--text2); font-weight: 400; }
+
+/* 테마 버튼 */
+.theme-btn {
+  position: fixed; top: 13px; right: 14px; z-index: 999;
+  display: flex; align-items: center; gap: 5px;
+  background: var(--tag-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 12px; color: var(--text2); transition: all .15s; user-select: none;
+}
+.theme-btn:hover { color: var(--text); }
+
+@media (max-width: 900px) { .rp { display: none; } .center { padding: 28px 24px; } }
+@media (max-width: 620px) { .sidebar { display: none; } .center { padding: 20px 16px; } }
+</style>
+</head>
+<body>
+
+<button class="theme-btn" onclick="toggleTheme()">
+  <span id="t-ico">☀️</span><span id="t-lbl">라이트</span>
+</button>
+
+<div class="layout">
+
+<!-- 사이드바 -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">F</div>
+    <span class="sb-logo-name">파이어볼</span>
+  </div>
+  <div class="sb-group-label">사내 운영 관리</div>
+  <div class="sb-item active" onclick="go('notices')"><span class="ico">📢</span>공지사항</div>
+  <div class="sb-item" onclick="go('org')"><span class="ico">👥</span>조직도</div>
+  <div class="sb-item" onclick="go('calendar')"><span class="ico">📅</span>연차 및 출장</div>
+  <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">📦</span>제품 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">🔄</span>제품 입고/출고/조정</div>
+  <div class="sb-item sb-indent"><span class="ico">📋</span>제품 신고 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">🚚</span>발주 진행 현황</div>
+  <div class="sb-item sb-indent"><span class="ico">🧪</span>원료 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">🏷️</span>제품 포장 및 정보</div>
+  <div class="sb-group-label" style="margin-top:6px">디자인팀</div>
+  <div class="sb-item sb-indent"><span class="ico">🎨</span>디자인 업무분배</div>
+  <div class="sb-item sb-indent"><span class="ico">📝</span>회의록</div>
+  <div class="sb-group-label" style="margin-top:6px">개인 업무관리</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>김다영</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>최혜선</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>송나겸</div>
+  <div class="sb-footer">
+    관리자 : 조상덕 과장, 박철완 과장<br>
+    페이지 제작자 : 김다영 대리
+  </div>
+</nav>
+
+<!-- 메인 -->
+<div class="main">
+  <div class="center">
+    <h1 class="page-h1">파이어볼</h1>
+    <p class="page-desc">업데이트 원할 시 관리자에게 문의 바랍니다.</p>
+
+    <!-- 공지사항 -->
+    <div class="sec" id="notices">
+      <div class="sec-title"><span class="ico">↗</span>공지사항</div>
+      <div class="tbl">
+        <div class="tbl-head"><div></div><div>공지사항</div><div>제목</div><div style="text-align:right">생성자</div></div>
+        <div class="tbl-row"><div class="chk on">✓</div><span class="tag tp">제품공지</span><div><div class="row-title">5월 출시 제품</div><div class="row-sum">5월에 출시되는 신제품 목록에는 나노코트 V3 50ml와 왁스부스터 50ml가 포함되어 있습니다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk on">✓</div><span class="tag ti">사내공지</span><div><div class="row-title">5월 도시락 담당</div><div class="row-sum">5월 도시락 담당자는 철완, 다영, 해연이다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk on">✓</div><span class="tag ti">사내공지</span><div><div class="row-title">4월 도시락 담당</div><div class="row-sum">4월 도시락 담당자는 준유, 혜선, 수빈입니다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk on">✓</div><span class="tag ti">사내공지</span><div><div class="row-title">슬리퍼 관련 공지사항</div><div class="row-sum">안전사고 예방을 위해 슬리퍼 착용에 대한 규정이 있습니다. 위반 시 시말서 작성 조치가 있을 예정이며, 크록스·뮬·샌들 모두 금지됩니다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk"></div><span class="tag ti">사내공지</span><div><div class="row-title">6월 도시락 담당</div><div class="row-sum">6월 도시락 담당자는 상덕, 나겸, 현지로 지정되었습니다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk"></div><span class="tag ti">사내공지</span><div><div class="row-title">3월 도시락 담당</div><div class="row-sum">3월 도시락 담당자는 김과장님, 선우, 리암입니다.</div></div><div class="row-auth">관리자</div></div>
+        <div class="tbl-row"><div class="chk"></div><span class="tag tg">일반공지</span><div><div class="row-title">산업안전보건교육</div><div class="row-sum">신입사원들을 위한 산업안전보건교육이 2026년 3월 31일 화요일 7시 55분에 진행됩니다.</div></div><div class="row-auth">관리자</div></div>
+      </div>
+    </div>
+
+    <!-- 캘린더 -->
+    <div class="sec" id="calendar">
+      <div class="sec-title">
+        <span class="ico">📅</span>직원 일정
+        <div class="cal-legend" style="margin-left:auto;font-weight:400">
+          <div class="leg"><div class="leg-dot" style="background:rgba(82,168,116,.5)"></div>연차</div>
+          <div class="leg"><div class="leg-dot" style="background:rgba(74,138,244,.5)"></div>출장</div>
+          <div class="leg"><div class="leg-dot" style="background:rgba(200,160,60,.5)"></div>반차</div>
+          <div class="leg"><div class="leg-dot" style="background:rgba(210,80,80,.4)"></div>공휴일</div>
+        </div>
+      </div>
+      <div class="cal-wrap">
+        <div class="cal-nav">
+          <span class="cal-nav-title" id="cal-title"></span>
+          <div class="cal-nav-right">
+            <button class="cal-btn" onclick="goToday()">오늘</button>
+            <button class="cal-btn" onclick="chMon(-1)">‹</button>
+            <button class="cal-btn" onclick="chMon(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-dh">일</div><div class="cal-dh">월</div><div class="cal-dh">화</div>
+          <div class="cal-dh">수</div><div class="cal-dh">목</div><div class="cal-dh">금</div><div class="cal-dh">토</div>
+        </div>
+        <div class="cal-grid" id="cal-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 우측 패널 -->
+  <aside class="rp">
+    <div>
+      <div class="rp-label">★ 사용법 안내</div>
+      <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px">Update : 2026.04.10</div>
+      <div class="rp-link"><span>🏢</span>파이어볼 회사소개</div>
+      <div class="rp-link"><span>📖</span>파이어볼 기본 예절</div>
+    </div>
+    <div>
+      <div class="rp-label">✈️ 현재 출장</div>
+      <div class="trip-now">🇨🇳 중국 샤먼 세미나</div>
+      <div class="trip-sub">박철완·전해연·작은사장님</div>
+      <div class="trip-sub">04.28 → 05.02</div>
+    </div>
+    <div>
+      <div class="rp-label">🕐 세계 시계</div>
+      <div class="clock-wrapper">
+        <select class="clock-tz-select" id="tzSel">
+          <option value="Asia/Seoul">대한민국 / 서울</option>
+          <option value="Asia/Tokyo">일본 / 도쿄</option>
+          <option value="Asia/Shanghai">중국 / 상하이</option>
+          <option value="Asia/Singapore">싱가포르</option>
+          <option value="Asia/Brunei">브루나이</option>
+          <option value="Asia/Manila">필리핀 / 마닐라</option>
+          <option value="Asia/Ho_Chi_Minh">베트남 / 호치민</option>
+          <option value="Asia/Bangkok">태국 / 방콕</option>
+          <option value="Asia/Jakarta">인도네시아 / 자카르타</option>
+          <option value="Asia/Kolkata">인도 / 뉴델리</option>
+          <option value="Asia/Tashkent">우즈베키스탄 / 타슈켄트</option>
+          <option value="Asia/Dubai">아랍에미리트 / 두바이</option>
+          <option value="Europe/London">영국 / 런던</option>
+          <option value="Europe/Paris">프랑스 / 파리</option>
+          <option value="Europe/Berlin">독일 / 베를린</option>
+          <option value="Europe/Warsaw">폴란드 / 바르샤바</option>
+          <option value="Europe/Kyiv">우크라이나 / 키이우</option>
+          <option value="Europe/Istanbul">튀르키에 / 이스탄불</option>
+          <option value="Europe/Moscow">러시아 / 모스크바</option>
+          <option value="America/New_York">미국 / 뉴욕</option>
+          <option value="America/Chicago">미국 / 시카고</option>
+          <option value="America/Denver">미국 / 덴버</option>
+          <option value="America/Los_Angeles">미국 / 로스앤젤레스</option>
+          <option value="America/Toronto">캐나다 / 토론토</option>
+          <option value="America/Puerto_Rico">푸에르토리코</option>
+          <option value="America/Sao_Paulo">브라질 / 상파울루</option>
+          <option value="America/Santiago">칠레 / 산티아고</option>
+          <option value="Australia/Sydney">호주 / 시드니</option>
+          <option value="Pacific/Auckland">뉴질랜드 / 오클랜드</option>
+        </select>
+        <div class="clock-face" id="clockFace">
+          <div class="c-digital-block">
+            <div class="c-time-str" id="timeStr">00:00:00</div>
+            <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+</div>
+
+<script>
+/* 테마 */
+function toggleTheme(){
+  const h=document.documentElement, dark=h.dataset.theme==='dark';
+  h.dataset.theme=dark?'light':'dark';
+  document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
+  document.getElementById('t-lbl').textContent=dark?'다크':'라이트';
+  if(window._applyTickColors) window._applyTickColors();
+}
+
+/* 스크롤 */
+function go(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+/* 세계 시계 */
+document.addEventListener('DOMContentLoaded', function(){
+  const face    = document.getElementById('clockFace');
+  const tzSel   = document.getElementById('tzSel');
+  const timeStr = document.getElementById('timeStr');
+  const dateStr = document.getElementById('dateStr');
+
+  const STORAGE_KEY = 'tz';
+  const VERSION_KEY = 'tz_version';
+  const DEFAULT_TZ = 'Asia/Kolkata';
+  const DEFAULT_TZ_VERSION = '2026-04-23-2';
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+  face.appendChild(svg);
+
+  function applyTickColors(){
+    const styles = getComputedStyle(document.documentElement);
+    const major = styles.getPropertyValue('--tick-major').trim();
+    const minor = styles.getPropertyValue('--tick-minor').trim();
+    [...svg.querySelectorAll('line')].forEach((line,i)=>{
+      line.setAttribute('stroke', i%3===0 ? major : minor);
+      line.setAttribute('opacity','1');
+    });
+  }
+  window._applyTickColors = applyTickColors;
+
+  function drawTicks(){
+    const SIZE = face.clientWidth;
+    const CX = SIZE/2, CY = SIZE/2;
+    svg.setAttribute('width',SIZE);
+    svg.setAttribute('height',SIZE);
+    svg.innerHTML='';
+    for(let i=0;i<12;i++){
+      const rad=(i*30-90)*Math.PI/180;
+      const outerR=CX-(SIZE*0.033);
+      const len=i%3===0?SIZE*0.047:SIZE*0.03;
+      const innerR=outerR-len;
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',CX+outerR*Math.cos(rad));
+      line.setAttribute('y1',CY+outerR*Math.sin(rad));
+      line.setAttribute('x2',CX+innerR*Math.cos(rad));
+      line.setAttribute('y2',CY+innerR*Math.sin(rad));
+      line.setAttribute('stroke-width',i%3===0?'2':'1.5');
+      line.setAttribute('stroke-linecap','round');
+      svg.appendChild(line);
+    }
+    applyTickColors();
+  }
+
+  ['hour','minute','second'].forEach(cls=>{
+    const d=document.createElement('div');
+    d.className='c-hand '+cls;
+    face.appendChild(d);
+    face['_'+cls]=d;
+  });
+  const dot=document.createElement('div');
+  dot.className='c-center-dot';
+  face.appendChild(dot);
+
+  function getTimeParts(timeZone){
+    const now=new Date();
+    const formatter=new Intl.DateTimeFormat('ko-KR',{
+      timeZone, year:'numeric', month:'2-digit', day:'2-digit',
+      weekday:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+    });
+    const map={};
+    formatter.formatToParts(now).forEach(p=>{ map[p.type]=p.value; });
+    return {
+      month:Number(map.month), day:Number(map.day), weekday:map.weekday,
+      hour:Number(map.hour), minute:Number(map.minute), second:Number(map.second),
+      ms:now.getMilliseconds()
+    };
+  }
+
+  function loadTimezone(){
+    const saved=localStorage.getItem(STORAGE_KEY);
+    const ver=localStorage.getItem(VERSION_KEY);
+    if(ver!==DEFAULT_TZ_VERSION){
+      tzSel.value=DEFAULT_TZ;
+      localStorage.setItem(STORAGE_KEY,DEFAULT_TZ);
+      localStorage.setItem(VERSION_KEY,DEFAULT_TZ_VERSION);
+    } else {
+      tzSel.value=saved||DEFAULT_TZ;
+    }
+  }
+
+  function tick(){
+    const t=getTimeParts(tzSel.value);
+    const ss=t.second+(t.ms/1000);
+    const mm=t.minute+(ss/60);
+    const hh=(t.hour%12)+(mm/60);
+    face._hour.style.transform=`rotate(${hh*30}deg)`;
+    face._minute.style.transform=`rotate(${mm*6}deg)`;
+    face._second.style.transform=`rotate(${ss*6}deg)`;
+    timeStr.textContent=[t.hour,t.minute,t.second].map(x=>String(x).padStart(2,'0')).join(':');
+    dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
+    requestAnimationFrame(tick);
+  }
+
+  tzSel.addEventListener('change',()=>{
+    localStorage.setItem(STORAGE_KEY,tzSel.value);
+    localStorage.setItem(VERSION_KEY,DEFAULT_TZ_VERSION);
+  });
+
+  window.addEventListener('resize', drawTicks);
+  loadTimezone();
+  drawTicks();
+  tick();
+});
+
+/* 캘린더 */
+let cY,cM2;
+const HOL={
+  '2026-01-01':'신정','2026-01-28':'설날 연휴','2026-01-29':'설날','2026-01-30':'설날 연휴',
+  '2026-03-01':'삼일절','2026-03-02':'대체공휴일','2026-05-01':'근로자의날',
+  '2026-05-05':'어린이날','2026-05-24':'부처님오신날','2026-06-04':'지방선거',
+  '2026-06-06':'현충일','2026-07-17':'제헌절','2026-08-15':'광복절',
+  '2026-09-24':'추석 연휴','2026-09-25':'추석','2026-09-26':'추석 연휴',
+  '2026-10-03':'개천절','2026-10-09':'한글날','2026-12-25':'크리스마스'
+};
+const EVS=[
+  {s:'2026-04-13',e:'2026-04-16',t:'t',l:'상하이 미팅',w:'안선우·전해연'},
+  {s:'2026-04-21',e:'2026-04-22',t:'t',l:'서울 현대차',w:'박철완·준유'},
+  {s:'2026-04-23',e:'2026-04-28',t:'t',l:'인도 총판',w:'김상윤·사장'},
+  {s:'2026-04-28',e:'2026-05-02',t:'t',l:'샤먼 세미나',w:'박철완·전해연'},
+  {s:'2026-03-16',t:'l',l:'연차',w:'김다영'},
+  {s:'2026-03-24',t:'l',l:'연차',w:'박준유'},
+  {s:'2026-03-24',t:'l',l:'월차',w:'안선우'},
+  {s:'2026-03-26',t:'l',l:'연차',w:'최혜선'},
+  {s:'2026-03-27',t:'l',l:'연차',w:'김다영'},
+  {s:'2026-03-27',t:'l',l:'월차',w:'김상윤'},
+  {s:'2026-03-27',t:'l',l:'연차',w:'송나겸'},
+  {s:'2026-04-03',t:'l',l:'연차',w:'박준유'},
+  {s:'2026-04-06',t:'l',l:'연차',w:'김다영'},
+  {s:'2026-04-07',t:'h',l:'오전반차',w:'김다영'},
+  {s:'2026-04-09',t:'l',l:'연차',w:'김상윤'},
+  {s:'2026-04-10',t:'l',l:'연차',w:'김상윤'},
+  {s:'2026-04-10',t:'l',l:'월차',w:'안선우'},
+  {s:'2026-04-10',t:'h',l:'오후반차',w:'송나겸'},
+  {s:'2026-04-15',t:'l',l:'연차',w:'최혜선'},
+  {s:'2026-04-16',t:'h',l:'오후반차',w:'박준유'},
+  {s:'2026-04-17',t:'l',l:'연차',w:'김다영'},
+  {s:'2026-04-20',t:'l',l:'연차',w:'조수빈'},
+  {s:'2026-04-20',t:'l',l:'연차',w:'김상윤'},
+  {s:'2026-04-24',t:'l',l:'연차',w:'송나겸'},
+  {s:'2026-04-29',t:'l',l:'월차',w:'강승훈'},
+  {s:'2026-05-04',t:'l',l:'연차',w:'조수빈'},
+  {s:'2026-05-04',t:'l',l:'연차',w:'박철완'},
+];
+
+function dk(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+
+function evForDate(y,m,d){
+  const key=dk(y,m,d),res=[];
+  for(const ev of EVS){
+    if(ev.e){const s=new Date(ev.s),e=new Date(ev.e),c=new Date(key);if(c>=s&&c<=e)res.push(ev);}
+    else if(ev.s===key)res.push(ev);
+  }
+  return res;
+}
+
+function renderCal(){
+  const now=new Date();
+  if(cY===undefined){cY=now.getFullYear();cM2=now.getMonth()+1;}
+  document.getElementById('cal-title').textContent=`${cY}년 ${cM2}월`;
+  const first=new Date(cY,cM2-1,1).getDay();
+  const dim=new Date(cY,cM2,0).getDate();
+  const prev=new Date(cY,cM2-1,0).getDate();
+  const todK=dk(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const total=Math.ceil((first+dim)/7)*7;
+  let html='';
+  for(let i=0;i<total;i++){
+    let day,yr=cY,mo=cM2,numCls='',cellCls='';
+    const dow=i%7;
+    if(i<first){day=prev-first+i+1;yr=cM2===1?cY-1:cY;mo=cM2===1?12:cM2-1;numCls='dim';}
+    else if(i>=first+dim){day=i-first-dim+1;yr=cM2===12?cY+1:cY;mo=cM2===12?1:cM2+1;numCls='dim';}
+    else{day=i-first+1;if(dow===0)numCls='sun';else if(dow===6)numCls='sat';}
+    const key=dk(yr,mo,day);
+    if(key===todK){cellCls='today-cell';numCls='today';}
+    const hol=HOL[key];
+    const evs=evForDate(yr,mo,day);
+    let eH='';
+    if(hol&&!numCls.includes('dim'))eH+=`<div class="ev ev-p" title="${hol}">${hol}</div>`;
+    for(const ev of evs.slice(0,3)){
+      const ec=ev.t==='t'?'ev-t':ev.t==='h'?'ev-h':'ev-l';
+      eH+=`<div class="ev ${ec}" title="${ev.w}">${ev.l} ${ev.w}</div>`;
+    }
+    if(evs.length>3)eH+=`<div style="font-size:10px;color:var(--text3);padding:0 3px">+${evs.length-3}</div>`;
+    html+=`<div class="cal-cell ${cellCls}"><div class="cal-num ${numCls}">${day}</div>${eH}</div>`;
+  }
+  document.getElementById('cal-body').innerHTML=html;
+}
+
+function chMon(d){cM2+=d;if(cM2>12){cM2=1;cY++;}if(cM2<1){cM2=12;cY--;}renderCal();}
+function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;renderCal();}
+renderCal();
+</script>
+</body>
+</html>
