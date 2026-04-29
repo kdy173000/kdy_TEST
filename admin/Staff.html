@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직원 계정 관리</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --border:#2e2e2e; --border2:#3a3a3a;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --input-bg:#242424; --input-border:#333;
+  --sel-border:#555; --opt-bg:#1e1e1e; --opt-text:#fff;
+}
+[data-theme="light"] {
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
+  --border:#e0e0e0; --border2:#d0d0d0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+  --sel-border:#cfcfcf; --opt-bg:#fff; --opt-text:#111;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; transition:background .2s,color .2s;
+}
+.topbar {
+  background:#9b1b30; padding:0 28px; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
+.tb-btn {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:6px; padding:5px 12px;
+  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
+}
+.tb-btn:hover { background:rgba(255,255,255,.22); }
+.container { max-width:860px; margin:0 auto; padding:36px 24px 60px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
+
+/* 추가 폼 */
+.add-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:22px 20px; margin-bottom:24px;
+}
+.add-title { font-size:13.5px; font-weight:700; margin-bottom:16px; }
+.add-grid { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; }
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; }
+.field input, .field select {
+  padding:8px 11px; border-radius:7px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg); color:var(--text);
+  font-size:13.5px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.field input:focus { border-color:#9b1b30; }
+.field select { appearance:none; -webkit-appearance:none; cursor:pointer; }
+.field select option { background:var(--opt-bg); color:var(--opt-text); }
+.add-btn {
+  padding:8px 18px; border-radius:7px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13.5px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:background .15s; white-space:nowrap;
+  align-self:end;
+}
+.add-btn:hover { background:#7e1627; }
+.add-err { font-size:12px; color:#d95f5f; margin-top:8px; min-height:16px; }
+
+/* 테이블 */
+.tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.tbl-head {
+  display:grid; grid-template-columns:40px 1fr 1fr 80px 90px 100px;
+  gap:8px; padding:8px 14px;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  font-size:11.5px; font-weight:600; color:var(--text3);
+}
+.tbl-row {
+  display:grid; grid-template-columns:40px 1fr 1fr 80px 90px 100px;
+  gap:8px; padding:9px 14px; align-items:center;
+  border-bottom:1px solid var(--border);
+  font-size:13.5px; transition:background .1s;
+}
+.tbl-row:last-child { border-bottom:none; }
+.tbl-row:hover { background:var(--hover); }
+.num { color:var(--text3); font-size:12px; }
+.pw-cell { display:flex; align-items:center; gap:6px; }
+.pw-text { font-family:monospace; font-size:12px; color:var(--text2); }
+.eye-btn {
+  background:none; border:none; cursor:pointer;
+  font-size:13px; opacity:.5; transition:opacity .1s; padding:0;
+}
+.eye-btn:hover { opacity:1; }
+.role-badge {
+  display:inline-flex; align-items:center;
+  padding:2px 8px; border-radius:20px;
+  font-size:11.5px; font-weight:600;
+}
+.role-admin { background:rgba(155,27,48,.15); color:#c0354f; }
+.role-user  { background:rgba(74,138,244,.12); color:#4a8af4; }
+.actions { display:flex; gap:5px; }
+.act-btn {
+  padding:3px 10px; border-radius:5px; border:1px solid var(--border);
+  background:none; color:var(--text2); font-size:12px;
+  font-family:inherit; cursor:pointer; transition:background .1s, color .1s;
+}
+.act-btn:hover { background:var(--hover); color:var(--text); }
+.act-btn.del:hover { background:rgba(220,80,80,.12); color:#d95f5f; border-color:#d95f5f; }
+.empty-row {
+  padding:32px; text-align:center;
+  font-size:13px; color:var(--text3);
+}
+.count-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px;
+}
+.count-text { font-size:12px; color:var(--text2); }
+
+/* 편집 모달 */
+.modal-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center;
+}
+.modal {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:26px 24px;
+  width:360px; max-width:95vw;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.modal-title { font-size:15px; font-weight:700; margin-bottom:18px; }
+.modal-fields { display:flex; flex-direction:column; gap:12px; }
+.modal-actions { display:flex; gap:8px; margin-top:18px; }
+.modal-btn {
+  flex:1; padding:9px; border-radius:7px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  transition:background .15s;
+}
+.modal-btn:hover { background:#7e1627; }
+.modal-btn.sec {
+  background:var(--bg3); color:var(--text2);
+  border:1px solid var(--border);
+}
+.modal-btn.sec:hover { background:var(--hover); color:var(--text); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="topbar-title">직원 계정 관리</span>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='admin.html'">← 관리자 홈</button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-title">직원 계정 관리</div>
+  <div class="page-sub">직원 로그인 아이디와 비밀번호를 등록하고 관리합니다.</div>
+
+  <!-- 추가 폼 -->
+  <div class="add-card">
+    <div class="add-title">신규 직원 추가</div>
+    <div class="add-grid">
+      <div class="field"><label>DISPLAY NAME</label><input id="newName" placeholder="이름 (ex: 김다영)"></div>
+      <div class="field"><label>ACCOUNT ID</label><input id="newId" placeholder="아이디 (ex: dayoung)"></div>
+      <div class="field"><label>PASSWORD</label><input id="newPw" type="text" placeholder="비밀번호"></div>
+      <div class="field">
+        <label>ROLE</label>
+        <select id="newRole">
+          <option value="user">일반 직원</option>
+          <option value="admin">관리자</option>
+        </select>
+      </div>
+      <button class="add-btn" onclick="addUser()">추가</button>
+    </div>
+    <div class="add-err" id="addErr"></div>
+  </div>
+
+  <!-- 목록 -->
+  <div class="count-bar">
+    <span class="count-text" id="countText">전체 0명</span>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div>#</div><div>이름</div><div>아이디</div>
+      <div>비밀번호</div><div>권한</div><div>관리</div>
+    </div>
+    <div id="userList"></div>
+  </div>
+</div>
+
+<!-- 편집 모달 -->
+<div class="modal-overlay" id="editOverlay" style="display:none" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <div class="modal-title">직원 정보 수정</div>
+    <div class="modal-fields">
+      <div class="field"><label>DISPLAY NAME</label><input id="eName" placeholder="이름"></div>
+      <div class="field"><label>ACCOUNT ID</label><input id="eId" placeholder="아이디"></div>
+      <div class="field"><label>PASSWORD</label><input id="ePw" type="text" placeholder="비밀번호"></div>
+      <div class="field">
+        <label>ROLE</label>
+        <select id="eRole">
+          <option value="user">일반 직원</option>
+          <option value="admin">관리자</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="saveEdit()">저장</button>
+      <button class="modal-btn sec" onclick="closeEdit()">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 세션 확인
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = 'index.html'; }
+
+const KEY_USERS = 'fb_accounts';
+
+function getUsers() {
+  return JSON.parse(localStorage.getItem(KEY_USERS) || '[]');
+}
+function saveUsers(list) {
+  localStorage.setItem(KEY_USERS, JSON.stringify(list));
+}
+
+function renderList() {
+  const users = getUsers();
+  const el = document.getElementById('userList');
+  document.getElementById('countText').textContent = `전체 ${users.length}명`;
+  if (users.length === 0) {
+    el.innerHTML = '<div class="empty-row">등록된 직원이 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = users.map((u, i) => `
+    <div class="tbl-row">
+      <div class="num">${i+1}</div>
+      <div>${u.name || '-'}</div>
+      <div style="font-weight:600">${u.id}</div>
+      <div class="pw-cell">
+        <span class="pw-text" id="pw-${i}">••••••</span>
+        <button class="eye-btn" onclick="togglePw(${i}, '${u.pw}')">👁</button>
+      </div>
+      <div><span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role==='admin'?'관리자':'직원'}</span></div>
+      <div class="actions">
+        <button class="act-btn" onclick="openEdit(${i})">수정</button>
+        <button class="act-btn del" onclick="deleteUser(${i})">삭제</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function togglePw(i, pw) {
+  const el = document.getElementById('pw-' + i);
+  el.textContent = el.textContent === '••••••' ? pw : '••••••';
+}
+
+function addUser() {
+  const name = document.getElementById('newName').value.trim();
+  const id   = document.getElementById('newId').value.trim();
+  const pw   = document.getElementById('newPw').value.trim();
+  const role = document.getElementById('newRole').value;
+  const err  = document.getElementById('addErr');
+
+  if (!name) { err.textContent = '이름을 입력해 주세요.'; return; }
+  if (!id)   { err.textContent = '아이디를 입력해 주세요.'; return; }
+  if (!pw)   { err.textContent = '비밀번호를 입력해 주세요.'; return; }
+
+  const users = getUsers();
+  if (users.some(u => u.id === id)) {
+    err.textContent = '이미 사용 중인 아이디입니다.'; return;
+  }
+
+  users.push({ name, id, pw, role, redirect: role === 'admin' ? 'admin.html' : 'main.html' });
+  saveUsers(users);
+  err.textContent = '';
+  document.getElementById('newName').value = '';
+  document.getElementById('newId').value = '';
+  document.getElementById('newPw').value = '';
+  document.getElementById('newRole').value = 'user';
+  renderList();
+}
+
+let editIdx = -1;
+function openEdit(i) {
+  const u = getUsers()[i];
+  editIdx = i;
+  document.getElementById('eName').value = u.name || '';
+  document.getElementById('eId').value   = u.id;
+  document.getElementById('ePw').value   = u.pw;
+  document.getElementById('eRole').value = u.role;
+  document.getElementById('editOverlay').style.display = 'flex';
+}
+function closeEdit() {
+  document.getElementById('editOverlay').style.display = 'none';
+  editIdx = -1;
+}
+function saveEdit() {
+  if (editIdx < 0) return;
+  const name = document.getElementById('eName').value.trim();
+  const id   = document.getElementById('eId').value.trim();
+  const pw   = document.getElementById('ePw').value.trim();
+  const role = document.getElementById('eRole').value;
+  if (!name || !id || !pw) { alert('모든 항목을 입력해 주세요.'); return; }
+  const users = getUsers();
+  if (users.some((u, i) => u.id === id && i !== editIdx)) {
+    alert('이미 사용 중인 아이디입니다.'); return;
+  }
+  users[editIdx] = { name, id, pw, role, redirect: role === 'admin' ? 'admin.html' : 'main.html' };
+  saveUsers(users);
+  closeEdit();
+  renderList();
+}
+function deleteUser(i) {
+  const u = getUsers()[i];
+  if (!confirm(`'${u.name || u.id}' 계정을 삭제하시겠습니까?`)) return;
+  const users = getUsers();
+  users.splice(i, 1);
+  saveUsers(users);
+  renderList();
+}
+function doLogout() {
+  sessionStorage.removeItem('fb_user');
+  window.location.href = 'index.html';
+}
+
+renderList();
+</script>
+</body>
+</html>
