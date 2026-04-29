@@ -788,17 +788,17 @@ function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;rend
   if (footer) {
     const nameEl = document.createElement('div');
     nameEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text2);';
-    nameEl.textContent = '로그인: ' + (fbUser.name || fbUser.id);
+    nameEl.textContent = '로그인: ' + (fbUser.name || fbUser.id) + ' (' + (fbUser.role === 'manager' ? '관리부' : '직원') + ')';
     footer.appendChild(nameEl);
   }
 
   const permLinks = JSON.parse(localStorage.getItem('fb_perm_links') || '{}');
   const userPerms = fbUser.perms || [];
-  const isAdmin = fbUser.role === 'admin' || userPerms.includes('관리자');
+  const isManager = fbUser.role === 'manager'; // 관리부: 메인 전체 접근
 
   document.querySelectorAll('.sb-item[data-perm]').forEach(item => {
     const perm = item.dataset.perm;
-    const hasAccess = isAdmin || userPerms.includes(perm);
+    const hasAccess = isManager || userPerms.includes(perm);
     const url = permLinks[perm];
     if (hasAccess) {
       item.style.opacity = '1';
