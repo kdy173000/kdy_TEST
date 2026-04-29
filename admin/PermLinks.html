@@ -1,0 +1,173 @@
+<!DOCTYPE html> 
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>권한 링크 설정</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --border:#2e2e2e;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --input-bg:#242424; --input-border:#333;
+}
+[data-theme="light"] {
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
+  --border:#e0e0e0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s,color .2s; }
+.topbar {
+  background:#9b1b30; padding:0 28px; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
+.tb-btn {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:6px; padding:5px 12px;
+  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
+}
+.tb-btn:hover { background:rgba(255,255,255,.22); }
+.container { max-width:700px; margin:0 auto; padding:40px 24px 60px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:6px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:32px; line-height:1.6; }
+.perm-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; overflow:hidden; margin-bottom:12px;
+}
+.perm-card-header {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px; border-bottom:1px solid var(--border);
+}
+.perm-badge {
+  display:inline-flex; align-items:center;
+  padding:3px 12px; border-radius:20px;
+  font-size:12px; font-weight:700;
+}
+.perm-card-desc { font-size:12px; color:var(--text2); margin-left:auto; }
+.link-row {
+  display:flex; align-items:center; gap:8px; padding:12px 18px;
+}
+.link-label { font-size:12px; color:var(--text3); width:80px; flex-shrink:0; }
+.link-input {
+  flex:1; padding:8px 12px; border-radius:7px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg); color:var(--text);
+  font-size:13px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.link-input:focus { border-color:#9b1b30; }
+.link-input::placeholder { color:var(--text3); }
+.link-test {
+  padding:7px 12px; border-radius:6px; border:1px solid var(--border);
+  background:none; color:var(--text2); font-size:12px;
+  font-family:inherit; cursor:pointer; white-space:nowrap;
+  transition:background .1s, color .1s;
+}
+.link-test:hover { background:var(--hover); color:var(--text); }
+.save-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:24px;
+}
+.save-btn {
+  padding:10px 28px; border-radius:8px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:14px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:background .15s;
+}
+.save-btn:hover { background:#7e1627; }
+.save-msg { font-size:13px; color:#52a874; display:none; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">권한 링크 설정</span>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='Staff.html'">← 직원 관리</button>
+    <button class="tb-btn" onclick="window.location.href='../admin.html'">관리자 홈</button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-title">권한 링크 설정</div>
+  <div class="page-sub">
+    각 권한에 해당하는 접근 가능 페이지 URL을 설정합니다.<br>
+    권한이 부여된 직원은 해당 링크의 페이지에 접근할 수 있습니다.
+  </div>
+
+  <div id="permCards"></div>
+
+  <div class="save-bar">
+    <button class="save-btn" onclick="saveLinks()">저장</button>
+    <span class="save-msg" id="saveMsg">✅ 저장되었습니다.</span>
+  </div>
+</div>
+
+<script>
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+
+const PERMS = ['관리자','재고조회','입출고관리','제품 신고 관리','원료관리'];
+const PERM_STYLE = {
+  '관리자':        { color:'#d95f5f', bg:'rgba(220,80,80,.15)',   border:'rgba(220,80,80,.35)' },
+  '재고조회':      { color:'#52a874', bg:'rgba(82,168,116,.15)',  border:'rgba(82,168,116,.35)' },
+  '입출고관리':    { color:'#6488e0', bg:'rgba(100,136,224,.15)', border:'rgba(100,136,224,.35)' },
+  '제품 신고 관리':{ color:'#c89a3c', bg:'rgba(200,154,60,.15)',  border:'rgba(200,154,60,.35)' },
+  '원료관리':      { color:'#b06ed6', bg:'rgba(176,110,214,.15)', border:'rgba(176,110,214,.35)' },
+};
+const KEY_LINKS = 'fb_perm_links';
+
+function getLinks() { return JSON.parse(localStorage.getItem(KEY_LINKS) || '{}'); }
+
+function render() {
+  const links = getLinks();
+  const el = document.getElementById('permCards');
+  el.innerHTML = PERMS.map(p => {
+    const s = PERM_STYLE[p];
+    const val = links[p] || '';
+    return `
+    <div class="perm-card">
+      <div class="perm-card-header">
+        <span class="perm-badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${p}</span>
+        <span class="perm-card-desc">이 권한이 있는 직원이 접근 가능한 URL</span>
+      </div>
+      <div class="link-row">
+        <span class="link-label">페이지 URL</span>
+        <input class="link-input" id="link-${p}" type="text" placeholder="https://..." value="${val}">
+        <button class="link-test" onclick="testLink('${p}')">테스트 →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function testLink(p) {
+  const url = document.getElementById('link-' + p).value.trim();
+  if (!url) { alert('URL을 먼저 입력해 주세요.'); return; }
+  window.open(url, '_blank');
+}
+
+function saveLinks() {
+  const data = {};
+  PERMS.forEach(p => { data[p] = document.getElementById('link-' + p).value.trim(); });
+  localStorage.setItem(KEY_LINKS, JSON.stringify(data));
+  const msg = document.getElementById('saveMsg');
+  msg.style.display = 'inline';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = '../index.html'; }
+
+render();
+</script>
+</body>
+</html>
