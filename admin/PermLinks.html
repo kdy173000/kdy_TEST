@@ -121,7 +121,7 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 <div class="topbar">
   <span class="topbar-title">권한 링크 설정</span>
   <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location.href='Staff.html'">← 직원 관리</button>
+    <button class="tb-btn" onclick="window.location.href='ID.html'">← 계정 관리</button>
     <button class="tb-btn" onclick="window.location.href='../admin.html'">관리자 홈</button>
     <button class="tb-btn" onclick="doLogout()">로그아웃</button>
   </div>
@@ -160,26 +160,57 @@ const PERM_STYLE = {
   '제품 신고 관리':{ color:'#c89a3c', bg:'rgba(200,154,60,.15)',  border:'rgba(200,154,60,.35)' },
   '원료관리':      { color:'#b06ed6', bg:'rgba(176,110,214,.15)', border:'rgba(176,110,214,.35)' },
 };
-const KEY_LINKS = 'fb_perm_links';
+const KEY_LINKS  = 'fb_perm_links';
+const KEY_CUSTOM = 'fb_custom_perms';
+const DEFAULT_STYLE = { color:'#9090a0', bg:'rgba(144,144,160,.15)', border:'rgba(144,144,160,.35)' };
 
-function getLinks() { return JSON.parse(localStorage.getItem(KEY_LINKS) || '{}'); }
+function getLinks()        { return JSON.parse(localStorage.getItem(KEY_LINKS)  || '{}'); }
+function getCustomPerms()  { return JSON.parse(localStorage.getItem(KEY_CUSTOM) || '[]'); }
+function saveCustomPerms(list) { localStorage.setItem(KEY_CUSTOM, JSON.stringify(list)); }
+function getAllPerms()     { return [...PERMS, ...getCustomPerms()]; }
+
+function addCustomPerm() {
+  const input = document.getElementById('newPermName');
+  const name  = input.value.trim();
+  if (!name) { input.focus(); return; }
+  if (getAllPerms().includes(name)) { alert('이미 존재하는 항목입니다.'); return; }
+  const custom = getCustomPerms();
+  custom.push(name);
+  saveCustomPerms(custom);
+  input.value = '';
+  render();
+}
+
+function deleteCustomPerm(name) {
+  if (!confirm(`'${name}' 항목을 삭제하시겠습니까?\n저장된 URL도 함께 삭제됩니다.`)) return;
+  saveCustomPerms(getCustomPerms().filter(p => p !== name));
+  const links = getLinks();
+  delete links[name];
+  localStorage.setItem(KEY_LINKS, JSON.stringify(links));
+  render();
+}
 
 function render() {
-  const links = getLinks();
-  const el = document.getElementById('permCards');
-  el.innerHTML = PERMS.map(p => {
-    const s = PERM_STYLE[p];
-    const val = links[p] || '';
+  const links  = getLinks();
+  const custom = getCustomPerms();
+  const el     = document.getElementById('permCards');
+  el.innerHTML = getAllPerms().map(p => {
+    const s   = PERM_STYLE[p] || DEFAULT_STYLE;
+    const val = (links[p] || '').replace(/"/g, '&quot;');
+    const isCustom = custom.includes(p);
+    const pEsc = p.replace(/'/g, "\\'");
+    const delBtn = isCustom ? `<button class="del-item-btn" onclick="deleteCustomPerm('${pEsc}')">삭제</button>` : '';
     return `
     <div class="perm-card">
       <div class="perm-card-header">
         <span class="perm-badge" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${p}</span>
         <span class="perm-card-desc">이 권한이 있는 직원이 접근 가능한 URL</span>
+        ${delBtn}
       </div>
       <div class="link-row">
         <span class="link-label">페이지 URL</span>
         <input class="link-input" id="link-${p}" type="text" placeholder="https://..." value="${val}">
-        <button class="link-test" onclick="testLink('${p}')">테스트 →</button>
+        <button class="link-test" onclick="testLink(this.dataset.p)" data-p="${p}">테스트 →</button>
       </div>
     </div>`;
   }).join('');
@@ -193,7 +224,10 @@ function testLink(p) {
 
 function saveLinks() {
   const data = {};
-  PERMS.forEach(p => { data[p] = document.getElementById('link-' + p).value.trim(); });
+  getAllPerms().forEach(p => {
+    const el = document.getElementById('link-' + p);
+    if (el) data[p] = el.value.trim();
+  });
   localStorage.setItem(KEY_LINKS, JSON.stringify(data));
   const msg = document.getElementById('saveMsg');
   msg.style.display = 'inline';
