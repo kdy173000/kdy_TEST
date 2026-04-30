@@ -581,7 +581,7 @@ button { font-family: inherit; cursor: pointer; }
   <div class="sb-group-label">사내 운영 관리</div>
   <div class="sb-item active" onclick="go('notices')"><span class="ico">📢</span>공지사항</div>
   <div class="sb-item" onclick="go('org')"><span class="ico">👥</span>조직도</div>
-  <div class="sb-item" onclick="go('calendar')"><span class="ico">📅</span>연차 및 출장</div>
+  <div class="sb-item" onclick="window.location.href='main/Leave.html'"><span class="ico">📅</span>내부 일정 관리</div>
   <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
   <div class="sb-item sb-indent" data-perm="재고조회"><span class="ico">📦</span>제품 관리</div>
   <div class="sb-item sb-indent" data-perm="입출고관리"><span class="ico">🔄</span>제품 입고/출고/조정</div>
@@ -658,9 +658,9 @@ button { font-family: inherit; cursor: pointer; }
     </div>
     <div>
       <div class="rp-label">✈️ 현재 출장</div>
-      <div class="trip-now">🇨🇳 중국 샤먼 세미나</div>
-      <div class="trip-sub">박철완·전해연·작은사장님</div>
-      <div class="trip-sub">04.28 → 05.02</div>
+      <div id="tripNowList"></div>
+      
+      
     </div>
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
@@ -995,15 +995,15 @@ const EVS=[
   {s:'2026-05-04',t:'l',l:'연차',w:'박철완'},
 ];
 function dk(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
-function evForDate(y,m,d){
+function getSchedule(){const s=localStorage.getItem('fb_schedule');if(!s){const seed=EVS.map((e,i)=>({...e,id:'d'+i}));localStorage.setItem('fb_schedule',JSON.stringify(seed));return seed;}return JSON.parse(s);}function evForDate(y,m,d){
   const key=dk(y,m,d),res=[];
-  for(const ev of EVS){
+  for(const ev of getSchedule()){
     if(ev.e){const s=new Date(ev.s),e=new Date(ev.e),c=new Date(key);if(c>=s&&c<=e)res.push(ev);}
     else if(ev.s===key)res.push(ev);
   }
   return res;
 }
-function renderCal(){
+function renderTripNow(){const now=new Date();const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');const trips=getSchedule().filter(e=>e.t==='t'&&e.s<=today&&(e.e?e.e>=today:e.s===today));const el=document.getElementById('tripNowList');if(!el)return;if(!trips.length){el.innerHTML='<div class="trip-sub" style="color:var(--text3)">현재 출장 없음</div>';return;}const flag=l=>{if(l.includes('중국')||l.includes('상하이')||l.includes('샤먼'))return'🇨🇳';if(l.includes('인도'))return'🇮🇳';if(l.includes('일본'))return'🇯🇵';if(l.includes('미국'))return'🇺🇸';if(l.includes('싱가포르'))return'🇸🇬';if(l.includes('베트남'))return'🇻🇳';return'✈️';};el.innerHTML=trips.map(e=>'<div class="trip-now">'+flag(e.l)+' '+e.l+'</div><div class="trip-sub">'+e.w+'</div><div class="trip-sub">'+e.s+(e.e?' → '+e.e:'')+'</div>').join('');}function renderCal(){
   const now=new Date();
   if(cY===undefined){cY=now.getFullYear();cM2=now.getMonth()+1;}
   document.getElementById('cal-title').textContent=`${cY}년 ${cM2}월`;
@@ -1034,8 +1034,8 @@ function renderCal(){
   }
   document.getElementById('cal-body').innerHTML=html;
 }
-function chMon(d){cM2+=d;if(cM2>12){cM2=1;cY++;}if(cM2<1){cM2=12;cY--;}renderCal();}
-function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;renderCal();}
+function chMon(d){cM2+=d;if(cM2>12){cM2=1;cY++;}if(cM2<1){cM2=12;cY--;}renderCal();renderTripNow();}
+function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;renderCal();renderTripNow();}
 
 // ============================================================
 // 로그인 체크 및 권한 기반 사이드바 제어
@@ -1223,7 +1223,7 @@ function doLogout() {
   sessionStorage.removeItem('fb_user');
   window.location.href = 'index.html';
 }
-renderCal();
+renderCal();renderTripNow();
 </script>
 </body>
 </html>
