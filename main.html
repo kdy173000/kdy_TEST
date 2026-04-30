@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>파이어볼</title>
+<script>
+(function(){
+  var raw = sessionStorage.getItem('fb_user');
+  if (!raw) { window.location.replace('index.html'); return; }
+  try {
+    var u = JSON.parse(raw);
+    if (!u || !u.id) { window.location.replace('index.html'); return; }
+    if (u.role === 'admin') { window.location.replace('admin.html'); return; }
+  } catch(e) { window.location.replace('index.html'); }
+})();
+</script>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
@@ -179,7 +190,7 @@ button { font-family: inherit; cursor: pointer; }
 .rp {
   width: 220px; flex-shrink: 0;
   border-left: 1px solid var(--border); background: var(--bg2);
-  padding: 20px 14px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto;
+  padding: 52px 14px 20px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto;
 }
 .rp-label { font-size: 11.5px; font-weight: 700; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 7px; }
 .rp-link {
@@ -328,6 +339,16 @@ button { font-family: inherit; cursor: pointer; }
   position: fixed; top: 12px; right: 14px; z-index: 999;
   display: flex; align-items: center; gap: 6px;
 }
+/* ─ Chat float button (bottom-right) ─ */
+.chat-float-btn {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1400;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #9b1b30; color: #fff; border: none;
+  box-shadow: 0 4px 18px rgba(155,27,48,.45);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s, transform .1s;
+}
+.chat-float-btn:hover { background: #7e1627; transform: scale(1.06); }
 .action-btn {
   width: 32px; height: 32px; border-radius: 8px;
   background: var(--tag-bg); border: 1px solid var(--border);
@@ -345,7 +366,7 @@ button { font-family: inherit; cursor: pointer; }
 .theme-inline:hover { color: var(--text); }
 /* ─ Chat popup ─ */
 .chat-popup {
-  position: fixed; bottom: 24px; right: 24px; z-index: 1500;
+  position: fixed; bottom: 84px; right: 24px; z-index: 1500;
   width: 320px; height: 460px;
   background: var(--modal-bg); border: 1px solid var(--modal-border);
   border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.35);
@@ -496,11 +517,12 @@ button { font-family: inherit; cursor: pointer; }
 
 <div class="fixed-actions">
   <button class="action-btn" onclick="openProfile()" title="내 프로필">👤</button>
-  <button class="action-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  </button>
   <div class="theme-inline" onclick="toggleTheme()"><span id="t-ico">☀️</span><span id="t-lbl">라이트</span></div>
 </div>
+
+<button class="chat-float-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
 
 <div class="admin-overlay" id="adminOverlay" style="display:none" onclick="overlayClick(event)">
   <div class="admin-modal" id="adminModal">
