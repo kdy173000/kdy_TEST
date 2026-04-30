@@ -232,7 +232,9 @@ function doLogin() {
   if (account) {
     const isAdmin = account.role === 'admin' || (account.perms && account.perms.includes('관리자'));
     sessionStorage.setItem('fb_user', JSON.stringify({ id: account.id, role: account.role || (isAdmin?'admin':'user'), name: account.name || account.id, perms: account.perms || [] }));
-    window.location.href = account.redirect || (isAdmin ? 'https://kdy173000.github.io/kdy_TEST/admin.html' : 'https://kdy173000.github.io/kdy_TEST/main.html');
+    window.location.href = isAdmin
+      ? (account.redirect || 'https://kdy173000.github.io/kdy_TEST/admin.html')
+      : 'https://kdy173000.github.io/kdy_TEST/main.html';
   } else {
     err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
   }
