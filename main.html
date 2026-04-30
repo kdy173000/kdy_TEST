@@ -163,7 +163,7 @@ button { font-family: inherit; cursor: pointer; }
 .cal-week { display:grid; grid-template-columns:repeat(7,1fr); }
 .cal-cell {
   min-height: 44px;
-  border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   padding: 4px 4px 2px;
 }
 .cal-cell:last-child { border-right: none; }
@@ -524,7 +524,6 @@ button { font-family: inherit; cursor: pointer; }
 
 <div class="fixed-actions">
   <button class="action-btn" onclick="openProfile()" title="내 프로필">👤</button>
-  <button class="action-btn" onclick="doLogout()" title="로그아웃" style="color:#d95f5f">🚪</button>
 </div>
 
 <button class="chat-float-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
@@ -670,10 +669,6 @@ button { font-family: inherit; cursor: pointer; }
       
     </div>
     <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-        <span class="rp-label" style="margin-bottom:0">🕐 세계 시계</span>
-        <button class="sb-admin-btn" onclick="openAdmin()" title="관리자 설정" style="float:none;opacity:0.45;font-size:13px">🔒</button>
-      </div>
       <div class="clock-wrapper">
         <select id="tzSel" style="display:none"></select>
         <div id="tzLabelDisplay" style="font-size:12px;color:var(--text2);text-align:center;letter-spacing:0.02em;padding:2px 0"></div>
