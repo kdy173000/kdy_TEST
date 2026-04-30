@@ -160,32 +160,39 @@ button { font-family: inherit; cursor: pointer; }
 }
 .cal-dh:first-child { color: #d95f5f; }
 .cal-dh:last-child  { color: #4a8af4; }
+.cal-week { display:grid; grid-template-columns:repeat(7,1fr); }
 .cal-cell {
-  min-height: 76px;
+  min-height: 44px;
   border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  padding: 4px 4px 3px;
+  padding: 4px 4px 2px;
 }
-.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell:last-child { border-right: none; }
 .cal-cell.today-cell { background: var(--today-bg); }
 .cal-num {
   width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%; font-size: 12px; font-weight: 500;
-  color: var(--text2); margin-bottom: 2px;
+  color: var(--text2); margin-bottom: 1px;
 }
 .cal-num.today { background: #e03131; color: #fff; font-weight: 700; }
 .cal-num.sun   { color: #d95f5f; }
 .cal-num.sat   { color: #4a8af4; }
 .cal-num.dim   { color: var(--text3); }
-.ev {
-  font-size: 10.5px; padding: 1px 5px; border-radius: 3px;
-  margin-bottom: 2px; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; cursor: default;
+.ev-hol { font-size:9.5px; color:#cc6060; padding:0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-evrow {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  grid-auto-rows: 20px; gap: 2px 0;
+  padding: 3px 2px 5px; border-bottom: 1px solid var(--border);
 }
-.ev-l { background: rgba(82,168,116,.2);  color: #52a874; }
-.ev-t { background: rgba(74,138,244,.2);  color: #4a8af4; }
-.ev-h { background: rgba(200,160,60,.2);  color: #c89a3c; }
-.ev-p { background: rgba(210,80,80,.15);  color: #cc6060; }
+.ev-bar {
+  font-size: 10.5px; padding: 1px 6px; border-radius: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: default; margin: 0 1px;
+}
+.ev-bar-l { background: rgba(82,168,116,.22); color: #52a874; }
+.ev-bar-t { background: rgba(74,138,244,.22); color: #4a8af4; }
+.ev-bar-h { background: rgba(200,160,60,.22); color: #c89a3c; }
+.ev-bar-p { background: rgba(210,80,80,.18); color: #cc6060; }
 
 .rp {
   width: 220px; flex-shrink: 0;
@@ -644,7 +651,7 @@ button { font-family: inherit; cursor: pointer; }
           <div class="cal-dh">일</div><div class="cal-dh">월</div><div class="cal-dh">화</div>
           <div class="cal-dh">수</div><div class="cal-dh">목</div><div class="cal-dh">금</div><div class="cal-dh">토</div>
         </div>
-        <div class="cal-grid" id="cal-body"></div>
+        <div id="cal-body"></div>
       </div>
     </div>
   </div>
@@ -995,15 +1002,9 @@ const EVS=[
   {s:'2026-05-04',t:'l',l:'연차',w:'박철완'},
 ];
 function dk(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
-function getSchedule(){const s=localStorage.getItem('fb_schedule');if(!s){const seed=EVS.map((e,i)=>({...e,id:'d'+i}));localStorage.setItem('fb_schedule',JSON.stringify(seed));return seed;}return JSON.parse(s);}function evForDate(y,m,d){
-  const key=dk(y,m,d),res=[];
-  for(const ev of getSchedule()){
-    if(ev.e){const s=new Date(ev.s),e=new Date(ev.e),c=new Date(key);if(c>=s&&c<=e)res.push(ev);}
-    else if(ev.s===key)res.push(ev);
-  }
-  return res;
-}
-function renderTripNow(){const now=new Date();const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');const trips=getSchedule().filter(e=>e.t==='t'&&e.s<=today&&(e.e?e.e>=today:e.s===today));const el=document.getElementById('tripNowList');if(!el)return;if(!trips.length){el.innerHTML='<div class="trip-sub" style="color:var(--text3)">현재 출장 없음</div>';return;}const flag=l=>{if(l.includes('중국')||l.includes('상하이')||l.includes('샤먼'))return'🇨🇳';if(l.includes('인도'))return'🇮🇳';if(l.includes('일본'))return'🇯🇵';if(l.includes('미국'))return'🇺🇸';if(l.includes('싱가포르'))return'🇸🇬';if(l.includes('베트남'))return'🇻🇳';return'✈️';};el.innerHTML=trips.map(e=>'<div class="trip-now">'+flag(e.l)+' '+e.l+'</div><div class="trip-sub">'+e.w+'</div><div class="trip-sub">'+e.s+(e.e?' → '+e.e:'')+'</div>').join('');}function renderCal(){
+function getSchedule(){const s=localStorage.getItem('fb_schedule');if(!s){const seed=EVS.map((e,i)=>({...e,id:'d'+i}));localStorage.setItem('fb_schedule',JSON.stringify(seed));return seed;}return JSON.parse(s);}
+function renderTripNow(){const now=new Date();const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');const trips=getSchedule().filter(e=>e.t==='t'&&e.s<=today&&(e.e?e.e>=today:e.s===today));const el=document.getElementById('tripNowList');if(!el)return;if(!trips.length){el.innerHTML='<div class="trip-sub" style="color:var(--text3)">현재 출장 없음</div>';return;}const flag=l=>{if(l.includes('중국')||l.includes('상하이')||l.includes('샤먼'))return'🇨🇳';if(l.includes('인도'))return'🇮🇳';if(l.includes('일본'))return'🇯🇵';if(l.includes('미국'))return'🇺🇸';if(l.includes('싱가포르'))return'🇸🇬';if(l.includes('베트남'))return'🇻🇳';return'✈️';};el.innerHTML=trips.map(e=>'<div class="trip-now">'+flag(e.l)+' '+e.l+'</div><div class="trip-sub">'+e.w+'</div><div class="trip-sub">'+e.s+(e.e?' → '+e.e:'')+'</div>').join('');}
+function renderCal(){
   const now=new Date();
   if(cY===undefined){cY=now.getFullYear();cM2=now.getMonth()+1;}
   document.getElementById('cal-title').textContent=`${cY}년 ${cM2}월`;
@@ -1011,26 +1012,47 @@ function renderTripNow(){const now=new Date();const today=now.getFullYear()+'-'+
   const dim=new Date(cY,cM2,0).getDate();
   const prev=new Date(cY,cM2-1,0).getDate();
   const todK=dk(now.getFullYear(),now.getMonth()+1,now.getDate());
-  const total=Math.ceil((first+dim)/7)*7;
+  const weeks=Math.ceil((first+dim)/7);
+  const sched=getSchedule();
   let html='';
-  for(let i=0;i<total;i++){
-    let day,yr=cY,mo=cM2,numCls='',cellCls='';
-    const dow=i%7;
-    if(i<first){day=prev-first+i+1;yr=cM2===1?cY-1:cY;mo=cM2===1?12:cM2-1;numCls='dim';}
-    else if(i>=first+dim){day=i-first-dim+1;yr=cM2===12?cY+1:cY;mo=cM2===12?1:cM2+1;numCls='dim';}
-    else{day=i-first+1;if(dow===0)numCls='sun';else if(dow===6)numCls='sat';}
-    const key=dk(yr,mo,day);
-    if(key===todK){cellCls='today-cell';numCls='today';}
-    const hol=HOL[key];
-    const evs=evForDate(yr,mo,day);
-    let eH='';
-    if(hol&&!numCls.includes('dim'))eH+=`<div class="ev ev-p" title="${hol}">${hol}</div>`;
-    for(const ev of evs.slice(0,3)){
-      const ec=ev.t==='t'?'ev-t':ev.t==='h'?'ev-h':'ev-l';
-      eH+=`<div class="ev ${ec}" title="${ev.w}">${ev.l} ${ev.w}</div>`;
+  for(let w=0;w<weeks;w++){
+    const wDates=[];
+    for(let d=0;d<7;d++){
+      const i=w*7+d;
+      let day,yr=cY,mo=cM2,numCls='',cellCls='',isDim=false;
+      if(i<first){day=prev-first+i+1;yr=cM2===1?cY-1:cY;mo=cM2===1?12:cM2-1;isDim=true;numCls='dim';}
+      else if(i>=first+dim){day=i-first-dim+1;yr=cM2===12?cY+1:cY;mo=cM2===12?1:cM2+1;isDim=true;numCls='dim';}
+      else{day=i-first+1;if(d===0)numCls='sun';else if(d===6)numCls='sat';}
+      const key=dk(yr,mo,day);
+      if(key===todK){cellCls='today-cell';numCls='today';}
+      wDates.push({key,day,numCls,cellCls,isDim});
     }
-    if(evs.length>3)eH+=`<div style="font-size:10px;color:var(--text3);padding:0 3px">+${evs.length-3}</div>`;
-    html+=`<div class="cal-cell ${cellCls}"><div class="cal-num ${numCls}">${day}</div>${eH}</div>`;
+    html+='<div class="cal-week">';
+    for(const wd of wDates){
+      const hol=HOL[wd.key];
+      html+=`<div class="cal-cell ${wd.cellCls}"><div class="cal-num ${wd.numCls}">${wd.day}</div>${(hol&&!wd.isDim)?`<div class="ev-hol">${hol}</div>`:''}</div>`;
+    }
+    html+='</div>';
+    const wStart=wDates[0].key,wEnd=wDates[6].key;
+    const wEvs=[];
+    for(const ev of sched){
+      const es=ev.s,ee=ev.e||ev.s;
+      if(es>wEnd||ee<wStart)continue;
+      let cs=-1,ce=-1;
+      for(let i=0;i<7;i++){if(wDates[i].key>=es&&cs===-1)cs=i;}
+      for(let i=6;i>=0;i--){if(wDates[i].key<=ee&&ce===-1)ce=i;}
+      if(cs<0||ce<0||cs>ce)continue;
+      wEvs.push({...ev,cs,ce});
+    }
+    if(wEvs.length){
+      html+='<div class="cal-evrow">';
+      for(const ev of wEvs){
+        const cls=ev.t==='t'?'ev-bar-t':ev.t==='h'?'ev-bar-h':ev.t==='p'?'ev-bar-p':'ev-bar-l';
+        const lbl=ev.t==='p'?ev.l:`${ev.l} ${ev.w}`;
+        html+=`<div class="ev-bar ${cls}" style="grid-column:${ev.cs+1}/${ev.ce+2}" title="${lbl}">${lbl}</div>`;
+      }
+      html+='</div>';
+    }
   }
   document.getElementById('cal-body').innerHTML=html;
 }
