@@ -323,15 +323,184 @@ button { font-family: inherit; cursor: pointer; }
 .admin-pw-row { display: flex; gap: 8px; margin-bottom: 4px; }
 .admin-pw-row .admin-input { flex: 1; }
 
+/* ─ Fixed action buttons ─ */
+.fixed-actions {
+  position: fixed; top: 12px; right: 14px; z-index: 999;
+  display: flex; align-items: center; gap: 6px;
+}
+.action-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--tag-bg); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.action-btn:hover { background: var(--hover); color: var(--text); }
+.theme-inline {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--tag-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px; font-size: 12px;
+  color: var(--text2); cursor: pointer; transition: all .15s; user-select: none;
+}
+.theme-inline:hover { color: var(--text); }
+/* ─ Chat popup ─ */
+.chat-popup {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1500;
+  width: 320px; height: 460px;
+  background: var(--modal-bg); border: 1px solid var(--modal-border);
+  border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  display: none; flex-direction: column; overflow: hidden;
+  animation: slideUp .22s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; background: #9b1b30; flex-shrink: 0;
+  border-radius: 14px 14px 0 0;
+}
+.chat-header-title { font-size: 13.5px; font-weight: 700; color: #fff; }
+.chat-hbtn {
+  background: rgba(255,255,255,.15); border: none; color: #fff;
+  border-radius: 6px; padding: 3px 9px; font-size: 11.5px;
+  font-family: inherit; cursor: pointer;
+}
+.chat-hbtn:hover { background: rgba(255,255,255,.28); }
+.chat-rooms-view, .chat-room-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.room-list-body { flex: 1; overflow-y: auto; padding: 6px; }
+.room-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background .1s;
+}
+.room-item:hover { background: var(--hover); }
+.room-icon { font-size: 18px; flex-shrink: 0; }
+.room-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.room-last { font-size: 11.5px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-list-footer {
+  padding: 8px; display: flex; gap: 6px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.room-footer-btn {
+  flex: 1; padding: 7px; border-radius: 7px; border: 1px solid var(--border);
+  background: none; color: var(--text2); font-size: 12px;
+  font-family: inherit; cursor: pointer; transition: background .1s, color .1s;
+}
+.room-footer-btn:hover { background: var(--hover); color: var(--text); }
+.chat-room-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-back-btn {
+  background: none; border: none; color: var(--text2); font-size: 18px;
+  cursor: pointer; padding: 2px 5px; border-radius: 4px;
+  transition: background .1s; line-height: 1;
+}
+.chat-back-btn:hover { background: var(--hover); color: var(--text); }
+.chat-room-title { font-size: 13px; font-weight: 700; flex: 1; }
+.chat-msgs {
+  flex: 1; overflow-y: auto; padding: 10px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.msg-wrap { display: flex; flex-direction: column; }
+.msg-me { align-items: flex-end; }
+.msg-other { align-items: flex-start; }
+.msg-sender { font-size: 10.5px; color: var(--text3); margin-bottom: 2px; }
+.msg-bubble {
+  max-width: 195px; padding: 7px 11px; font-size: 13px;
+  border-radius: 12px; word-break: break-word; line-height: 1.5;
+}
+.msg-bubble-me { background: #9b1b30; color: #fff; border-radius: 12px 12px 3px 12px; }
+.msg-bubble-other { background: var(--bg3); color: var(--text); border-radius: 12px 12px 12px 3px; }
+.msg-time { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.chat-input-row {
+  display: flex; gap: 6px; padding: 8px 10px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; padding: 8px 11px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+  font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s;
+}
+.chat-input:focus { border-color: #9b1b30; }
+.chat-send-btn {
+  padding: 8px 12px; border-radius: 8px; border: none;
+  background: #9b1b30; color: #fff; font-size: 13px;
+  font-family: inherit; cursor: pointer; transition: background .15s;
+}
+.chat-send-btn:hover { background: #7e1627; }
+/* ─ Modals (new room + profile) ─ */
+.nr-overlay, .pf-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+  display: none; align-items: center; justify-content: center;
+}
+.nr-box, .pf-box {
+  background: var(--modal-bg); border: 1px solid var(--modal-border);
+  border-radius: 14px; padding: 26px 24px;
+  width: 360px; max-width: 95vw; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+.pf-box { width: 380px; }
+.nr-title, .pf-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.nr-field, .pf-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.nr-label, .pf-label { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .05em; }
+.nr-input, .pf-input {
+  padding: 9px 12px; border-radius: 8px;
+  border: 1px solid var(--sel-border); background: var(--bg3); color: var(--text);
+  font-size: 13px; font-family: inherit; outline: none; transition: border-color .15s;
+}
+.nr-input:focus, .pf-input:focus { border-color: #9b1b30; }
+.nr-users {
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+  max-height: 130px; overflow-y: auto; background: var(--bg3);
+}
+.nr-actions, .pf-actions { display: flex; gap: 8px; margin-top: 16px; }
+.nr-btn, .pf-btn {
+  flex: 1; padding: 9px; border-radius: 8px; border: none;
+  background: #9b1b30; color: #fff; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background .15s;
+}
+.nr-btn:hover, .pf-btn:hover { background: #7e1627; }
+.nr-btn.sec, .pf-btn.sec { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.nr-btn.sec:hover, .pf-btn.sec:hover { background: var(--hover); color: var(--text); }
+.pf-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.pf-avatar {
+  width: 50px; height: 50px; border-radius: 50%; background: #9b1b30;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.pf-name { font-size: 16px; font-weight: 700; }
+.pf-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.pf-sec-title {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  letter-spacing: .05em; margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border); margin-top: 18px;
+}
+.pf-sec-title:first-of-type { margin-top: 0; }
+.pf-msg { font-size: 12px; min-height: 16px; margin-bottom: 8px; }
+.pf-full-btn {
+  width: 100%; padding: 10px; border-radius: 8px; border: none;
+  background: #9b1b30; color: #fff; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; margin-bottom: 8px; transition: background .15s;
+}
+.pf-full-btn:hover { background: #7e1627; }
+.leave-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.leave-val { font-weight: 700; color: #52a874; font-size: 15px; }
 @media (max-width: 900px) { .rp { display: none; } .center { padding: 28px 24px; } }
 @media (max-width: 620px) { .sidebar { display: none; } .center { padding: 20px 16px; } }
 </style>
 </head>
 <body>
 
-<button class="theme-btn" onclick="toggleTheme()">
-  <span id="t-ico">☀️</span><span id="t-lbl">라이트</span>
-</button>
+<div class="fixed-actions">
+  <button class="action-btn" onclick="openProfile()" title="내 프로필">👤</button>
+  <button class="action-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>
+  <div class="theme-inline" onclick="toggleTheme()"><span id="t-ico">☀️</span><span id="t-lbl">라이트</span></div>
+</div>
 
 <div class="admin-overlay" id="adminOverlay" style="display:none" onclick="overlayClick(event)">
   <div class="admin-modal" id="adminModal">
@@ -375,7 +544,7 @@ button { font-family: inherit; cursor: pointer; }
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="sb-logo">
+  <div class="sb-logo" style="cursor:pointer" onclick="window.location.href='main.html'" title="메인으로 이동">
     <div class="sb-logo-icon">
       <svg viewBox="0 0 120 120" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
         <circle cx="60" cy="60" r="58" fill="#9b1b30"/>
@@ -489,6 +658,77 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </aside>
 </div>
+</div>
+
+<!-- 채팅 팝업 -->
+<div class="chat-popup" id="chatPopup">
+  <div class="chat-header">
+    <span class="chat-header-title">💬 채팅</span>
+    <button class="chat-hbtn" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-rooms-view" id="chatRoomsView">
+    <div class="room-list-body" id="roomListBody"></div>
+    <div class="room-list-footer">
+      <button class="room-footer-btn" onclick="openNewRoomModal('dm')">💬 1:1 채팅</button>
+      <button class="room-footer-btn" onclick="openNewRoomModal('group')">👥 단체채팅</button>
+    </div>
+  </div>
+  <div class="chat-room-view" id="chatRoomView" style="display:none">
+    <div class="chat-room-header">
+      <button class="chat-back-btn" onclick="showRoomList()">‹</button>
+      <span class="chat-room-title" id="chatRoomTitle"></span>
+    </div>
+    <div class="chat-msgs" id="chatMsgBody"></div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="메시지 입력…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}">
+      <button class="chat-send-btn" onclick="sendMsg()">전송</button>
+    </div>
+  </div>
+</div>
+
+<!-- 새 채팅방 -->
+<div class="nr-overlay" id="newRoomModal" onclick="if(event.target===this)closeNewRoomModal()">
+  <div class="nr-box">
+    <input type="hidden" id="nrType">
+    <div class="nr-title" id="nrTitle">채팅방 만들기</div>
+    <div class="nr-field" id="nrNameField">
+      <div class="nr-label">방 이름</div>
+      <input class="nr-input" id="nrRoomName" placeholder="예: 디자인팀 회의방">
+    </div>
+    <div class="nr-field">
+      <div class="nr-label">참여자 선택</div>
+      <div class="nr-users" id="nrUsers"></div>
+    </div>
+    <div class="nr-actions">
+      <button class="nr-btn" onclick="createRoom()">만들기</button>
+      <button class="nr-btn sec" onclick="closeNewRoomModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 프로필 -->
+<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box">
+    <div class="pf-header">
+      <div class="pf-avatar">👤</div>
+      <div>
+        <div class="pf-name" id="pfName"></div>
+        <div class="pf-meta" id="pfRoleLabel"></div>
+        <div class="pf-meta">아이디: <span id="pfId"></span></div>
+      </div>
+    </div>
+    <div class="pf-sec-title" style="margin-top:0">🔒 비밀번호 변경</div>
+    <div class="pf-field"><div class="pf-label">현재 비밀번호</div><input class="pf-input" id="pfPwOld" type="password" placeholder="현재 비밀번호"></div>
+    <div class="pf-field"><div class="pf-label">새 비밀번호</div><input class="pf-input" id="pfPwNew" type="password" placeholder="새 비밀번호 (4자 이상)"></div>
+    <div class="pf-field"><div class="pf-label">비밀번호 확인</div><input class="pf-input" id="pfPwConfirm" type="password" placeholder="새 비밀번호 재입력"></div>
+    <div class="pf-msg" id="pfPwMsg"></div>
+    <button class="pf-full-btn" onclick="changePw()">비밀번호 변경</button>
+    <div class="pf-sec-title">📅 연차 현황</div>
+    <div class="leave-row"><span>잔여 연차</span><span class="leave-val" id="leaveRemain">-</span></div>
+    <div style="font-size:11.5px;color:var(--text3);margin-top:8px">※ 연차 정보는 추후 연차 및 출장 페이지와 연동될 예정입니다.</div>
+    <button class="pf-full-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);margin-top:16px" onclick="closeProfile()">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -815,6 +1055,138 @@ function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;rend
   });
 })();
 
+// ============================================================
+// 채팅
+// ============================================================
+const KEY_ROOMS = 'fb_chat_rooms';
+const KEY_MSGS = rid => 'fb_chat_msgs_' + rid;
+const _cu = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+function getRooms() { return JSON.parse(localStorage.getItem(KEY_ROOMS) || '[]'); }
+function saveRooms(r) { localStorage.setItem(KEY_ROOMS, JSON.stringify(r)); }
+function getMsgs(rid) { return JSON.parse(localStorage.getItem(KEY_MSGS(rid)) || '[]'); }
+function addMsg(rid, msg) { const m = getMsgs(rid); m.push(msg); localStorage.setItem(KEY_MSGS(rid), JSON.stringify(m)); }
+function getAllUsers() { return JSON.parse(localStorage.getItem('fb_accounts') || '[]'); }
+let _chatRoomId = null;
+function toggleChat() {
+  const p = document.getElementById('chatPopup');
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  if (!open) showRoomList();
+}
+function showRoomList() {
+  _chatRoomId = null;
+  document.getElementById('chatRoomsView').style.display = 'flex';
+  document.getElementById('chatRoomView').style.display = 'none';
+  renderRoomList();
+}
+function renderRoomList() {
+  const rooms = getRooms().filter(r => r.members.includes(_cu.id));
+  const el = document.getElementById('roomListBody');
+  if (!rooms.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;font-size:12px;color:var(--text3)">채팅방이 없습니다.<br>아래 버튼으로 시작하세요.</div>';
+    return;
+  }
+  el.innerHTML = rooms.map(r => {
+    const msgs = getMsgs(r.id), last = msgs[msgs.length - 1];
+    const lt = last ? (last.name + ': ' + last.text).substring(0, 28) : '메시지 없음';
+    return `<div class="room-item" onclick="openRoom('${r.id}')"><br>      <div class="room-icon">${r.type === 'group' ? '👥' : '💬'}</div><br>      <div style="min-width:0"><br>        <div class="room-name">${r.name}</div><br>        <div class="room-last">${lt}</div><br>      </div><br>    </div>`;
+  }).join('');
+}
+function openRoom(rid) {
+  _chatRoomId = rid;
+  const r = getRooms().find(r => r.id === rid);
+  document.getElementById('chatRoomsView').style.display = 'none';
+  document.getElementById('chatRoomView').style.display = 'flex';
+  document.getElementById('chatRoomTitle').textContent = r.name;
+  renderMessages();
+}
+function renderMessages() {
+  if (!_chatRoomId) return;
+  const msgs = getMsgs(_chatRoomId), uid = _cu.id;
+  const el = document.getElementById('chatMsgBody');
+  el.innerHTML = msgs.map(m => {
+    const me = m.from === uid;
+    return `<div class="msg-wrap ${me ? 'msg-me' : 'msg-other'}"><br>      ${!me ? `<div class="msg-sender">${m.name}</div>` : ''}<br>      <div class="msg-bubble ${me ? 'msg-bubble-me' : 'msg-bubble-other'}">${escH(m.text)}</div><br>      <div class="msg-time">${fmtTs(m.ts)}</div><br>    </div>`;
+  }).join('');
+  setTimeout(() => el.scrollTop = el.scrollHeight, 30);
+}
+function sendMsg() {
+  const inp = document.getElementById('chatInput'), text = inp.value.trim();
+  if (!text || !_chatRoomId) return;
+  addMsg(_chatRoomId, { from: _cu.id, name: _cu.name || _cu.id, text, ts: Date.now() });
+  inp.value = ''; renderMessages();
+}
+function escH(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function fmtTs(ts) {
+  const d = new Date(ts);
+  return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+}
+function openNewRoomModal(type) {
+  document.getElementById('nrType').value = type;
+  document.getElementById('nrTitle').textContent = type === 'dm' ? '1:1 채팅 시작' : '단체 채팅방 만들기';
+  document.getElementById('nrNameField').style.display = type === 'group' ? '' : 'none';
+  document.getElementById('nrRoomName').value = '';
+  document.getElementById('newRoomModal').style.display = 'flex';
+  const users = getAllUsers().filter(u => u.id !== _cu.id);
+  document.getElementById('nrUsers').innerHTML = users.length
+    ? users.map(u => `<label style="display:flex;align-items:center;gap:7px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="${u.id}" data-name="${u.name || u.id}" style="accent-color:#9b1b30">${u.name || u.id} (${u.id})</label>`).join('')
+    : '<div style="font-size:12px;color:var(--text3)">다른 직원이 없습니다.</div>';
+  if (type === 'dm') {
+    document.querySelectorAll('#nrUsers input').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) document.querySelectorAll('#nrUsers input').forEach(o => { if (o !== cb) o.checked = false; });
+      });
+    });
+  }
+}
+function closeNewRoomModal() { document.getElementById('newRoomModal').style.display = 'none'; }
+function createRoom() {
+  const type = document.getElementById('nrType').value;
+  const checked = [...document.querySelectorAll('#nrUsers input:checked')];
+  if (!checked.length) { alert('참여자를 선택해주세요.'); return; }
+  let name = type === 'dm'
+    ? checked[0].dataset.name + '와의 대화'
+    : document.getElementById('nrRoomName').value.trim();
+  if (type === 'group' && !name) { alert('방 이름을 입력해주세요.'); return; }
+  const rooms = getRooms(), rid = 'room_' + Date.now();
+  rooms.push({ id: rid, name, type, members: [_cu.id, ...checked.map(c => c.value)], createdAt: Date.now() });
+  saveRooms(rooms); closeNewRoomModal(); openRoom(rid);
+}
+window.addEventListener('storage', e => {
+  if (_chatRoomId && e.key === KEY_MSGS(_chatRoomId)) renderMessages();
+  else if (!_chatRoomId && document.getElementById('chatPopup').style.display === 'flex') renderRoomList();
+});
+// ============================================================
+// 프로필
+// ============================================================
+function openProfile() {
+  const u = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+  document.getElementById('pfName').textContent = u.name || u.id;
+  document.getElementById('pfId').textContent = u.id;
+  document.getElementById('pfRoleLabel').textContent = u.role === 'manager' ? '관리부' : '직원';
+  ['pfPwOld', 'pfPwNew', 'pfPwConfirm'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pfPwMsg').textContent = '';
+  document.getElementById('profileModal').style.display = 'flex';
+}
+function closeProfile() { document.getElementById('profileModal').style.display = 'none'; }
+function changePw() {
+  const u = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+  const oldPw = document.getElementById('pfPwOld').value;
+  const newPw = document.getElementById('pfPwNew').value;
+  const cfm   = document.getElementById('pfPwConfirm').value;
+  const msg   = document.getElementById('pfPwMsg');
+  if (!oldPw || !newPw || !cfm) { msg.style.color = '#d95f5f'; msg.textContent = '모든 항목을 입력해주세요.'; return; }
+  if (newPw !== cfm)            { msg.style.color = '#d95f5f'; msg.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+  if (newPw.length < 4)         { msg.style.color = '#d95f5f'; msg.textContent = '4자 이상 입력해주세요.'; return; }
+  const accounts = JSON.parse(localStorage.getItem('fb_accounts') || '[]');
+  const idx = accounts.findIndex(a => a.id === u.id);
+  if (idx === -1)                     { msg.style.color = '#d95f5f'; msg.textContent = '계정 정보를 찾을 수 없습니다.'; return; }
+  if (accounts[idx].pw !== oldPw)     { msg.style.color = '#d95f5f'; msg.textContent = '현재 비밀번호가 올바르지 않습니다.'; return; }
+  accounts[idx].pw = newPw;
+  localStorage.setItem('fb_accounts', JSON.stringify(accounts));
+  msg.style.color = '#52a874'; msg.textContent = '✅ 비밀번호가 변경되었습니다.';
+  ['pfPwOld', 'pfPwNew', 'pfPwConfirm'].forEach(id => document.getElementById(id).value = '');
+}
 renderCal();
 </script>
 </body>
