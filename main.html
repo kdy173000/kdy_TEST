@@ -1049,8 +1049,17 @@ function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;rend
   const footer = document.querySelector('.sb-footer');
   if (footer) {
     const nameEl = document.createElement('div');
-    nameEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text2);';
-    nameEl.textContent = '로그인: ' + (fbUser.name || fbUser.id) + ' (' + (fbUser.role === 'manager' ? '관리부' : '직원') + ')';
+    nameEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:6px;';
+    const nameText = document.createElement('span');
+    nameText.textContent = '로그인: ' + (fbUser.name || fbUser.id) + ' (' + (fbUser.role === 'manager' ? '관리부' : '직원') + ')';
+    const logoutBtn = document.createElement('button');
+    logoutBtn.textContent = '로그아웃';
+    logoutBtn.style.cssText = 'background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text2);cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .1s,color .1s;';
+    logoutBtn.onmouseover = () => { logoutBtn.style.background='rgba(220,80,80,.12)'; logoutBtn.style.color='#d95f5f'; logoutBtn.style.borderColor='#d95f5f'; };
+    logoutBtn.onmouseout  = () => { logoutBtn.style.background='none'; logoutBtn.style.color='var(--text2)'; logoutBtn.style.borderColor='var(--border2)'; };
+    logoutBtn.onclick = () => doLogout();
+    nameEl.appendChild(nameText);
+    nameEl.appendChild(logoutBtn);
     footer.appendChild(nameEl);
   }
 
