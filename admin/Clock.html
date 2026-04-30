@@ -127,7 +127,7 @@ body {
 }
 .c-time-str { font-size:20px; font-weight:500; color:var(--text); letter-spacing:.04em; line-height:1; }
 .c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
-.tz-label { font-size:12px; color:var(--text2); text-align:center; } .topbar-badge{font-size:10.5px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:2px 8px;border-radius:20px;font-weight:600;margin-left:8px;}
+.tz-label { font-size:12px; color:var(--text2); text-align:center; }
 .tz-select-wrap {
   width:100%;
 }
@@ -142,7 +142,7 @@ body {
 </head>
 <body>
 <div class="topbar">
-  <span class="topbar-title">시계 설정</span><span class="topbar-badge">ADMIN</span>
+  <span class="topbar-title">시계 설정</span>
   <div class="topbar-right">
     <button class="tb-btn" onclick="history.back()">← 뒤로</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
@@ -152,10 +152,10 @@ body {
 
 <div class="container">
   <div class="clock-section">
-    <div class="tz-select-wrap" style="display:none">
+    <div class="tz-select-wrap">
       <select id="tzPreview" onchange="onTzChange()"></select>
     </div>
-    <div class="tz-label" id="tzLabel" style="display:none"></div>
+    <div class="tz-label" id="tzLabel"></div>
     <div class="clock-face" id="clockFace">
       <div class="c-digital-block">
         <div class="c-time-str" id="timeStr">00:00:00</div>
@@ -181,14 +181,14 @@ body {
       <div class="tz-list" id="tzList"></div>
 
       <hr class="divider">
-      <div class="card-title" style="display:none">잠금 비밀번호 변경</div>
+      <div class="card-title">잠금 비밀번호 변경</div>
       <div class="field">
-        <label style="display:none">새 비밀번호 (6자 이상)</label>
-        <input type="password" id="newPw1" placeholder="새 비밀번호" style="display:none">
+        <label>새 비밀번호 (6자 이상)</label>
+        <input type="password" id="newPw1" placeholder="새 비밀번호">
       </div>
       <div class="field">
-        <label style="display:none">비밀번호 확인</label>
-        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력" style="display:none">
+        <label>비밀번호 확인</label>
+        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력">
       </div>
 
       <button class="save-btn" onclick="saveSettings()">저장</button>
@@ -219,10 +219,9 @@ const ALL_TZ = [
   {v:'Pacific/Auckland',l:'뉴질랜드 / 오클랜드'},
 ];
 
-const KEY_PW='admin_pw', KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
-const DEFAULT_PW='kdy17300', DEFAULT_TZ='Asia/Kolkata';
+const KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
+const DEFAULT_TZ='Asia/Kolkata';
 
-function getPw()      { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
 function getDefault() { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
 function getEnabled() { const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
 
@@ -246,11 +245,7 @@ function init() {
     list.appendChild(item);
   });
 
-  // 미리보기 드롭다운
-  const preview = document.getElementById('tzPreview');
-  ALL_TZ.forEach(t => { const o=document.createElement('option'); o.value=t.v; o.textContent=t.l; preview.appendChild(o); });
-  preview.value = getDefault();
-  updateLabel();
+
 }
 
 function updateLabel() {
@@ -263,20 +258,12 @@ function onTzChange() { updateLabel(); }
 
 function saveSettings() {
   const msg = document.getElementById('saveMsg');
-  const p1 = document.getElementById('newPw1').value;
-  const p2 = document.getElementById('newPw2').value;
-  if (p1 || p2) {
-    if (p1.length < 6) { msg.className='msg err'; msg.textContent='비밀번호는 6자 이상이어야 합니다.'; return; }
-    if (p1 !== p2)    { msg.className='msg err'; msg.textContent='비밀번호가 일치하지 않습니다.'; return; }
-    localStorage.setItem(KEY_PW, p1);
-  }
+  
   const def = document.getElementById('defaultTzSel').value;
   localStorage.setItem(KEY_DEFAULT, def);
   const checked = [...document.querySelectorAll('#tzList input:checked')].map(cb=>cb.value);
   if (!checked.length) { msg.className='msg err'; msg.textContent='타임존을 하나 이상 선택해주세요.'; return; }
   localStorage.setItem(KEY_ENABLED, JSON.stringify(checked));
-  document.getElementById('newPw1').value='';
-  document.getElementById('newPw2').value='';
   msg.className='msg ok'; msg.textContent='✅ 저장되었습니다.';
   setTimeout(()=>msg.textContent='',3000);
 }
