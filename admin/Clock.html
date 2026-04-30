@@ -127,7 +127,7 @@ body {
 }
 .c-time-str { font-size:20px; font-weight:500; color:var(--text); letter-spacing:.04em; line-height:1; }
 .c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
-.tz-label { font-size:12px; color:var(--text2); text-align:center; }
+.tz-label { font-size:12px; color:var(--text2); text-align:center; } .topbar-badge{font-size:10.5px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:2px 8px;border-radius:20px;font-weight:600;margin-left:8px;}
 .tz-select-wrap {
   width:100%;
 }
@@ -142,7 +142,7 @@ body {
 </head>
 <body>
 <div class="topbar">
-  <span class="topbar-title">시계 설정</span>
+  <span class="topbar-title">시계 설정</span><span class="topbar-badge">ADMIN</span>
   <div class="topbar-right">
     <button class="tb-btn" onclick="history.back()">← 뒤로</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
@@ -152,10 +152,10 @@ body {
 
 <div class="container">
   <div class="clock-section">
-    <div class="tz-select-wrap">
+    <div class="tz-select-wrap" style="display:none">
       <select id="tzPreview" onchange="onTzChange()"></select>
     </div>
-    <div class="tz-label" id="tzLabel"></div>
+    <div class="tz-label" id="tzLabel" style="display:none"></div>
     <div class="clock-face" id="clockFace">
       <div class="c-digital-block">
         <div class="c-time-str" id="timeStr">00:00:00</div>
@@ -181,14 +181,14 @@ body {
       <div class="tz-list" id="tzList"></div>
 
       <hr class="divider">
-      <div class="card-title">잠금 비밀번호 변경</div>
+      <div class="card-title" style="display:none">잠금 비밀번호 변경</div>
       <div class="field">
-        <label>새 비밀번호 (6자 이상)</label>
-        <input type="password" id="newPw1" placeholder="새 비밀번호">
+        <label style="display:none">새 비밀번호 (6자 이상)</label>
+        <input type="password" id="newPw1" placeholder="새 비밀번호" style="display:none">
       </div>
       <div class="field">
-        <label>비밀번호 확인</label>
-        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력">
+        <label style="display:none">비밀번호 확인</label>
+        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력" style="display:none">
       </div>
 
       <button class="save-btn" onclick="saveSettings()">저장</button>
@@ -293,7 +293,7 @@ function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href
 document.addEventListener('DOMContentLoaded',function(){
   init();
   const face=document.getElementById('clockFace');
-  const tzSel=document.getElementById('tzPreview');
+  
   const timeStr=document.getElementById('timeStr');
   const dateStr=document.getElementById('dateStr');
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded',function(){
     return{month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds()};
   }
   function tick(){
-    const t=getTimeParts(tzSel.value||DEFAULT_TZ);
+    const t=getTimeParts(getDefault());
     const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
     face._hour.style.transform=`rotate(${hh*30}deg)`;
     face._minute.style.transform=`rotate(${mm*6}deg)`;
