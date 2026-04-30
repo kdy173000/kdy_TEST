@@ -46,7 +46,7 @@ body {
   font-size: 12px; font-family: inherit; cursor: pointer;
   transition: background .15s;
 }
-.theme-btn:hover { background: rgba(255,255,255,.12); }
+.theme-btn:hover { background: rgba(255,255,255,.12); } .topbar-badge{font-size:10.5px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:2px 8px;border-radius:20px;font-weight:600;margin-left:8px;}
 .container { max-width:900px; margin:0 auto; padding:36px 24px 60px; }
 .page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
 .page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
@@ -153,7 +153,7 @@ body {
 <body>
 
 <div class="topbar">
-  <span class="topbar-title">계정 관리</span>
+  <span class="topbar-title">계정 관리</span><span class="topbar-badge">ADMIN</span>
   <div class="topbar-right">
     <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
@@ -283,7 +283,7 @@ function togglePw(i, pw) {
 }
 
 const roleLabelMap = { admin:'관리자', manager:'관리부', user:'직원' };
-const roleRedirectMap = { admin:'../admin.html', manager:'../main.html', user:'../main.html' };
+const roleRedirectMap = { admin:'admin.html', manager:'main.html', user:'main.html' };
 
 function addUser() {
   const name  = document.getElementById('newName').value.trim();
