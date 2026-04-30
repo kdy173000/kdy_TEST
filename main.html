@@ -52,7 +52,8 @@ body {
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 
-.layout { display: flex; min-height: 100vh; }
+html, body { height: 100%; overflow: hidden; }
+.layout { display: flex; height: 100vh; overflow: hidden; }
 
 .sidebar {
   width: 236px; flex-shrink: 0; background: var(--bg2);
@@ -178,7 +179,8 @@ button { font-family: inherit; cursor: pointer; }
 .cal-num.sun   { color: #d95f5f; }
 .cal-num.sat   { color: #4a8af4; }
 .cal-num.dim   { color: var(--text3); }
-.ev-hol { font-size:9.5px; color:#cc6060; padding:0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-num.hol   { color: #d95f5f; }
+.ev-hol { font-size:9.5px; color:#d95f5f; padding:0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cal-evrow {
   display: grid; grid-template-columns: repeat(7,1fr);
   grid-auto-rows: 20px; gap: 2px 0;
@@ -657,8 +659,6 @@ button { font-family: inherit; cursor: pointer; }
 
   <aside class="rp">
     <div>
-      <div class="rp-label">★ 사용법 안내</div>
-      <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px">Update : 2026.04.10</div>
       <div class="rp-link"><span>🏢</span>파이어볼 회사소개</div>
       <div class="rp-link"><span>📖</span>파이어볼 기본 예절</div>
     </div>
@@ -1025,7 +1025,8 @@ function renderCal(){
     html+='<div class="cal-week">';
     for(const wd of wDates){
       const hol=HOL[wd.key];
-      html+=`<div class="cal-cell ${wd.cellCls}"><div class="cal-num ${wd.numCls}">${wd.day}</div>${(hol&&!wd.isDim)?`<div class="ev-hol">${hol}</div>`:''}</div>`;
+      let nC=wd.numCls;if(hol&&!wd.isDim&&!nC.includes('today'))nC+=' hol';
+      html+=`<div class="cal-cell ${wd.cellCls}"><div class="cal-num ${nC}">${wd.day}</div>${(hol&&!wd.isDim)?`<div class="ev-hol">${hol}</div>`:''}</div>`;
     }
     html+='</div>';
     const wStart=wDates[0].key,wEnd=wDates[6].key;
