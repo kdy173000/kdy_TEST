@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연차 및 출장 관리</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --border:#2e2e2e; --border2:#3a3a3a;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --input-bg:#242424; --input-border:#333;
+}
+[data-theme="light"] {
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
+  --border:#e0e0e0; --border2:#d0d0d0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s,color .2s; }
+.topbar { background:#9b1b30; padding:0 28px; height:52px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.3); }
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
+.tb-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:6px; padding:5px 12px; font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s; }
+.tb-btn:hover { background:rgba(255,255,255,.22); }
+.theme-btn { background:none; border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px; font-size:12px; font-family:inherit; cursor:pointer; }
+.topbar-badge { font-size:10.5px; background:rgba(255,255,255,.2); color:rgba(255,255,255,.9); padding:2px 8px; border-radius:20px; font-weight:600; margin-left:8px; }
+.container { max-width:960px; margin:0 auto; padding:36px 24px 60px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
+.toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+.filter-row { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn { padding:5px 14px; border-radius:20px; border:1.5px solid var(--border2); background:none; color:var(--text2); font-size:12.5px; font-family:inherit; cursor:pointer; transition:all .15s; }
+.filter-btn:hover { border-color:#9b1b30; color:var(--text); }
+.filter-btn.on { border-color:transparent; color:#fff; background:#9b1b30; }
+.add-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.add-btn:hover { background:#7e1627; }
+.tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.tbl-head { display:grid; grid-template-columns:40px 110px 72px 1fr 100px 100px 90px; gap:8px; padding:8px 14px; background:var(--bg2); border-bottom:1px solid var(--border); font-size:11.5px; font-weight:600; color:var(--text3); }
+.tbl-row { display:grid; grid-template-columns:40px 110px 72px 1fr 100px 100px 90px; gap:8px; padding:9px 14px; align-items:center; border-bottom:1px solid var(--border); font-size:13px; transition:background .1s; }
+.tbl-row:last-child { border-bottom:none; }
+.tbl-row:hover { background:var(--hover); }
+.type-badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:20px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+.type-t { background:rgba(74,138,244,.15); color:#4a8af4; }
+.type-l { background:rgba(82,168,116,.15); color:#52a874; }
+.type-h { background:rgba(200,160,60,.15); color:#c89a3c; }
+.type-p { background:rgba(210,80,80,.15); color:#cc6060; }
+.act-btn { padding:3px 10px; border-radius:5px; border:1px solid var(--border); background:none; color:var(--text2); font-size:12px; font-family:inherit; cursor:pointer; transition:background .1s,color .1s; }
+.act-btn:hover { background:var(--hover); color:var(--text); }
+.act-btn.del:hover { background:rgba(220,80,80,.12); color:#d95f5f; border-color:#d95f5f; }
+.actions { display:flex; gap:5px; }
+.empty-row { padding:32px; text-align:center; font-size:13px; color:var(--text3); }
+.count-bar { font-size:12px; color:var(--text2); margin-bottom:10px; }
+.modal-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; }
+.modal { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:28px 24px; width:440px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+.modal-title { font-size:16px; font-weight:700; margin-bottom:20px; }
+.mfield { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+.mfield label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.mfield input, .mfield select { padding:9px 12px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); color:var(--text); font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s; }
+.mfield input:focus, .mfield select:focus { border-color:#9b1b30; }
+.mrow2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.modal-actions { display:flex; gap:8px; margin-top:20px; }
+.m-btn { flex:1; padding:10px; border-radius:8px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:background .15s; }
+.m-btn:hover { background:#7e1627; }
+.m-btn.sec { background:var(--bg3); color:var(--text2); border:1px solid var(--border); }
+.m-btn.sec:hover { background:var(--hover); color:var(--text); }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-title">연차 및 출장 관리</span><span class="topbar-badge">ADMIN</span>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
+    <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+<div class="container">
+  <div class="page-title">📅 연차 및 출장 관리</div>
+  <div class="page-sub">직원 연차·출장·반차 일정을 등록하고 관리합니다. 메인화면 캘린더와 현재 출장 목록에 자동 반영됩니다.</div>
+  <div class="toolbar">
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn on" onclick="setFilter(this,'all')">전체</button>
+      <button class="filter-btn" onclick="setFilter(this,'t')">출장</button>
+      <button class="filter-btn" onclick="setFilter(this,'l')">연차</button>
+      <button class="filter-btn" onclick="setFilter(this,'h')">반차</button>
+      <button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button>
+    </div>
+    <button class="add-btn" onclick="openModal()">＋ 일정 추가</button>
+  </div>
+  <div class="count-bar" id="countBar"></div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div>#</div><div>이름</div><div>구분</div><div>내용</div>
+      <div>시작일</div><div>종료일</div><div>관리</div>
+    </div>
+    <div id="scheduleList"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">일정 추가</div>
+    <div class="mfield"><label>이름 (담당자)</label><input id="mName" placeholder="예: 김다영·박철완"></div>
+    <div class="mfield"><label>구분</label><select id="mType"><option value="t">출장</option><option value="l">연차</option><option value="h">반차</option><option value="p">공휴일</option></select></div>
+    <div class="mfield"><label>내용 / 장소</label><input id="mLabel" placeholder="예: 중국 샤먼 세미나"></div>
+    <div class="mrow2">
+      <div class="mfield"><label>시작일</label><input id="mStart" type="date"></div>
+      <div class="mfield"><label>종료일 (없으면 비워두세요)</label><input id="mEnd" type="date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="m-btn" onclick="saveEntry()">저장</button>
+      <button class="m-btn sec" onclick="closeModal()">취소</button>
+    </div>
+  </div>
+</div>
+<script>
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+const KEY = 'fb_schedule';
+const DEFAULT_DATA = [
+  {id:'d0',s:'2026-04-13',e:'2026-04-16',t:'t',l:'상하이 미팅',w:'안선우·전해연'},
+  {id:'d1',s:'2026-04-21',e:'2026-04-22',t:'t',l:'서울 현대차',w:'박철완·준유'},
+  {id:'d2',s:'2026-04-23',e:'2026-04-28',t:'t',l:'인도 총판',w:'김상윤·사장'},
+  {id:'d3',s:'2026-04-28',e:'2026-05-02',t:'t',l:'샤먼 세미나',w:'박철완·전해연·작은사장님'},
+  {id:'d4',s:'2026-03-16',t:'l',l:'연차',w:'김다영'},
+  {id:'d5',s:'2026-03-24',t:'l',l:'연차',w:'박준유'},
+  {id:'d6',s:'2026-03-24',t:'l',l:'월차',w:'안선우'},
+  {id:'d7',s:'2026-03-26',t:'l',l:'연차',w:'최혜선'},
+  {id:'d8',s:'2026-03-27',t:'l',l:'연차',w:'김다영'},
+  {id:'d9',s:'2026-03-27',t:'l',l:'월차',w:'김상윤'},
+  {id:'d10',s:'2026-03-27',t:'l',l:'연차',w:'송나겸'},
+  {id:'d11',s:'2026-04-03',t:'l',l:'연차',w:'박준유'},
+  {id:'d12',s:'2026-04-06',t:'l',l:'연차',w:'김다영'},
+  {id:'d13',s:'2026-04-07',t:'h',l:'오전반차',w:'김다영'},
+  {id:'d14',s:'2026-04-09',t:'l',l:'연차',w:'김상윤'},
+  {id:'d15',s:'2026-04-10',t:'l',l:'연차',w:'김상윤'},
+  {id:'d16',s:'2026-04-10',t:'l',l:'월차',w:'안선우'},
+  {id:'d17',s:'2026-04-10',t:'h',l:'오후반차',w:'송나겸'},
+  {id:'d18',s:'2026-04-15',t:'l',l:'연차',w:'최혜선'},
+  {id:'d19',s:'2026-04-16',t:'h',l:'오후반차',w:'박준유'},
+  {id:'d20',s:'2026-04-17',t:'l',l:'연차',w:'김다영'},
+  {id:'d21',s:'2026-04-20',t:'l',l:'연차',w:'조수빈'},
+  {id:'d22',s:'2026-04-20',t:'l',l:'연차',w:'김상윤'},
+  {id:'d23',s:'2026-04-24',t:'l',l:'연차',w:'송나겸'},
+  {id:'d24',s:'2026-04-29',t:'l',l:'월차',w:'강승훈'},
+  {id:'d25',s:'2026-05-04',t:'l',l:'연차',w:'조수빈'},
+  {id:'d26',s:'2026-05-04',t:'l',l:'연차',w:'박철완'},
+];
+function getSchedule(){const s=localStorage.getItem(KEY);if(!s){localStorage.setItem(KEY,JSON.stringify(DEFAULT_DATA));return [...DEFAULT_DATA];}return JSON.parse(s);}
+function saveSchedule(list){localStorage.setItem(KEY,JSON.stringify(list));}
+const TYPE_MAP={t:'출장',l:'연차',h:'반차',p:'공휴일'};
+const TYPE_CLS={t:'type-t',l:'type-l',h:'type-h',p:'type-p'};
+let currentFilter='all';
+function setFilter(btn,f){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderList();
+}
+function renderList(){
+  const data=getSchedule().filter(e=>currentFilter==='all'||e.t===currentFilter);
+  data.sort((a,b)=>b.s.localeCompare(a.s));
+  const el=document.getElementById('scheduleList');
+  document.getElementById('countBar').textContent='총 '+data.length+'건';
+  if(!data.length){el.innerHTML='<div class="empty-row">등록된 일정이 없습니다.</div>';return;}
+  el.innerHTML=data.map((e,i)=>`
+    <div class="tbl-row">
+      <div style="color:var(--text3);font-size:12px">${i+1}</div>
+      <div>${e.w}</div>
+      <div><span class="type-badge ${TYPE_CLS[e.t]||'type-l'}">${TYPE_MAP[e.t]||e.t}</span></div>
+      <div>${e.l}</div>
+      <div style="font-size:12.5px">${e.s}</div>
+      <div style="font-size:12.5px;color:var(--text2)">${e.e||'-'}</div>
+      <div class="actions">
+        <button class="act-btn" onclick="openEdit('${e.id}')">수정</button>
+        <button class="act-btn del" onclick="deleteEntry('${e.id}')">삭제</button>
+      </div>
+    </div>`).join('');
+}
+let editId=null;
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modalTitle').textContent=id?'일정 수정':'일정 추가';
+  if(id){
+    const e=getSchedule().find(x=>x.id===id);
+    document.getElementById('mName').value=e.w;
+    document.getElementById('mType').value=e.t;
+    document.getElementById('mLabel').value=e.l;
+    document.getElementById('mStart').value=e.s;
+    document.getElementById('mEnd').value=e.e||'';
+  }else{
+    document.getElementById('mName').value='';
+    document.getElementById('mType').value='t';
+    document.getElementById('mLabel').value='';
+    document.getElementById('mStart').value='';
+    document.getElementById('mEnd').value='';
+  }
+  document.getElementById('modal').style.display='flex';
+  setTimeout(()=>document.getElementById('mName').focus(),80);
+}
+function openEdit(id){openModal(id);}
+function closeModal(){document.getElementById('modal').style.display='none';editId=null;}
+function saveEntry(){
+  const w=document.getElementById('mName').value.trim();
+  const t=document.getElementById('mType').value;
+  const l=document.getElementById('mLabel').value.trim();
+  const s=document.getElementById('mStart').value;
+  const e=document.getElementById('mEnd').value||undefined;
+  if(!w||!l||!s){alert('이름, 내용, 시작일을 입력해주세요.');return;} 
+  const list=getSchedule();
+  if(editId){
+    const idx=list.findIndex(x=>x.id===editId);
+    if(idx>=0)list[idx]={id:editId,s,e,t,l,w};
+  }else{
+    list.push({id:'u'+Date.now(),s,e,t,l,w});
+  }
+  saveSchedule(list);
+  closeModal();
+  renderList();
+}
+function deleteEntry(id){
+  const e=getSchedule().find(x=>x.id===id);
+  if(!confirm(`'${e.l} (${e.w})' 일정을 삭제하시겠습니까?`))return;
+  saveSchedule(getSchedule().filter(x=>x.id!==id));
+  renderList();
+}
+function toggleTheme(){
+  const h=document.documentElement,dark=h.dataset.theme==='dark';
+  h.dataset.theme=dark?'light':'dark';
+  document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
+}
+function doLogout(){sessionStorage.removeItem('fb_user');window.location.href='../index.html';}
+renderList();
+</script>
+</body>
+</html>
