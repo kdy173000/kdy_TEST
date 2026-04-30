@@ -72,9 +72,9 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 </head>
 <body>
 <div class="topbar">
-  <span class="topbar-title">연차 및 출장 관리</span><span class="topbar-badge">ADMIN</span>
+  <span class="topbar-title">연차 및 출장 관리</span>
   <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
+    <button class="tb-btn" onclick="window.location.href='../main.html'">← 메인으로</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
     <button class="tb-btn" onclick="doLogout()">로그아웃</button>
   </div>
@@ -119,7 +119,7 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 </div>
 <script>
 const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
-if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+if (!me || !me.id) { window.location.href = '../index.html'; }
 const KEY = 'fb_schedule';
 const DEFAULT_DATA = [
   {id:'d0',s:'2026-04-13',e:'2026-04-16',t:'t',l:'상하이 미팅',w:'안선우·전해연'},
@@ -210,7 +210,7 @@ function saveEntry(){
   const l=document.getElementById('mLabel').value.trim();
   const s=document.getElementById('mStart').value;
   const e=document.getElementById('mEnd').value||undefined;
-  if(!w||!l||!s){alert('이름, 내용, 시작일을 입력해주세요.');return;} 
+  if(!w||!l||!s){alert('이름, 내용, 시작일을 입력해주세요.');return;}
   const list=getSchedule();
   if(editId){
     const idx=list.findIndex(x=>x.id===editId);
