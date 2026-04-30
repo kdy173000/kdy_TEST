@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시계 설정</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --border:#2e2e2e; --border2:#3a3a3a;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --input-bg:#242424; --input-border:#333;
+  --sel-border:#555; --sel-border-h:#7a7a7a;
+  --opt-bg:#1e1e1e; --opt-text:#fff;
+  --tick-major:rgba(245,245,245,0.9); --tick-minor:rgba(245,245,245,0.5);
+  --hand:#f5f5f5; --center-dot:#f5f5f5;
+}
+[data-theme="light"] {
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
+  --border:#e0e0e0; --border2:#d0d0d0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+  --sel-border:#cfcfcf; --sel-border-h:#b8b8b8;
+  --opt-bg:#ffffff; --opt-text:#111111;
+  --tick-major:rgba(17,17,17,0.9); --tick-minor:rgba(17,17,17,0.5);
+  --hand:#111111; --center-dot:#111111;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; transition:background .2s,color .2s;
+}
+.topbar {
+  background:#9b1b30; padding:0 28px; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
+.tb-btn {
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:6px; padding:5px 12px;
+  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
+}
+.tb-btn:hover { background:rgba(255,255,255,.22); }
+.theme-btn {
+  background:none; border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px;
+  font-size:12px; font-family:inherit; cursor:pointer;
+}
+.container { max-width:800px; margin:0 auto; padding:36px 24px 60px; display:flex; gap:32px; flex-wrap:wrap; }
+.clock-section { flex:0 0 220px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+.settings-section { flex:1; min-width:280px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:24px; }
+.card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:22px 20px; margin-bottom:18px;
+}
+.card-title { font-size:13.5px; font-weight:700; margin-bottom:14px; }
+.field { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+.field label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.field select, .field input {
+  padding:9px 12px; border-radius:8px;
+  border:1px solid var(--sel-border); background:var(--bg3); color:var(--text);
+  font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s;
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+}
+.field input { appearance:auto; -webkit-appearance:auto; }
+.field select:focus, .field input:focus { border-color:#9b1b30; }
+.tz-list {
+  border:1px solid var(--border); border-radius:8px;
+  max-height:260px; overflow-y:auto; background:var(--bg3);
+  margin-bottom:14px;
+}
+.tz-item {
+  display:flex; align-items:center; gap:9px;
+  padding:7px 12px; cursor:pointer;
+  border-bottom:1px solid var(--border);
+  font-size:13px; color:var(--text2); transition:background .1s;
+}
+.tz-item:last-child { border-bottom:none; }
+.tz-item:hover { background:var(--hover); }
+.tz-item input[type=checkbox] { accent-color:#9b1b30; flex-shrink:0; }
+.tz-item span.checked { color:var(--text); }
+.save-btn {
+  width:100%; padding:10px; border-radius:8px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:background .15s;
+}
+.save-btn:hover { background:#7e1627; }
+.msg { font-size:12px; min-height:18px; margin-top:8px; }
+.msg.ok { color:#52a874; }
+.msg.err { color:#d95f5f; }
+.divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+/* clock */
+.clock-face {
+  position:relative; width:180px; height:180px;
+  border-radius:50%; background:var(--bg2);
+  border:2px solid var(--border);
+  box-shadow:0 4px 20px var(--shadow);
+}
+.c-hand {
+  position:absolute; left:50%; bottom:50%;
+  transform-origin:bottom center;
+  border-radius:999px; background:var(--hand);
+  will-change:transform;
+}
+.c-hand.hour   { width:3px; height:52px; margin-left:-1.5px; }
+.c-hand.minute { width:2px; height:74px; margin-left:-1px; }
+.c-hand.second { width:1px; height:82px; margin-left:-.5px; background:#9b1b30; }
+.c-center-dot {
+  position:absolute; left:50%; top:50%;
+  width:8px; height:8px; margin:-4px 0 0 -4px;
+  border-radius:50%; background:var(--center-dot); z-index:5;
+}
+.c-digital-block {
+  position:absolute; left:50%; top:62%;
+  transform:translateX(-50%);
+  text-align:center; pointer-events:none; white-space:nowrap;
+}
+.c-time-str { font-size:20px; font-weight:500; color:var(--text); letter-spacing:.04em; line-height:1; }
+.c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
+.tz-label { font-size:12px; color:var(--text2); text-align:center; }
+.tz-select-wrap {
+  width:100%;
+}
+.tz-select-wrap select {
+  width:100%; padding:7px 10px;
+  border-radius:7px; border:1px solid var(--sel-border);
+  background:var(--bg3); color:var(--text);
+  font-size:12px; font-family:inherit;
+  appearance:none; -webkit-appearance:none; outline:none;
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-title">시계 설정</span>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="history.back()">← 뒤로</button>
+    <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="clock-section">
+    <div class="tz-select-wrap">
+      <select id="tzPreview" onchange="onTzChange()"></select>
+    </div>
+    <div class="tz-label" id="tzLabel"></div>
+    <div class="clock-face" id="clockFace">
+      <div class="c-digital-block">
+        <div class="c-time-str" id="timeStr">00:00:00</div>
+        <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="page-title">🕐 시계 설정</div>
+    <div class="page-sub">세계 시계 타임존과 기본값을 설정합니다.</div>
+
+    <div class="card">
+      <div class="card-title">기본 타임존</div>
+      <div class="field">
+        <label>페이지 로드 시 기본 선택값</label>
+        <select id="defaultTzSel"></select>
+      </div>
+
+      <hr class="divider">
+      <div class="card-title">표시할 타임존</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:10px">체크한 항목만 드롭다운에 표시됩니다.</p>
+      <div class="tz-list" id="tzList"></div>
+
+      <hr class="divider">
+      <div class="card-title">잠금 비밀번호 변경</div>
+      <div class="field">
+        <label>새 비밀번호 (6자 이상)</label>
+        <input type="password" id="newPw1" placeholder="새 비밀번호">
+      </div>
+      <div class="field">
+        <label>비밀번호 확인</label>
+        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력">
+      </div>
+
+      <button class="save-btn" onclick="saveSettings()">저장</button>
+      <div class="msg" id="saveMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+
+const ALL_TZ = [
+  {v:'Asia/Seoul',l:'대한민국 / 서울'},{v:'Asia/Tokyo',l:'일본 / 도쿄'},
+  {v:'Asia/Shanghai',l:'중국 / 상하이'},{v:'Asia/Singapore',l:'싱가포르'},
+  {v:'Asia/Brunei',l:'브루나이'},{v:'Asia/Manila',l:'필리핀 / 마닐라'},
+  {v:'Asia/Ho_Chi_Minh',l:'베트남 / 호치민'},{v:'Asia/Bangkok',l:'태국 / 방콕'},
+  {v:'Asia/Jakarta',l:'인도네시아 / 자카르타'},{v:'Asia/Kolkata',l:'인도 / 뉴델리'},
+  {v:'Asia/Tashkent',l:'우즈베키스탄 / 타슈켄트'},{v:'Asia/Dubai',l:'아랍에미리트 / 두바이'},
+  {v:'Europe/London',l:'영국 / 런던'},{v:'Europe/Paris',l:'프랑스 / 파리'},
+  {v:'Europe/Berlin',l:'독일 / 베를린'},{v:'Europe/Warsaw',l:'폴란드 / 바르샤바'},
+  {v:'Europe/Kyiv',l:'우크라이나 / 키이우'},{v:'Europe/Istanbul',l:'튀르키에 / 이스탄불'},
+  {v:'Europe/Moscow',l:'러시아 / 모스크바'},{v:'America/New_York',l:'미국 / 뉴욕'},
+  {v:'America/Chicago',l:'미국 / 시카고'},{v:'America/Denver',l:'미국 / 덴버'},
+  {v:'America/Los_Angeles',l:'미국 / 로스앤젤레스'},{v:'America/Toronto',l:'캐나다 / 토론토'},
+  {v:'America/Puerto_Rico',l:'푸에르토리코'},{v:'America/Sao_Paulo',l:'브라질 / 상파울루'},
+  {v:'America/Santiago',l:'칠레 / 산티아고'},{v:'Australia/Sydney',l:'호주 / 시드니'},
+  {v:'Pacific/Auckland',l:'뉴질랜드 / 오클랜드'},
+];
+
+const KEY_PW='admin_pw', KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
+const DEFAULT_PW='kdy17300', DEFAULT_TZ='Asia/Kolkata';
+
+function getPw()      { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
+function getDefault() { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
+function getEnabled() { const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
+
+function init() {
+  // 기본 타임존 셀렉트
+  const defSel = document.getElementById('defaultTzSel');
+  ALL_TZ.forEach(t => { const o=document.createElement('option'); o.value=t.v; o.textContent=t.l; defSel.appendChild(o); });
+  defSel.value = getDefault();
+
+  // 타임존 체크리스트
+  const enabled = getEnabled();
+  const list = document.getElementById('tzList');
+  ALL_TZ.forEach(t => {
+    const item = document.createElement('div'); item.className='tz-item';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.value=t.v; cb.checked=enabled.includes(t.v);
+    const lbl = document.createElement('span'); lbl.textContent=t.l;
+    if(cb.checked) lbl.className='checked';
+    cb.addEventListener('change',()=>{ lbl.className=cb.checked?'checked':''; });
+    item.appendChild(cb); item.appendChild(lbl);
+    item.addEventListener('click',e=>{ if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
+    list.appendChild(item);
+  });
+
+  // 미리보기 드롭다운
+  const preview = document.getElementById('tzPreview');
+  ALL_TZ.forEach(t => { const o=document.createElement('option'); o.value=t.v; o.textContent=t.l; preview.appendChild(o); });
+  preview.value = getDefault();
+  updateLabel();
+}
+
+function updateLabel() {
+  const sel = document.getElementById('tzPreview');
+  const found = ALL_TZ.find(t=>t.v===sel.value);
+  document.getElementById('tzLabel').textContent = found ? found.l : sel.value;
+}
+
+function onTzChange() { updateLabel(); }
+
+function saveSettings() {
+  const msg = document.getElementById('saveMsg');
+  const p1 = document.getElementById('newPw1').value;
+  const p2 = document.getElementById('newPw2').value;
+  if (p1 || p2) {
+    if (p1.length < 6) { msg.className='msg err'; msg.textContent='비밀번호는 6자 이상이어야 합니다.'; return; }
+    if (p1 !== p2)    { msg.className='msg err'; msg.textContent='비밀번호가 일치하지 않습니다.'; return; }
+    localStorage.setItem(KEY_PW, p1);
+  }
+  const def = document.getElementById('defaultTzSel').value;
+  localStorage.setItem(KEY_DEFAULT, def);
+  const checked = [...document.querySelectorAll('#tzList input:checked')].map(cb=>cb.value);
+  if (!checked.length) { msg.className='msg err'; msg.textContent='타임존을 하나 이상 선택해주세요.'; return; }
+  localStorage.setItem(KEY_ENABLED, JSON.stringify(checked));
+  document.getElementById('newPw1').value='';
+  document.getElementById('newPw2').value='';
+  msg.className='msg ok'; msg.textContent='✅ 저장되었습니다.';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function toggleTheme() {
+  const h=document.documentElement,dark=h.dataset.theme==='dark';
+  h.dataset.theme=dark?'light':'dark';
+  document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
+  if(window._applyTickColors) window._applyTickColors();
+}
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href='../index.html'; }
+
+// 시계
+document.addEventListener('DOMContentLoaded',function(){
+  init();
+  const face=document.getElementById('clockFace');
+  const tzSel=document.getElementById('tzPreview');
+  const timeStr=document.getElementById('timeStr');
+  const dateStr=document.getElementById('dateStr');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;';
+  face.appendChild(svg);
+  function applyTickColors(){
+    const st=getComputedStyle(document.documentElement);
+    const major=st.getPropertyValue('--tick-major').trim();
+    const minor=st.getPropertyValue('--tick-minor').trim();
+    [...svg.querySelectorAll('line')].forEach((l,i)=>l.setAttribute('stroke',i%3===0?major:minor));
+  }
+  window._applyTickColors=applyTickColors;
+  function drawTicks(){
+    const S=face.clientWidth,CX=S/2,CY=S/2;
+    svg.setAttribute('width',S);svg.setAttribute('height',S);svg.innerHTML='';
+    for(let i=0;i<12;i++){
+      const rad=(i*30-90)*Math.PI/180,outerR=CX-(S*0.033);
+      const len=i%3===0?S*0.05:S*0.03,innerR=outerR-len;
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',CX+outerR*Math.cos(rad));line.setAttribute('y1',CY+outerR*Math.sin(rad));
+      line.setAttribute('x2',CX+innerR*Math.cos(rad));line.setAttribute('y2',CY+innerR*Math.sin(rad));
+      line.setAttribute('stroke-width',i%3===0?'2':'1.5');line.setAttribute('stroke-linecap','round');
+      svg.appendChild(line);
+    }
+    applyTickColors();
+  }
+  ['hour','minute','second'].forEach(cls=>{
+    const d=document.createElement('div');d.className='c-hand '+cls;face.appendChild(d);face['_'+cls]=d;
+  });
+  face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
+  function getTimeParts(tz){
+    const now=new Date();
+    const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+    const map={};fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
+    return{month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds()};
+  }
+  function tick(){
+    const t=getTimeParts(tzSel.value||DEFAULT_TZ);
+    const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
+    face._hour.style.transform=`rotate(${hh*30}deg)`;
+    face._minute.style.transform=`rotate(${mm*6}deg)`;
+    face._second.style.transform=`rotate(${ss*6}deg)`;
+    timeStr.textContent=[t.hour,t.minute,t.second].map(x=>String(x).padStart(2,'0')).join(':');
+    dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize',drawTicks);
+  drawTicks();tick();
+});
+</script>
+</body>
+</html>
