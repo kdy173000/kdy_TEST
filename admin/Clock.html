@@ -4,203 +4,173 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>시계 설정</title>
+<script>
+(function(){
+  var raw = sessionStorage.getItem('fb_user');
+  if (!raw) { window.location.replace('../index.html'); return; }
+  try { var u = JSON.parse(raw); if (!u || u.role !== 'admin') { window.location.replace('../index.html'); return; } }
+  catch(e) { window.location.replace('../index.html'); }
+})();
+</script>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
-  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --bg:#191919; --bg2:#202020; --bg3:#272727;
   --border:#2e2e2e; --border2:#3a3a3a;
-  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
-  --hover:#222222; --shadow:rgba(0,0,0,.5);
-  --input-bg:#242424; --input-border:#333;
+  --text:#E8E8E8; --text2:#9B9B9B; --text3:#5a5a5a;
+  --hover:#252525; --shadow:rgba(0,0,0,.5);
   --sel-border:#555; --sel-border-h:#7a7a7a;
   --opt-bg:#1e1e1e; --opt-text:#fff;
-  --tick-major:rgba(245,245,245,0.9); --tick-minor:rgba(245,245,245,0.5);
+  --modal-bg:#1c1c1c; --modal-border:#333;
   --hand:#f5f5f5; --center-dot:#f5f5f5;
+  --tick-major:rgba(245,245,245,0.9); --tick-minor:rgba(245,245,245,0.5);
 }
 [data-theme="light"] {
-  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
-  --border:#e0e0e0; --border2:#d0d0d0;
-  --text:#111111; --text2:#666666; --text3:#b0b0b0;
-  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
-  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+  --bg:#FFFFFF; --bg2:#F7F7F5; --bg3:#EFEFED;
+  --border:#E8E8E5; --border2:#D5D5D2;
+  --text:#1A1A1A; --text2:#787774; --text3:#AFAFAC;
+  --hover:#F0F0EE; --shadow:rgba(0,0,0,.08);
   --sel-border:#cfcfcf; --sel-border-h:#b8b8b8;
   --opt-bg:#ffffff; --opt-text:#111111;
-  --tick-major:rgba(17,17,17,0.9); --tick-minor:rgba(17,17,17,0.5);
+  --modal-bg:#ffffff; --modal-border:#e0e0e0;
   --hand:#111111; --center-dot:#111111;
+  --tick-major:rgba(17,17,17,0.9); --tick-minor:rgba(17,17,17,0.5);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family:'Pretendard',-apple-system,sans-serif;
-  background:var(--bg); color:var(--text);
-  min-height:100vh; transition:background .2s,color .2s;
-}
-.topbar {
-  background:#9b1b30; padding:0 28px; height:52px;
-  display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:100;
-  box-shadow:0 2px 12px rgba(0,0,0,.3);
-}
+body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s,color .2s; }
+.topbar { background:#9b1b30; padding:0 28px; height:52px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.3); }
 .topbar-title { font-size:15px; font-weight:700; color:#fff; }
-.topbar-right { display:flex; gap:8px; }
-.tb-btn {
-  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-  color:#fff; border-radius:6px; padding:5px 12px;
-  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
-}
+.topbar-right { display:flex; gap:8px; align-items:center; }
+.tb-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:6px; padding:5px 12px; font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s; }
 .tb-btn:hover { background:rgba(255,255,255,.22); }
-.theme-btn {
-  background:none; border:1px solid rgba(255,255,255,.2);
-  color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px;
-  font-size:12px; font-family:inherit; cursor:pointer;
-}
-.container { max-width:800px; margin:0 auto; padding:36px 24px 60px; display:flex; gap:32px; flex-wrap:wrap; }
-.clock-section { flex:0 0 220px; display:flex; flex-direction:column; align-items:center; gap:14px; }
-.settings-section { flex:1; min-width:280px; }
+.tb-btn.icon { padding:5px 10px; font-size:14px; }
+.theme-btn { background:none; border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px; font-size:12px; font-family:inherit; cursor:pointer; }
+.container { max-width:920px; margin:0 auto; padding:36px 24px 60px; display:flex; gap:32px; flex-wrap:wrap; }
+.clock-section { flex:0 0 220px; display:flex; flex-direction:column; align-items:center; gap:14px; padding-top:6px; }
+.settings-section { flex:1; min-width:300px; }
+.preview-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.preview-tz-label { font-size:12px; color:var(--text2); text-align:center; min-height:18px; letter-spacing:.02em; }
+.preview-note { font-size:11px; color:var(--text3); text-align:center; line-height:1.6; margin-top:4px; }
 .page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
 .page-sub { font-size:13px; color:var(--text2); margin-bottom:24px; }
-.card {
-  background:var(--bg2); border:1px solid var(--border);
-  border-radius:12px; padding:22px 20px; margin-bottom:18px;
-}
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:22px 20px; margin-bottom:18px; }
 .card-title { font-size:13.5px; font-weight:700; margin-bottom:14px; }
-.field { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
-.field label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
-.field select, .field input {
-  padding:9px 12px; border-radius:8px;
-  border:1px solid var(--sel-border); background:var(--bg3); color:var(--text);
-  font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s;
-  appearance:none; -webkit-appearance:none; cursor:pointer;
-}
-.field input { appearance:auto; -webkit-appearance:auto; }
-.field select:focus, .field input:focus { border-color:#9b1b30; }
-.tz-list {
-  border:1px solid var(--border); border-radius:8px;
-  max-height:260px; overflow-y:auto; background:var(--bg3);
-  margin-bottom:14px;
-}
-.tz-item {
-  display:flex; align-items:center; gap:9px;
-  padding:7px 12px; cursor:pointer;
-  border-bottom:1px solid var(--border);
-  font-size:13px; color:var(--text2); transition:background .1s;
-}
+.field { display:flex; flex-direction:column; gap:5px; }
+.field select { padding:9px 12px; border-radius:8px; border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none; cursor:pointer; }
+.field select:focus { border-color:#9b1b30; }
+.field-help { font-size:11.5px; color:var(--text3); margin-bottom:10px; line-height:1.6; }
+.tz-list { border:1px solid var(--border); border-radius:8px; max-height:300px; overflow-y:auto; background:var(--bg3); }
+.tz-item { display:flex; align-items:center; gap:9px; padding:7px 12px; cursor:pointer; border-bottom:1px solid var(--border); font-size:13px; color:var(--text2); transition:background .1s; }
 .tz-item:last-child { border-bottom:none; }
 .tz-item:hover { background:var(--hover); }
 .tz-item input[type=checkbox] { accent-color:#9b1b30; flex-shrink:0; }
 .tz-item span.checked { color:var(--text); }
-.save-btn {
-  width:100%; padding:10px; border-radius:8px; border:none;
-  background:#9b1b30; color:#fff;
-  font-size:13px; font-weight:700; font-family:inherit;
-  cursor:pointer; transition:background .15s;
-}
-.save-btn:hover { background:#7e1627; }
-.msg { font-size:12px; min-height:18px; margin-top:8px; }
-.msg.ok { color:#52a874; }
-.msg.err { color:#d95f5f; }
-.divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
-/* clock */
-.clock-face {
-  position:relative; width:180px; height:180px;
-  border-radius:50%; background:var(--bg2);
-  border:2px solid var(--border);
-  box-shadow:0 4px 20px var(--shadow);
-}
-.c-hand {
-  position:absolute; left:50%; bottom:50%;
-  transform-origin:bottom center;
-  border-radius:999px; background:var(--hand);
-  will-change:transform;
-}
-.c-hand.hour   { width:3px; height:52px; margin-left:-1.5px; }
-.c-hand.minute { width:2px; height:74px; margin-left:-1px; }
-.c-hand.second { width:1px; height:82px; margin-left:-.5px; background:#9b1b30; }
-.c-center-dot {
-  position:absolute; left:50%; top:50%;
-  width:8px; height:8px; margin:-4px 0 0 -4px;
-  border-radius:50%; background:var(--center-dot); z-index:5;
-}
-.c-digital-block {
-  position:absolute; left:50%; top:62%;
-  transform:translateX(-50%);
-  text-align:center; pointer-events:none; white-space:nowrap;
-}
-.c-time-str { font-size:20px; font-weight:500; color:var(--text); letter-spacing:.04em; line-height:1; }
+.live-msg { font-size:11.5px; color:#52a874; margin-top:10px; min-height:16px; opacity:0; transition:opacity .2s; }
+.live-msg.show { opacity:1; }
+/* clock — main.html과 동일 디자인 */
+.clock-face { position:relative; width:170px; height:170px; border-radius:50%; background:transparent; }
+.c-hand { position:absolute; left:50%; bottom:50%; transform-origin:bottom center; border-radius:999px; background:var(--hand); will-change:transform; backface-visibility:hidden; }
+.c-hand.hour   { width:3px; height:48px; margin-left:-1.5px; }
+.c-hand.minute { width:2px; height:70px; margin-left:-1px; }
+.c-hand.second { width:1px; height:78px; margin-left:-.5px; }
+.c-center-dot { position:absolute; left:50%; top:50%; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--center-dot); z-index:5; }
+.c-digital-block { position:absolute; left:50%; top:62%; transform:translateX(-50%); text-align:center; pointer-events:none; white-space:nowrap; }
+.c-time-str { font-size:19px; font-weight:500; color:var(--text); letter-spacing:.04em; line-height:1; }
 .c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
-.tz-label { font-size:12px; color:var(--text2); text-align:center; }
-.tz-select-wrap {
-  width:100%;
-}
-.tz-select-wrap select {
-  width:100%; padding:7px 10px;
-  border-radius:7px; border:1px solid var(--sel-border);
-  background:var(--bg3); color:var(--text);
-  font-size:12px; font-family:inherit;
-  appearance:none; -webkit-appearance:none; outline:none;
-}
+/* Profile modal */
+.pf-overlay { position:fixed; inset:0; z-index:3000; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; }
+.pf-box { background:var(--modal-bg); border:1px solid var(--modal-border); border-radius:14px; padding:26px 24px; width:440px; max-width:95vw; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.45); position:relative; }
+.pf-header { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.pf-avatar { width:50px; height:50px; border-radius:50%; background:#9b1b30; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.pf-name { font-size:16px; font-weight:700; }
+.pf-meta { font-size:12px; color:var(--text2); margin-top:2px; }
+.pf-sec-title { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); margin-top:18px; }
+.pf-sec-title:first-of-type { margin-top:0; }
+.pf-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+.pf-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.pf-input { padding:9px 12px; border-radius:8px; border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border-color .15s; }
+.pf-input:focus { border-color:#9b1b30; }
+.pf-msg { font-size:12px; min-height:16px; margin-bottom:8px; }
+.pf-full-btn { width:100%; padding:10px; border-radius:8px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:8px; transition:background .15s; }
+.pf-full-btn:hover { background:#7e1627; }
+.log-wrap { max-height:240px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
+.log-tbl { width:100%; border-collapse:collapse; font-size:11.5px; }
+.log-tbl th, .log-tbl td { padding:6px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+.log-tbl th { font-size:10.5px; color:var(--text3); font-weight:700; letter-spacing:.05em; background:var(--bg3); position:sticky; top:0; }
+.log-tbl td { color:var(--text2); }
+.log-empty { padding:20px; text-align:center; font-size:12px; color:var(--text3); }
 </style>
 </head>
 <body>
+
 <div class="topbar">
-  <span class="topbar-title">시계 설정</span>
+  <div class="topbar-title">🕐 시계 설정</div>
   <div class="topbar-right">
-    <button class="tb-btn" onclick="history.back()">← 뒤로</button>
-    <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn" onclick="window.location.href='../admin.html'">← 뒤로</button>
+    <button class="theme-btn" onclick="toggleTheme()" title="테마"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn icon" onclick="openProfile()" title="내 프로필">👤</button>
     <button class="tb-btn" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
 
 <div class="container">
   <div class="clock-section">
-    <div class="tz-select-wrap">
-      <select id="tzPreview" onchange="onTzChange()"></select>
-    </div>
-    <div class="tz-label" id="tzLabel"></div>
+    <div class="preview-label">미리보기</div>
     <div class="clock-face" id="clockFace">
       <div class="c-digital-block">
         <div class="c-time-str" id="timeStr">00:00:00</div>
         <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
       </div>
     </div>
+    <div class="preview-tz-label" id="previewTzLabel"></div>
+    <div class="preview-note">메인 페이지 직원 시계와<br>동일한 디자인입니다.</div>
   </div>
 
   <div class="settings-section">
-    <div class="page-title">🕐 시계 설정</div>
-    <div class="page-sub">세계 시계 타임존과 기본값을 설정합니다.</div>
+    <h1 class="page-title">시계 설정</h1>
+    <p class="page-sub">변경 사항은 즉시 저장되어 메인 페이지에 반영됩니다.</p>
 
     <div class="card">
       <div class="card-title">기본 타임존</div>
+      <div class="field-help">메인 페이지 로드 시 처음 표시되는 타임존입니다.</div>
       <div class="field">
-        <label>페이지 로드 시 기본 선택값</label>
-        <select id="defaultTzSel"></select>
+        <select id="defaultTzSel" onchange="saveDefault()"></select>
       </div>
+    </div>
 
-      <hr class="divider">
+    <div class="card">
       <div class="card-title">표시할 타임존</div>
-      <p style="font-size:12px;color:var(--text3);margin-bottom:10px">체크한 항목만 드롭다운에 표시됩니다.</p>
+      <div class="field-help">체크된 타임존만 메인 페이지에서 사용 가능합니다.</div>
       <div class="tz-list" id="tzList"></div>
-
-      <hr class="divider">
-      <div class="card-title">잠금 비밀번호 변경</div>
-      <div class="field">
-        <label>새 비밀번호 (6자 이상)</label>
-        <input type="password" id="newPw1" placeholder="새 비밀번호">
-      </div>
-      <div class="field">
-        <label>비밀번호 확인</label>
-        <input type="password" id="newPw2" placeholder="새 비밀번호 재입력">
-      </div>
-
-      <button class="save-btn" onclick="saveSettings()">저장</button>
-      <div class="msg" id="saveMsg"></div>
+      <div class="live-msg" id="liveMsg">✅ 저장됨</div>
     </div>
   </div>
 </div>
 
-<script>
-const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
-if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+<!-- 프로필 -->
+<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box">
+    <div class="pf-header">
+      <div class="pf-avatar">👑</div>
+      <div>
+        <div class="pf-name" id="pfName"></div>
+        <div class="pf-meta">관리자</div>
+        <div class="pf-meta">아이디: <span id="pfId"></span></div>
+      </div>
+    </div>
+    <div class="pf-sec-title">🔒 비밀번호 변경</div>
+    <div class="pf-field"><div class="pf-label">현재 비밀번호</div><input class="pf-input" id="pfPwOld" type="password" placeholder="현재 비밀번호"></div>
+    <div class="pf-field"><div class="pf-label">새 비밀번호</div><input class="pf-input" id="pfPwNew" type="password" placeholder="새 비밀번호 (4자 이상)"></div>
+    <div class="pf-field"><div class="pf-label">비밀번호 확인</div><input class="pf-input" id="pfPwConfirm" type="password" placeholder="새 비밀번호 재입력"></div>
+    <div class="pf-msg" id="pfPwMsg"></div>
+    <button class="pf-full-btn" onclick="changePw()">비밀번호 변경</button>
+    <div class="pf-sec-title">🖥️ 로그인 기록 (최근 50건)</div>
+    <div class="log-wrap"><table class="log-tbl"><thead><tr><th>일시</th><th>PC / 환경</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    <button class="pf-full-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);margin-top:16px" onclick="closeProfile()">닫기</button>
+  </div>
+</div>
 
+<script>
 const ALL_TZ = [
   {v:'Asia/Seoul',l:'대한민국 / 서울'},{v:'Asia/Tokyo',l:'일본 / 도쿄'},
   {v:'Asia/Shanghai',l:'중국 / 상하이'},{v:'Asia/Singapore',l:'싱가포르'},
@@ -218,69 +188,127 @@ const ALL_TZ = [
   {v:'America/Santiago',l:'칠레 / 산티아고'},{v:'Australia/Sydney',l:'호주 / 시드니'},
   {v:'Pacific/Auckland',l:'뉴질랜드 / 오클랜드'},
 ];
-
 const KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
 const DEFAULT_TZ='Asia/Kolkata';
-
 function getDefault() { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
 function getEnabled() { const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
 
-function init() {
-  // 기본 타임존 셀렉트
-  const defSel = document.getElementById('defaultTzSel');
-  ALL_TZ.forEach(t => { const o=document.createElement('option'); o.value=t.v; o.textContent=t.l; defSel.appendChild(o); });
-  defSel.value = getDefault();
-
-  // 타임존 체크리스트
-  const enabled = getEnabled();
-  const list = document.getElementById('tzList');
-  ALL_TZ.forEach(t => {
-    const item = document.createElement('div'); item.className='tz-item';
-    const cb = document.createElement('input'); cb.type='checkbox'; cb.value=t.v; cb.checked=enabled.includes(t.v);
-    const lbl = document.createElement('span'); lbl.textContent=t.l;
-    if(cb.checked) lbl.className='checked';
-    cb.addEventListener('change',()=>{ lbl.className=cb.checked?'checked':''; });
-    item.appendChild(cb); item.appendChild(lbl);
-    item.addEventListener('click',e=>{ if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
-    list.appendChild(item);
+function flashSaved() {
+  const m=document.getElementById('liveMsg');
+  m.classList.add('show');
+  clearTimeout(window._sfx); window._sfx=setTimeout(()=>m.classList.remove('show'),1400);
+}
+function saveDefault() {
+  const v=document.getElementById('defaultTzSel').value;
+  if(!v) return;
+  localStorage.setItem(KEY_DEFAULT,v);
+  localStorage.setItem('tz', v);
+  updatePreviewLabel();
+  flashSaved();
+}
+function saveEnabled() {
+  const checked=[...document.querySelectorAll('#tzList input:checked')].map(cb=>cb.value);
+  if(!checked.length) return false;
+  localStorage.setItem(KEY_ENABLED,JSON.stringify(checked));
+  rebuildDefaultSelect();
+  updatePreviewLabel();
+  flashSaved();
+  return true;
+}
+function rebuildDefaultSelect() {
+  const defSel=document.getElementById('defaultTzSel');
+  const enabled=getEnabled();
+  const cur=getDefault();
+  defSel.innerHTML='';
+  ALL_TZ.filter(t=>enabled.includes(t.v)).forEach(t=>{
+    const o=document.createElement('option'); o.value=t.v; o.textContent=t.l; defSel.appendChild(o);
   });
-
-
+  if([...defSel.options].some(o=>o.value===cur)) defSel.value=cur;
+  else { defSel.value=defSel.options[0]?.value||''; if(defSel.value) localStorage.setItem(KEY_DEFAULT,defSel.value); }
 }
-
-function updateLabel() {
-  const sel = document.getElementById('tzPreview');
-  const found = ALL_TZ.find(t=>t.v===sel.value);
-  document.getElementById('tzLabel').textContent = found ? found.l : sel.value;
+function updatePreviewLabel() {
+  const found=ALL_TZ.find(t=>t.v===getDefault());
+  document.getElementById('previewTzLabel').textContent=found?found.l:getDefault();
 }
-
-function onTzChange() { updateLabel(); }
-
-function saveSettings() {
-  const msg = document.getElementById('saveMsg');
-  
-  const def = document.getElementById('defaultTzSel').value;
-  localStorage.setItem(KEY_DEFAULT, def);
-  const checked = [...document.querySelectorAll('#tzList input:checked')].map(cb=>cb.value);
-  if (!checked.length) { msg.className='msg err'; msg.textContent='타임존을 하나 이상 선택해주세요.'; return; }
-  localStorage.setItem(KEY_ENABLED, JSON.stringify(checked));
-  msg.className='msg ok'; msg.textContent='✅ 저장되었습니다.';
-  setTimeout(()=>msg.textContent='',3000);
-}
-
 function toggleTheme() {
   const h=document.documentElement,dark=h.dataset.theme==='dark';
   h.dataset.theme=dark?'light':'dark';
   document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
   if(window._applyTickColors) window._applyTickColors();
 }
-function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href='../index.html'; }
+function doLogout() { if(!confirm('로그아웃 하시겠습니까?')) return; sessionStorage.removeItem('fb_user'); window.location.href='../index.html'; }
 
-// 시계
+// ─ Profile ─
+function openProfile() {
+  const u=JSON.parse(sessionStorage.getItem('fb_user')||'{}');
+  document.getElementById('pfName').textContent=u.name||u.id||'관리자';
+  document.getElementById('pfId').textContent=u.id||'';
+  ['pfPwOld','pfPwNew','pfPwConfirm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pfPwMsg').textContent='';
+  renderLoginLog();
+  document.getElementById('profileModal').style.display='flex';
+}
+function closeProfile() { document.getElementById('profileModal').style.display='none'; }
+function changePw() {
+  const u=JSON.parse(sessionStorage.getItem('fb_user')||'{}');
+  const oldPw=document.getElementById('pfPwOld').value;
+  const newPw=document.getElementById('pfPwNew').value;
+  const cfm=document.getElementById('pfPwConfirm').value;
+  const msg=document.getElementById('pfPwMsg');
+  if(!oldPw||!newPw||!cfm){ msg.style.color='#d95f5f'; msg.textContent='모든 항목을 입력해주세요.'; return; }
+  if(newPw!==cfm){ msg.style.color='#d95f5f'; msg.textContent='새 비밀번호가 일치하지 않습니다.'; return; }
+  if(newPw.length<4){ msg.style.color='#d95f5f'; msg.textContent='4자 이상 입력해주세요.'; return; }
+  const accounts=JSON.parse(localStorage.getItem('fb_accounts')||'[]');
+  const idx=accounts.findIndex(a=>a.id===u.id);
+  if(idx===-1){
+    // 고정 관리자 계정 (fireballadmin) — admin_account_pw 키로 별도 관리
+    const FIXED='adminfireball';
+    const stored=localStorage.getItem('admin_account_pw')||FIXED;
+    if(oldPw!==stored){ msg.style.color='#d95f5f'; msg.textContent='현재 비밀번호가 올바르지 않습니다.'; return; }
+    localStorage.setItem('admin_account_pw',newPw);
+  } else {
+    if(accounts[idx].pw!==oldPw){ msg.style.color='#d95f5f'; msg.textContent='현재 비밀번호가 올바르지 않습니다.'; return; }
+    accounts[idx].pw=newPw;
+    localStorage.setItem('fb_accounts',JSON.stringify(accounts));
+  }
+  msg.style.color='#52a874'; msg.textContent='✅ 비밀번호가 변경되었습니다.';
+  ['pfPwOld','pfPwNew','pfPwConfirm'].forEach(id=>document.getElementById(id).value='');
+}
+function renderLoginLog() {
+  const u=JSON.parse(sessionStorage.getItem('fb_user')||'{}');
+  const log=JSON.parse(localStorage.getItem('fb_login_log')||'[]').filter(r=>r.id===u.id);
+  const body=document.getElementById('logBody');
+  if(!log.length){ body.innerHTML='<tr><td colspan="2" class="log-empty">로그인 기록이 없습니다.</td></tr>'; return; }
+  body.innerHTML=log.slice().reverse().map(r=>{
+    const d=new Date(r.ts);
+    const ts=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+
+      String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+    const dev=(r.deviceId||'').slice(0,8);
+    const ua=(r.ua||'').replace(/Mozilla\/[\d.]+\s\(/,'').replace(/\).*$/,'').slice(0,42);
+    return `<tr><td>${ts}</td><td><div style="color:var(--text);font-weight:500">${r.platform||'-'} · #${dev}</div><div style="color:var(--text3);font-size:10.5px;margin-top:1px">${ua}</div><div style="color:var(--text3);font-size:10.5px">${r.screen||''}</div></td></tr>`;
+  }).join('');
+}
+
+// ─ 시계 (메인과 동일) ─
 document.addEventListener('DOMContentLoaded',function(){
-  init();
+  rebuildDefaultSelect();
+  const enabled=getEnabled();
+  const list=document.getElementById('tzList');
+  ALL_TZ.forEach(t=>{
+    const item=document.createElement('div'); item.className='tz-item';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=t.v; cb.checked=enabled.includes(t.v);
+    const lbl=document.createElement('span'); lbl.textContent=t.l; if(cb.checked) lbl.className='checked';
+    cb.addEventListener('change',()=>{
+      lbl.className=cb.checked?'checked':'';
+      if(!saveEnabled()){ cb.checked=true; lbl.className='checked'; alert('최소 한 개 이상 선택해야 합니다.'); }
+    });
+    item.appendChild(cb); item.appendChild(lbl);
+    item.addEventListener('click',e=>{ if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
+    list.appendChild(item);
+  });
+  updatePreviewLabel();
+
   const face=document.getElementById('clockFace');
-  
   const timeStr=document.getElementById('timeStr');
   const dateStr=document.getElementById('dateStr');
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -295,27 +323,27 @@ document.addEventListener('DOMContentLoaded',function(){
   window._applyTickColors=applyTickColors;
   function drawTicks(){
     const S=face.clientWidth,CX=S/2,CY=S/2;
-    svg.setAttribute('width',S);svg.setAttribute('height',S);svg.innerHTML='';
+    svg.setAttribute('width',S); svg.setAttribute('height',S); svg.innerHTML='';
     for(let i=0;i<12;i++){
       const rad=(i*30-90)*Math.PI/180,outerR=CX-(S*0.033);
-      const len=i%3===0?S*0.05:S*0.03,innerR=outerR-len;
+      const len=i%3===0?S*0.047:S*0.03,innerR=outerR-len;
       const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',CX+outerR*Math.cos(rad));line.setAttribute('y1',CY+outerR*Math.sin(rad));
-      line.setAttribute('x2',CX+innerR*Math.cos(rad));line.setAttribute('y2',CY+innerR*Math.sin(rad));
-      line.setAttribute('stroke-width',i%3===0?'2':'1.5');line.setAttribute('stroke-linecap','round');
+      line.setAttribute('x1',CX+outerR*Math.cos(rad)); line.setAttribute('y1',CY+outerR*Math.sin(rad));
+      line.setAttribute('x2',CX+innerR*Math.cos(rad)); line.setAttribute('y2',CY+innerR*Math.sin(rad));
+      line.setAttribute('stroke-width',i%3===0?'2':'1.5'); line.setAttribute('stroke-linecap','round');
       svg.appendChild(line);
     }
     applyTickColors();
   }
   ['hour','minute','second'].forEach(cls=>{
-    const d=document.createElement('div');d.className='c-hand '+cls;face.appendChild(d);face['_'+cls]=d;
+    const d=document.createElement('div'); d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
   });
   face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
   function getTimeParts(tz){
     const now=new Date();
     const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
-    const map={};fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
-    return{month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds()};
+    const map={}; fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
+    return { month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds() };
   }
   function tick(){
     const t=getTimeParts(getDefault());
@@ -328,7 +356,12 @@ document.addEventListener('DOMContentLoaded',function(){
     requestAnimationFrame(tick);
   }
   window.addEventListener('resize',drawTicks);
-  drawTicks();tick();
+  drawTicks(); tick();
+
+  // 다른 탭에서 설정이 바뀌면 즉시 반영
+  window.addEventListener('storage', e=>{
+    if(e.key===KEY_DEFAULT||e.key===KEY_ENABLED){ rebuildDefaultSelect(); updatePreviewLabel(); }
+  });
 });
 </script>
 </body>
