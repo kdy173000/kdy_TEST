@@ -7,18 +7,20 @@
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
-  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727; --bg4:#1e1e1e;
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
   --border:#2e2e2e; --border2:#3a3a3a;
   --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
   --hover:#222222; --shadow:rgba(0,0,0,.5);
-  --card-bg:#242424; --col-bg:#1a1a1a;
+  --input-bg:#242424; --input-border:#333;
+  --drag-over:rgba(155,27,48,.1);
 }
 [data-theme="light"] {
-  --bg:#f5f5f4; --bg2:#ffffff; --bg3:#efefed; --bg4:#f0f0ee;
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
   --border:#e0e0e0; --border2:#d0d0d0;
   --text:#111111; --text2:#666666; --text3:#b0b0b0;
   --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
-  --card-bg:#ffffff; --col-bg:#f7f7f5;
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+  --drag-over:rgba(155,27,48,.06);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
@@ -29,11 +31,11 @@ body {
 .topbar {
   background:#9b1b30; padding:0 28px; height:52px;
   display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:200;
+  position:sticky; top:0; z-index:100;
   box-shadow:0 2px 12px rgba(0,0,0,.3);
 }
 .topbar-title { font-size:15px; font-weight:700; color:#fff; }
-.topbar-right { display:flex; gap:8px; }
+.topbar-right { display:flex; gap:8px; align-items:center; }
 .tb-btn {
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
   color:#fff; border-radius:6px; padding:5px 12px;
@@ -45,124 +47,78 @@ body {
   color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px;
   font-size:12px; font-family:inherit; cursor:pointer;
 }
-
-/* page layout */
-.page-wrap { padding:36px 32px 60px; }
-.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; gap:16px; }
-.page-title { font-size:28px; font-weight:700; letter-spacing:-.02em; }
-.page-sub { font-size:13px; color:var(--text2); margin-top:4px; }
-.header-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; }
-
-.add-btn {
-  display:flex; align-items:center; gap:6px;
-  padding:8px 16px; border-radius:7px; border:none;
-  background:#9b1b30; color:#fff;
-  font-size:13px; font-weight:700; font-family:inherit;
-  cursor:pointer; transition:background .15s; white-space:nowrap;
-}
-.add-btn:hover { background:#7e1627; }
-
-/* board */
-.board {
-  display:flex; gap:14px;
-  overflow-x:auto; align-items:flex-start;
-  padding-bottom:20px;
-}
-.board::-webkit-scrollbar { height:6px; }
-.board::-webkit-scrollbar-track { background:transparent; }
-.board::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-
-.col {
-  flex-shrink:0; width:240px;
-  background:var(--col-bg); border:1px solid var(--border);
-  border-radius:10px; display:flex; flex-direction:column;
-  transition:background .1s;
-}
-.col.drag-over { border-color:#9b1b30; background:rgba(155,27,48,.06); }
-
-.col-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 14px 10px;
-  border-bottom:1px solid var(--border);
-}
-.col-title-row { display:flex; align-items:center; gap:7px; }
-.col-title { font-size:13px; font-weight:700; }
-.col-count {
-  font-size:11px; padding:1px 7px; border-radius:20px;
-  background:var(--bg3); color:var(--text3); font-weight:600;
-}
-.col-add-btn {
-  width:22px; height:22px; border-radius:4px; border:none;
-  background:none; color:var(--text3); font-size:16px;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition:background .1s, color .1s; line-height:1;
-}
-.col-add-btn:hover { background:var(--hover); color:var(--text); }
-
-.col-body {
-  padding:8px; flex:1;
-  min-height:60px;
-  display:flex; flex-direction:column; gap:6px;
-}
-.col-empty {
-  padding:18px 10px; text-align:center;
-  font-size:12px; color:var(--text3);
-  border:2px dashed var(--border); border-radius:7px;
-  margin:2px;
-}
-
-/* employee card */
-.emp-card {
-  background:var(--card-bg); border:1px solid var(--border);
-  border-radius:8px; padding:12px 13px;
-  cursor:grab; transition:box-shadow .15s, border-color .15s, opacity .15s;
-  position:relative;
-}
-.emp-card:hover { box-shadow:0 3px 12px var(--shadow); border-color:var(--border2); }
-.emp-card.dragging { opacity:.45; cursor:grabbing; }
-
-.emp-name { font-size:13.5px; font-weight:700; margin-bottom:5px; }
-.emp-rank {
+.container { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
+.section-wrap { margin-bottom:8px; }
+.section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.section-badge {
   display:inline-flex; align-items:center;
-  padding:2px 9px; border-radius:20px;
-  font-size:11px; font-weight:600; margin-bottom:7px;
+  padding:3px 14px; border-radius:20px;
+  font-size:12px; font-weight:700; letter-spacing:.04em;
 }
-.emp-work {
-  font-size:12px; color:var(--text2); line-height:1.55;
-  display:-webkit-box; -webkit-line-clamp:3;
-  -webkit-box-orient:vertical; overflow:hidden;
+.section-badge.office { background:rgba(74,138,244,.15); color:#4a8af4; border:1px solid rgba(74,138,244,.3); }
+.section-badge.field  { background:rgba(82,168,116,.15); color:#52a874; border:1px solid rgba(82,168,116,.3); }
+.section-count { font-size:12px; color:var(--text3); }
+.section-divider { border:none; border-top:2px solid var(--border2); margin:28px 0 24px; }
+.teams-grid { display:flex; flex-wrap:wrap; gap:14px; }
+.team-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; overflow:hidden;
+  width:calc(33.333% - 10px); min-width:220px; flex-shrink:0;
+  transition:box-shadow .15s, border-color .15s;
 }
-.emp-join {
-  font-size:11px; color:var(--text3); margin-top:8px;
-  display:flex; align-items:center; gap:4px;
+.team-card.drag-over-team { border-color:#9b1b30; box-shadow:0 0 0 2px rgba(155,27,48,.25); }
+.team-card.dragging-team { opacity:0.35; }
+.team-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px;
+  background:var(--bg3); border-bottom:1px solid var(--border);
+  cursor:grab; user-select:none;
 }
-.emp-actions {
-  position:absolute; top:8px; right:8px;
-  display:none; gap:3px;
+.team-header:active { cursor:grabbing; }
+.team-header-left { display:flex; align-items:center; gap:6px; }
+.team-drag-icon { font-size:14px; opacity:.4; }
+.team-name { font-size:13px; font-weight:700; }
+.team-count { font-size:11px; color:var(--text3); }
+.team-add-btn {
+  background:none; border:none; color:var(--text3);
+  font-size:18px; cursor:pointer; padding:0 2px;
+  transition:color .15s; line-height:1;
 }
-.emp-card:hover .emp-actions { display:flex; }
-.emp-act {
-  width:22px; height:22px; border-radius:4px; border:none;
-  background:var(--bg3); color:var(--text2); font-size:11px;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
+.team-add-btn:hover { color:#9b1b30; }
+.emp-list {
+  padding:8px; min-height:56px;
+  display:flex; flex-direction:column; gap:5px;
+}
+.emp-list.drag-over { background:var(--drag-over); }
+.emp-empty {
+  padding:14px 8px; text-align:center;
+  font-size:12px; color:var(--text3);
+  border:1.5px dashed var(--border); border-radius:8px;
+}
+.emp-card {
+  display:flex; align-items:center;
+  padding:8px 10px; border-radius:8px;
+  background:var(--bg3); border:1px solid var(--border);
+  cursor:grab; user-select:none;
+  transition:background .1s, box-shadow .1s;
+}
+.emp-card:active { cursor:grabbing; }
+.emp-card:hover { background:var(--hover); }
+.emp-card.dragging { opacity:0.35; }
+.emp-drag { font-size:12px; opacity:.35; margin-right:7px; flex-shrink:0; }
+.emp-info { flex:1; min-width:0; }
+.emp-name-line { font-size:13px; font-weight:600; color:var(--text); }
+.emp-phone { font-size:11.5px; color:var(--text3); margin-top:2px; }
+.emp-actions { display:flex; gap:3px; flex-shrink:0; margin-left:6px; }
+.emp-act-btn {
+  background:none; border:none; color:var(--text3);
+  font-size:12px; cursor:pointer; padding:2px 5px; border-radius:4px;
   transition:background .1s, color .1s;
 }
-.emp-act:hover { background:var(--hover); color:var(--text); }
-.emp-act.del:hover { background:rgba(220,80,80,.15); color:#d95f5f; }
-
-/* add team col */
-.col-add {
-  flex-shrink:0; width:240px;
-  border:2px dashed var(--border); border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  min-height:60px; cursor:pointer;
-  color:var(--text3); font-size:13px; gap:7px;
-  transition:border-color .15s, color .15s;
-  padding:20px;
-}
-.col-add:hover { border-color:#9b1b30; color:var(--text); }
-
-/* modal */
+.emp-act-btn:hover { background:var(--hover); color:var(--text); }
+.emp-act-btn.del:hover { color:#d95f5f; }
 .modal-overlay {
   position:fixed; inset:0; z-index:2000;
   background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
@@ -170,45 +126,39 @@ body {
 }
 .modal {
   background:var(--bg2); border:1px solid var(--border);
-  border-radius:14px; padding:28px 26px;
-  width:420px; max-width:95vw; max-height:90vh; overflow-y:auto;
-  box-shadow:0 24px 64px rgba(0,0,0,.45);
+  border-radius:12px; padding:26px 24px;
+  width:400px; max-width:95vw; max-height:90vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
 }
-.modal-title { font-size:16px; font-weight:700; margin-bottom:6px; }
-.modal-sub { font-size:12px; color:var(--text2); margin-bottom:20px; }
-.modal-fields { display:flex; flex-direction:column; gap:13px; }
-.mfield { display:flex; flex-direction:column; gap:5px; }
-.mfield label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
-.mfield input, .mfield select, .mfield textarea {
-  padding:9px 12px; border-radius:8px;
-  border:1px solid var(--border2);
-  background:var(--bg3); color:var(--text);
+.modal-title { font-size:15px; font-weight:700; margin-bottom:18px; }
+.modal-fields { display:flex; flex-direction:column; gap:12px; }
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; }
+.field input, .field select {
+  padding:9px 12px; border-radius:7px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg); color:var(--text);
   font-size:13.5px; font-family:inherit; outline:none;
   transition:border-color .15s;
 }
-.mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color:#9b1b30; }
-.mfield textarea { resize:vertical; min-height:72px; line-height:1.55; }
-.modal-actions { display:flex; gap:8px; margin-top:22px; }
-.m-btn {
-  flex:1; padding:10px; border-radius:8px; border:none;
+.field input:focus, .field select:focus { border-color:#9b1b30; }
+.modal-actions { display:flex; gap:8px; margin-top:18px; }
+.modal-btn {
+  flex:1; padding:9px; border-radius:7px; border:none;
   background:#9b1b30; color:#fff;
   font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
   transition:background .15s;
 }
-.m-btn:hover { background:#7e1627; }
-.m-btn.sec {
+.modal-btn:hover { background:#7e1627; }
+.modal-btn.sec {
   background:var(--bg3); color:var(--text2);
   border:1px solid var(--border);
 }
-.m-btn.sec:hover { background:var(--hover); color:var(--text); }
-
-/* rank colors */
-.rank-이사    { color:#d95f5f; background:rgba(220,80,80,.14); }
-.rank-과장    { color:#c89a3c; background:rgba(200,154,60,.14); }
-.rank-대리    { color:#6488e0; background:rgba(100,136,224,.14); }
-.rank-사원    { color:#52a874; background:rgba(82,168,116,.14); }
-.rank-인턴    { color:#b06ed6; background:rgba(176,110,214,.14); }
-.rank-기타    { color:#9090a0; background:rgba(144,144,160,.14); }
+.modal-btn.sec:hover { background:var(--hover); color:var(--text); }
+@media (max-width:700px) {
+  .team-card { width:100%; min-width:0; }
+  .teams-grid { flex-direction:column; }
+}
 </style>
 </head>
 <body>
@@ -222,270 +172,31 @@ body {
   </div>
 </div>
 
-<div class="page-wrap">
-  <div class="page-header">
-    <div>
-      <div class="page-title">👥 직원 관리</div>
-      <div class="page-sub">팀별 직원 현황을 관리합니다. 카드를 드래그하여 팀을 이동할 수 있습니다.</div>
-    </div>
-    <div class="header-actions">
-      <button class="add-btn" onclick="openAddModal()">＋ 직원 추가</button>
-    </div>
-  </div>
-  <div class="board" id="board"></div>
+<div class="container">
+  <div class="page-title">직원 관리</div>
+  <div class="page-sub">팀별 직원 현황을 관리합니다. 직원 카드와 팀을 드래그하여 이동할 수 있습니다.</div>
+  <div id="orgRoot"></div>
 </div>
 
-<!-- 직원 추가/수정 모달 -->
-<div class="modal-overlay" id="empModal" style="display:none" onclick="if(event.target===this)closeModal()">
+<div class="modal-overlay" id="empModal" style="display:none" onclick="if(event.target===this)closeEmpModal()">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">직원 추가</div>
-    <div class="modal-sub" id="modalSub">새 직원 정보를 입력하세요.</div>
+    <div class="modal-title" id="empModalTitle">직원 추가</div>
     <div class="modal-fields">
-      <div class="mfield">
-        <label>이름</label>
-        <input id="mName" placeholder="예: 김다영">
-      </div>
-      <div class="mfield">
-        <label>직급</label>
-        <select id="mRank">
-          <option value="이사">이사</option>
-          <option value="과장">과장</option>
-          <option value="대리" selected>대리</option>
-          <option value="사원">사원</option>
-          <option value="인턴">인턴</option>
-          <option value="기타">기타</option>
-        </select>
-      </div>
-      <div class="mfield">
-        <label>팀</label>
-        <select id="mTeam"></select>
-      </div>
-      <div class="mfield">
-        <label>입사일자</label>
-        <input id="mJoin" type="date">
-      </div>
-      <div class="mfield">
-        <label>하는 일</label>
-        <textarea id="mWork" placeholder="담당 업무를 입력하세요"></textarea>
-      </div>
+      <div class="field"><label>이름</label><input id="empName" placeholder="예: 김다영"></div>
+      <div class="field"><label>직책</label><input id="empRank" placeholder="예: 대리"></div>
+      <div class="field"><label>핸드폰 번호</label><input id="empPhone" type="tel" placeholder="예: 010-1234-5678"></div>
+      <div class="field"><label>소속 팀</label><select id="empTeamSel"></select></div>
     </div>
     <div class="modal-actions">
-      <button class="m-btn" onclick="saveEmployee()">저장</button>
-      <button class="m-btn sec" onclick="closeModal()">취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- 팀 추가 모달 -->
-<div class="modal-overlay" id="teamModal" style="display:none" onclick="if(event.target===this)closeTeamModal()">
-  <div class="modal" style="width:340px">
-    <div class="modal-title">팀 추가</div>
-    <div class="modal-sub">새 팀 이름을 입력하세요.</div>
-    <div class="modal-fields">
-      <div class="mfield">
-        <label>팀 이름</label>
-        <input id="tName" placeholder="예: 영업팀" onkeydown="if(event.key==='Enter')saveTeam()">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="m-btn" onclick="saveTeam()">추가</button>
-      <button class="m-btn sec" onclick="closeTeamModal()">취소</button>
+      <button class="modal-btn" onclick="saveEmp()">저장</button>
+      <button class="modal-btn sec" onclick="closeEmpModal()">취소</button>
     </div>
   </div>
 </div>
 
 <script>
-const fbUser = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
-if (!fbUser || fbUser.role !== 'admin') { window.location.href = '../index.html'; }
-
-const KEY_EMP   = 'fb_employees';
-const KEY_TEAMS = 'fb_teams';
-const DEFAULT_TEAMS = ['관리팀','해외소통팀','디자인팀','국내홍보팀','연구팀'];
-
-function getEmployees() { return JSON.parse(localStorage.getItem(KEY_EMP)   || '[]'); }
-function getTeams()     { const s = localStorage.getItem(KEY_TEAMS); return s ? JSON.parse(s) : [...DEFAULT_TEAMS]; }
-function saveEmployees(list) { localStorage.setItem(KEY_EMP, JSON.stringify(list)); }
-function saveTeams(list)     { localStorage.setItem(KEY_TEAMS, JSON.stringify(list)); }
-
-let dragCard = null, dragIdx = null, dragTeam = null;
-
-function rankClass(r) {
-  const map = {'이사':'rank-이사','과장':'rank-과장','대리':'rank-대리','사원':'rank-사원','인턴':'rank-인턴'};
-  return map[r] || 'rank-기타';
-}
-
-function formatDate(d) {
-  if (!d) return '';
-  const [y,m,dd] = d.split('-');
-  return `${y}.${m}.${dd}`;
-}
-
-function renderBoard() {
-  const board = document.getElementById('board');
-  const teams = getTeams();
-  const emps  = getEmployees();
-  board.innerHTML = '';
-
-  teams.forEach(team => {
-    const members = emps.filter(e => e.team === team);
-    const col = document.createElement('div');
-    col.className = 'col';
-    col.dataset.team = team;
-
-    col.innerHTML = `
-      <div class="col-header">
-        <div class="col-title-row">
-          <span class="col-title">${team}</span>
-          <span class="col-count">${members.length}</span>
-        </div>
-        <button class="col-add-btn" onclick="openAddModal('${team.replace(/'/g,"\\'")}')">＋</button>
-      </div>
-      <div class="col-body" id="col-${team.replace(/[^a-zA-Z0-9가-힣]/g,'_')}"></div>
-    `;
-    board.appendChild(col);
-
-    const body = col.querySelector('.col-body');
-
-    if (members.length === 0) {
-      body.innerHTML = '<div class="col-empty">직원을 여기에 끌어다 놓으세요</div>';
-    } else {
-      members.forEach((emp, localIdx) => {
-        const globalIdx = emps.indexOf(emp);
-        const card = document.createElement('div');
-        card.className = 'emp-card';
-        card.draggable = true;
-        card.dataset.idx = globalIdx;
-        card.innerHTML = `
-          <div class="emp-actions">
-            <button class="emp-act" onclick="openEditModal(${globalIdx})">✏️</button>
-            <button class="emp-act del" onclick="deleteEmp(${globalIdx})">🗑</button>
-          </div>
-          <div class="emp-name">${emp.name}</div>
-          <span class="emp-rank ${rankClass(emp.rank)}">${emp.rank || '사원'}</span>
-          <div class="emp-work">${(emp.work || '').replace(/\n/g,'<br>')}</div>
-          ${emp.join ? `<div class="emp-join">📅 ${formatDate(emp.join)} 입사</div>` : ''}
-        `;
-        card.addEventListener('dragstart', e => {
-          dragCard = card;
-          dragIdx  = globalIdx;
-          dragTeam = team;
-          setTimeout(() => card.classList.add('dragging'), 0);
-          e.dataTransfer.effectAllowed = 'move';
-        });
-        card.addEventListener('dragend', () => {
-          card.classList.remove('dragging');
-          dragCard = null; dragIdx = null; dragTeam = null;
-          document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
-        });
-        body.appendChild(card);
-      });
-    }
-
-    // drop zone
-    col.addEventListener('dragover', e => {
-      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
-      col.classList.add('drag-over');
-    });
-    col.addEventListener('dragleave', e => {
-      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
-    });
-    col.addEventListener('drop', e => {
-      e.preventDefault(); col.classList.remove('drag-over');
-      if (dragIdx === null) return;
-      if (dragTeam === team) return;
-      const emps2 = getEmployees();
-      emps2[dragIdx].team = team;
-      saveEmployees(emps2);
-      renderBoard();
-    });
-  });
-
-  // add team button
-  const addCol = document.createElement('div');
-  addCol.className = 'col-add';
-  addCol.innerHTML = '＋ 팀 추가';
-  addCol.onclick = () => openTeamModal();
-  board.appendChild(addCol);
-}
-
-// ── modal state ──
-let editIdx = -1, preTeam = '';
-
-function populateTeamSelect(selected) {
-  const sel = document.getElementById('mTeam');
-  sel.innerHTML = '';
-  getTeams().forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t; opt.textContent = t;
-    if (t === selected) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
-
-function openAddModal(team) {
-  editIdx = -1;
-  document.getElementById('modalTitle').textContent = '직원 추가';
-  document.getElementById('modalSub').textContent   = '새 직원 정보를 입력하세요.';
-  document.getElementById('mName').value = '';
-  document.getElementById('mRank').value = '사원';
-  document.getElementById('mJoin').value = '';
-  document.getElementById('mWork').value = '';
-  populateTeamSelect(team || getTeams()[0]);
-  document.getElementById('empModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('mName').focus(), 80);
-}
-
-function openEditModal(idx) {
-  const emp = getEmployees()[idx];
-  editIdx = idx;
-  document.getElementById('modalTitle').textContent = '직원 정보 수정';
-  document.getElementById('modalSub').textContent   = emp.name + ' 님의 정보를 수정합니다.';
-  document.getElementById('mName').value = emp.name || '';
-  document.getElementById('mRank').value = emp.rank || '사원';
-  document.getElementById('mJoin').value = emp.join || '';
-  document.getElementById('mWork').value = emp.work || '';
-  populateTeamSelect(emp.team);
-  document.getElementById('empModal').style.display = 'flex';
-}
-
-function closeModal() { document.getElementById('empModal').style.display = 'none'; editIdx = -1; }
-
-function saveEmployee() {
-  const name = document.getElementById('mName').value.trim();
-  const rank = document.getElementById('mRank').value;
-  const team = document.getElementById('mTeam').value;
-  const join = document.getElementById('mJoin').value;
-  const work = document.getElementById('mWork').value.trim();
-  if (!name) { document.getElementById('mName').focus(); return; }
-  const emps = getEmployees();
-  const obj  = { name, rank, team, join, work };
-  if (editIdx >= 0) emps[editIdx] = obj;
-  else emps.push(obj);
-  saveEmployees(emps);
-  closeModal();
-  renderBoard();
-}
-
-function deleteEmp(idx) {
-  const emp = getEmployees()[idx];
-  if (!confirm(`'${emp.name}' 님을 삭제하시겠습니까?`)) return;
-  const emps = getEmployees(); emps.splice(idx, 1); saveEmployees(emps); renderBoard();
-}
-
-// ── team modal ──
-function openTeamModal() {
-  document.getElementById('tName').value = '';
-  document.getElementById('teamModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('tName').focus(), 80);
-}
-function closeTeamModal() { document.getElementById('teamModal').style.display = 'none'; }
-function saveTeam() {
-  const name = document.getElementById('tName').value.trim();
-  if (!name) { document.getElementById('tName').focus(); return; }
-  const teams = getTeams();
-  if (teams.includes(name)) { alert('이미 존재하는 팀입니다.'); return; }
-  teams.push(name); saveTeams(teams); closeTeamModal(); renderBoard();
-}
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
 
 function toggleTheme() {
   const h = document.documentElement, dark = h.dataset.theme === 'dark';
@@ -494,7 +205,272 @@ function toggleTheme() {
 }
 function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = '../index.html'; }
 
-renderBoard();
+const KEY = 'fb_emp_data';
+const DEFAULT_DATA = {
+  sections: [
+    {
+      id: 'office', name: '사무실',
+      teams: [
+        { id: 't_mgmt',   name: '관리팀',    employees: [] },
+        { id: 't_intl',   name: '해외소통팀', employees: [] },
+        { id: 't_design', name: '디자인팀',   employees: [] },
+        { id: 't_pr',     name: '국내홍보팀', employees: [] },
+        { id: 't_rd',     name: '연구팀',     employees: [] },
+      ]
+    },
+    {
+      id: 'field', name: '현장',
+      teams: [
+        { id: 't_mfg', name: '제조팀', employees: [] },
+        { id: 't_sub', name: '소분팀', employees: [] },
+        { id: 't_pkg', name: '포장팀', employees: [] },
+      ]
+    }
+  ]
+};
+
+function getData() {
+  const s = localStorage.getItem(KEY);
+  return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function saveData(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+function uid() { return 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+
+function findTeam(data, teamId) {
+  for (const sec of data.sections)
+    for (const t of sec.teams)
+      if (t.id === teamId) return t;
+  return null;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  const data = getData();
+  const root = document.getElementById('orgRoot');
+  let html = '';
+  data.sections.forEach((sec, si) => {
+    if (si > 0) html += '<hr class="section-divider">';
+    const empCount = sec.teams.reduce((n, t) => n + t.employees.length, 0);
+    html += `
+    <div class="section-wrap">
+      <div class="section-header">
+        <span class="section-badge ${sec.id}">${esc(sec.name)}</span>
+        <span class="section-count">팀 ${sec.teams.length}개 · 직원 ${empCount}명</span>
+      </div>
+      <div class="teams-grid" id="grid_${sec.id}" data-section-id="${sec.id}">
+        ${sec.teams.map(t => renderTeam(t, sec.id)).join('')}
+      </div>
+    </div>`;
+  });
+  root.innerHTML = html;
+  attachDragEvents();
+}
+
+function renderTeam(team, secId) {
+  const empRows = team.employees.length > 0
+    ? team.employees.map(e => renderEmp(e, team.id)).join('')
+    : '<div class="emp-empty">직원이 없습니다. ＋ 버튼으로 추가하거나 드롭하세요</div>';
+  return `
+  <div class="team-card" id="team_${team.id}" data-team-id="${team.id}" data-section-id="${secId}" draggable="true">
+    <div class="team-header">
+      <div class="team-header-left">
+        <span class="team-drag-icon">⠿</span>
+        <span class="team-name">${esc(team.name)}</span>
+        <span class="team-count">(${team.employees.length}명)</span>
+      </div>
+      <button class="team-add-btn" onclick="openAddEmp('${team.id}')" title="직원 추가">＋</button>
+    </div>
+    <div class="emp-list" id="emplist_${team.id}" data-team-id="${team.id}">
+      ${empRows}
+    </div>
+  </div>`;
+}
+
+function renderEmp(emp, teamId) {
+  const rank = emp.rank ? ` [${esc(emp.rank)}]` : '';
+  const phone = emp.phone ? `<div class="emp-phone">📱 ${esc(emp.phone)}</div>` : '';
+  return `
+  <div class="emp-card" id="emp_${emp.id}" data-emp-id="${emp.id}" data-team-id="${teamId}" draggable="true">
+    <span class="emp-drag">⠿</span>
+    <div class="emp-info">
+      <div class="emp-name-line">${esc(emp.name)}${rank}</div>
+      ${phone}
+    </div>
+    <div class="emp-actions">
+      <button class="emp-act-btn" onclick="openEditEmp('${emp.id}','${teamId}')">✏️</button>
+      <button class="emp-act-btn del" onclick="deleteEmp('${emp.id}','${teamId}')">✕</button>
+    </div>
+  </div>`;
+}
+
+let dragEmpId=null, dragEmpFromTeam=null;
+let dragTeamId=null, dragTeamFromSection=null;
+let dragType=null;
+
+function attachDragEvents() {
+  document.querySelectorAll('.emp-card').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragType='emp'; dragEmpId=el.dataset.empId; dragEmpFromTeam=el.dataset.teamId;
+      setTimeout(()=>el.classList.add('dragging'),0);
+      e.dataTransfer.effectAllowed='move'; e.stopPropagation();
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.emp-list').forEach(l=>l.classList.remove('drag-over'));
+      dragType=null;
+    });
+  });
+
+  document.querySelectorAll('.emp-list').forEach(zone => {
+    zone.addEventListener('dragover', e => {
+      if (dragType!=='emp') return;
+      e.preventDefault(); e.stopPropagation();
+      e.dataTransfer.dropEffect='move';
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', e => {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      zone.classList.remove('drag-over');
+      if (dragType!=='emp'||!dragEmpId) return;
+      const toTeam=zone.dataset.teamId;
+      if (toTeam===dragEmpFromTeam) return;
+      const data=getData();
+      const fromT=findTeam(data,dragEmpFromTeam);
+      const toT=findTeam(data,toTeam);
+      if(!fromT||!toT) return;
+      const idx=fromT.employees.findIndex(e=>e.id===dragEmpId);
+      if(idx<0) return;
+      const [emp]=fromT.employees.splice(idx,1);
+      toT.employees.push(emp);
+      saveData(data); render();
+    });
+  });
+
+  document.querySelectorAll('.team-card').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      if (dragType==='emp') return;
+      dragType='team'; dragTeamId=el.dataset.teamId; dragTeamFromSection=el.dataset.sectionId;
+      setTimeout(()=>el.classList.add('dragging-team'),0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging-team');
+      document.querySelectorAll('.team-card').forEach(t=>t.classList.remove('drag-over-team'));
+      dragType=null;
+    });
+    el.addEventListener('dragover', e => {
+      if (dragType!=='team'||el.dataset.teamId===dragTeamId) return;
+      e.preventDefault(); e.stopPropagation();
+      document.querySelectorAll('.team-card').forEach(t=>t.classList.remove('drag-over-team'));
+      el.classList.add('drag-over-team');
+    });
+    el.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      document.querySelectorAll('.team-card').forEach(t=>t.classList.remove('drag-over-team'));
+      if (dragType!=='team'||!dragTeamId||el.dataset.teamId===dragTeamId) return;
+      const toTeamId=el.dataset.teamId, toSecId=el.dataset.sectionId;
+      const data=getData();
+      const fromSec=data.sections.find(s=>s.id===dragTeamFromSection);
+      const toSec=data.sections.find(s=>s.id===toSecId);
+      if(!fromSec||!toSec) return;
+      const fromIdx=fromSec.teams.findIndex(t=>t.id===dragTeamId);
+      if(fromIdx<0) return;
+      const [movedTeam]=fromSec.teams.splice(fromIdx,1);
+      const toIdx=toSec.teams.findIndex(t=>t.id===toTeamId);
+      toSec.teams.splice(toIdx,0,movedTeam);
+      saveData(data); render();
+    });
+  });
+}
+
+let _editEmpId=null, _editEmpTeam=null;
+
+function buildTeamOptions(selectedTeamId) {
+  const data=getData();
+  const sel=document.getElementById('empTeamSel');
+  sel.innerHTML='';
+  data.sections.forEach(sec=>{
+    const og=document.createElement('optgroup'); og.label=sec.name;
+    sec.teams.forEach(t=>{
+      const opt=document.createElement('option');
+      opt.value=t.id; opt.textContent=t.name;
+      if(t.id===selectedTeamId) opt.selected=true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function openAddEmp(teamId) {
+  _editEmpId=null; _editEmpTeam=null;
+  document.getElementById('empModalTitle').textContent='직원 추가';
+  document.getElementById('empName').value='';
+  document.getElementById('empRank').value='';
+  document.getElementById('empPhone').value='';
+  buildTeamOptions(teamId);
+  document.getElementById('empModal').style.display='flex';
+  setTimeout(()=>document.getElementById('empName').focus(),100);
+}
+
+function openEditEmp(empId, teamId) {
+  _editEmpId=empId; _editEmpTeam=teamId;
+  const data=getData();
+  const team=findTeam(data,teamId);
+  const emp=team?.employees.find(e=>e.id===empId);
+  if(!emp) return;
+  document.getElementById('empModalTitle').textContent='직원 수정';
+  document.getElementById('empName').value=emp.name||'';
+  document.getElementById('empRank').value=emp.rank||'';
+  document.getElementById('empPhone').value=emp.phone||'';
+  buildTeamOptions(teamId);
+  document.getElementById('empModal').style.display='flex';
+}
+
+function closeEmpModal() { document.getElementById('empModal').style.display='none'; }
+
+function saveEmp() {
+  const name=document.getElementById('empName').value.trim();
+  const rank=document.getElementById('empRank').value.trim();
+  const phone=document.getElementById('empPhone').value.trim();
+  const teamId=document.getElementById('empTeamSel').value;
+  if(!name){alert('이름을 입력해주세요.');return;}
+  const data=getData();
+  if(_editEmpId){
+    const oldTeam=findTeam(data,_editEmpTeam);
+    const idx=oldTeam?.employees.findIndex(e=>e.id===_editEmpId);
+    if(idx==null||idx<0) return;
+    const emp=oldTeam.employees[idx];
+    emp.name=name; emp.rank=rank; emp.phone=phone;
+    if(teamId!==_editEmpTeam){
+      oldTeam.employees.splice(idx,1);
+      const newTeam=findTeam(data,teamId);
+      if(newTeam) newTeam.employees.push(emp);
+    }
+  } else {
+    const team=findTeam(data,teamId);
+    if(!team) return;
+    team.employees.push({id:uid(),name,rank,phone});
+  }
+  saveData(data); closeEmpModal(); render();
+}
+
+function deleteEmp(empId, teamId) {
+  if(!confirm('해당 직원을 삭제하시겠습니까?')) return;
+  const data=getData();
+  const team=findTeam(data,teamId);
+  if(!team) return;
+  const idx=team.employees.findIndex(e=>e.id===empId);
+  if(idx>=0) team.employees.splice(idx,1);
+  saveData(data); render();
+}
+
+render();
 </script>
 </body>
 </html>
