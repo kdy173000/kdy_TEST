@@ -105,7 +105,8 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
   <div class="modal">
     <div class="modal-title" id="modalTitle">일정 추가</div>
     <div class="mfield"><label>이름 (담당자)</label><input id="mName" placeholder="예: 김다영·박철완"></div>
-    <div class="mfield"><label>구분</label><select id="mType"><option value="t">출장</option><option value="l">연차</option><option value="h">반차</option><option value="p">공휴일</option></select></div>
+    <div class="mfield"><label>구분</label><select id="mType" onchange="onTypeChange()"><option value="t">출장</option><option value="l">연차</option><option value="p">공휴일</option></select></div>
+    <div class="mfield" id="mSubRow" style="display:none"><label>연차 구분</label><select id="mSub"><option value="l">연차 (하루)</option><option value="ha">오전반차</option><option value="hp">오후반차</option></select></div>
     <div class="mfield"><label>내용 / 장소</label><input id="mLabel" placeholder="예: 중국 샤먼 세미나"></div>
     <div class="mrow2">
       <div class="mfield"><label>시작일</label><input id="mStart" type="date"></div>
@@ -182,19 +183,37 @@ function renderList(){
     </div>`).join('');
 }
 let editId=null;
+function onTypeChange(){
+  const t=document.getElementById('mType').value;
+  const sub=document.getElementById('mSubRow');
+  sub.style.display=t==='l'?'':'none';
+  if(t!=='l'){document.getElementById('mLabel').placeholder='예: 중국 샤먼 세미나';}
+  else{document.getElementById('mLabel').placeholder='예: 개인 사유';}
+}
 function openModal(id){
   editId=id||null;
   document.getElementById('modalTitle').textContent=id?'일정 수정':'일정 추가';
   if(id){
     const e=getSchedule().find(x=>x.id===id);
     document.getElementById('mName').value=e.w;
-    document.getElementById('mType').value=e.t;
+    if(e.t==='h'){
+      document.getElementById('mType').value='l';
+      document.getElementById('mSubRow').style.display='';
+      if(e.l==='오전반차')document.getElementById('mSub').value='ha';
+      else document.getElementById('mSub').value='hp';
+    }else{
+      document.getElementById('mType').value=e.t;
+      document.getElementById('mSubRow').style.display=e.t==='l'?'':'none';
+      document.getElementById('mSub').value='l';
+    }
     document.getElementById('mLabel').value=e.l;
     document.getElementById('mStart').value=e.s;
     document.getElementById('mEnd').value=e.e||'';
   }else{
     document.getElementById('mName').value='';
     document.getElementById('mType').value='t';
+    document.getElementById('mSub').value='l';
+    document.getElementById('mSubRow').style.display='none';
     document.getElementById('mLabel').value='';
     document.getElementById('mStart').value='';
     document.getElementById('mEnd').value='';
@@ -206,11 +225,18 @@ function openEdit(id){openModal(id);}
 function closeModal(){document.getElementById('modal').style.display='none';editId=null;}
 function saveEntry(){
   const w=document.getElementById('mName').value.trim();
-  const t=document.getElementById('mType').value;
-  const l=document.getElementById('mLabel').value.trim();
+  let t=document.getElementById('mType').value;
+  let l=document.getElementById('mLabel').value.trim();
   const s=document.getElementById('mStart').value;
   const e=document.getElementById('mEnd').value||undefined;
-  if(!w||!l||!s){alert('이름, 내용, 시작일을 입력해주세요.');return;}
+  if(!w||!s){alert('이름과 시작일을 입력해주세요.');return;}
+  if(t==='l'){
+    const sub=document.getElementById('mSub').value;
+    if(sub==='ha'){t='h';if(!l)l='오전반차';}
+    else if(sub==='hp'){t='h';if(!l)l='오후반차';}
+    else{if(!l)l='연차';}
+  }
+  if(!l){alert('내용을 입력해주세요.');return;}
   const list=getSchedule();
   if(editId){
     const idx=list.findIndex(x=>x.id===editId);
