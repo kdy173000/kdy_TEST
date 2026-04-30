@@ -3,156 +3,352 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>파이어볼 관리자</title>
+<title>직원 관리</title>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
-  --bg: #111111; --bg2: #1c1c1c; --bg3: #272727;
-  --border: #2e2e2e; --text: #e8e8e8; --text2: #888888; --text3: #4a4a4a;
-  --hover: #222222; --shadow: rgba(0,0,0,0.5);
-  --card-bg: #1c1c1c; --card-border: #2e2e2e;
+  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
+  --border:#2e2e2e; --border2:#3a3a3a;
+  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
+  --hover:#222222; --shadow:rgba(0,0,0,.5);
+  --input-bg:#242424; --input-border:#333;
 }
 [data-theme="light"] {
-  --bg: #f2f2f2; --bg2: #ffffff; --bg3: #efefed;
-  --border: #e0e0e0; --text: #111111; --text2: #666666; --text3: #b0b0b0;
-  --hover: #f0f0ee; --shadow: rgba(0,0,0,0.08);
-  --card-bg: #ffffff; --card-border: #e0e0e0;
+  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
+  --border:#e0e0e0; --border2:#d0d0d0;
+  --text:#111111; --text2:#666666; --text3:#b0b0b0;
+  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
+  --input-bg:#f7f7f7; --input-border:#d8d8d8;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: 'Pretendard', -apple-system, sans-serif;
-  background: var(--bg); color: var(--text);
-  min-height: 100vh; transition: background .2s, color .2s;
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; transition:background .2s,color .2s;
 }
 .topbar {
-  background: #9b1b30;
-  padding: 0 28px;
-  height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  background:#9b1b30; padding:0 28px; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
 }
-.topbar-left { display: flex; align-items: center; gap: 10px; }
-.topbar-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em; }
-.topbar-badge {
-  font-size: 10.5px; background: rgba(255,255,255,.2);
-  color: rgba(255,255,255,.9); padding: 2px 8px;
-  border-radius: 20px; font-weight: 600;
-}
-.topbar-right { display: flex; align-items: center; gap: 8px; }
+.topbar-title { font-size:15px; font-weight:700; color:#fff; }
+.topbar-right { display:flex; gap:8px; }
 .tb-btn {
-  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-  color: #fff; border-radius: 6px; padding: 5px 12px;
-  font-size: 12px; font-family: inherit; cursor: pointer;
-  transition: background .15s;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:6px; padding:5px 12px;
+  font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s;
 }
-.tb-btn:hover { background: rgba(255,255,255,.22); }
-.tb-btn.danger { background: rgba(255,255,255,.08); }
-.tb-btn.danger:hover { background: rgba(255,80,80,.3); }
-.container { max-width: 900px; margin: 0 auto; padding: 40px 24px 60px; }
-.page-title { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
-.page-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
-.grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-}
-.card {
-  background: var(--card-bg); border: 1px solid var(--card-border);
-  border-radius: 12px; padding: 22px 20px;
-  cursor: pointer; transition: box-shadow .15s, transform .1s, border-color .15s;
-  text-decoration: none; color: inherit;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.card:hover {
-  box-shadow: 0 6px 24px var(--shadow);
-  transform: translateY(-2px);
-  border-color: #9b1b30;
-}
-.card-icon { font-size: 28px; line-height: 1; }
-.card-title { font-size: 14px; font-weight: 700; margin-top: 2px; }
-.card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.section-label {
-  font-size: 11.5px; font-weight: 700; color: var(--text3);
-  letter-spacing: .05em; margin-bottom: 12px; margin-top: 32px;
-}
+.tb-btn:hover { background:rgba(255,255,255,.22); }
 .theme-btn {
   background: none; border: 1px solid rgba(255,255,255,.2);
   color: rgba(255,255,255,.8); border-radius: 6px; padding: 5px 10px;
   font-size: 12px; font-family: inherit; cursor: pointer;
+  transition: background .15s;
 }
+.theme-btn:hover { background: rgba(255,255,255,.12); } .topbar-badge{font-size:10.5px;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:2px 8px;border-radius:20px;font-weight:600;margin-left:8px;}
+.container { max-width:900px; margin:0 auto; padding:36px 24px 60px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
+.add-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:22px 20px; margin-bottom:24px;
+}
+.add-title { font-size:13.5px; font-weight:700; margin-bottom:16px; }
+.add-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px; }
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; }
+.field input {
+  padding:8px 11px; border-radius:7px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg); color:var(--text);
+  font-size:13.5px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.field input:focus { border-color:#9b1b30; }
+.perm-label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; margin-bottom:8px; }
+.perm-group { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.perm-btn {
+  padding:5px 14px; border-radius:20px;
+  border:1.5px solid var(--border2);
+  background:none; color:var(--text2);
+  font-size:12.5px; font-family:inherit; cursor:pointer;
+  transition:all .15s;
+}
+.perm-btn:hover { border-color:#9b1b30; color:var(--text); }
+.perm-btn.on { border-color:transparent; color:#fff; background:#9b1b30; }
+.add-btn {
+  padding:9px 22px; border-radius:7px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13.5px; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:background .15s;
+}
+.add-btn:hover { background:#7e1627; }
+.add-err { font-size:12px; color:#d95f5f; margin-top:10px; min-height:16px; }
+.count-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.count-text { font-size:12px; color:var(--text2); }
+.tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.tbl-head {
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 72px 1fr 100px;
+  gap:8px; padding:8px 14px;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  font-size:11.5px; font-weight:600; color:var(--text3);
+}
+.tbl-row {
+  display:grid; grid-template-columns:40px 1fr 1fr 90px 72px 1fr 100px;
+  gap:8px; padding:9px 14px; align-items:center;
+  border-bottom:1px solid var(--border);
+  font-size:13.5px; transition:background .1s;
+}
+.tbl-row:last-child { border-bottom:none; }
+.tbl-row:hover { background:var(--hover); }
+.num { color:var(--text3); font-size:12px; }
+.pw-cell { display:flex; align-items:center; gap:6px; }
+.pw-text { font-family:monospace; font-size:12px; color:var(--text2); }
+.eye-btn { background:none; border:none; cursor:pointer; font-size:13px; opacity:.5; transition:opacity .1s; padding:0; }
+.eye-btn:hover { opacity:1; }
+.perm-tags { display:flex; flex-wrap:wrap; gap:3px; }
+.perm-tag {
+  display:inline-flex; align-items:center;
+  padding:2px 8px; border-radius:20px;
+  font-size:11px; font-weight:600;
+}
+.actions { display:flex; gap:5px; }
+.act-btn {
+  padding:3px 10px; border-radius:5px; border:1px solid var(--border);
+  background:none; color:var(--text2); font-size:12px;
+  font-family:inherit; cursor:pointer; transition:background .1s, color .1s;
+}
+.act-btn:hover { background:var(--hover); color:var(--text); }
+.act-btn.del:hover { background:rgba(220,80,80,.12); color:#d95f5f; border-color:#d95f5f; }
+.empty-row { padding:32px; text-align:center; font-size:13px; color:var(--text3); }
+.modal-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center;
+}
+.modal {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:26px 24px;
+  width:400px; max-width:95vw;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.modal-title { font-size:15px; font-weight:700; margin-bottom:18px; }
+.modal-fields { display:flex; flex-direction:column; gap:12px; }
+.modal-actions { display:flex; gap:8px; margin-top:18px; }
+.modal-btn {
+  flex:1; padding:9px; border-radius:7px; border:none;
+  background:#9b1b30; color:#fff;
+  font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  transition:background .15s;
+}
+.modal-btn:hover { background:#7e1627; }
+.modal-btn.sec {
+  background:var(--bg3); color:var(--text2);
+  border:1px solid var(--border);
+}
+.modal-btn.sec:hover { background:var(--hover); color:var(--text); }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-left">
-    <span class="topbar-title">파이어볼 관리자</span>
-    <span class="topbar-badge">ADMIN</span>
-  </div>
+  <span class="topbar-title">계정 관리</span><span class="topbar-badge">ADMIN</span>
   <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='../admin.html'">← 관리자 홈</button>
     <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
-    <button class="tb-btn danger" onclick="doLogout()">로그아웃</button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
 
 <div class="container">
-  <div class="page-title">관리자 대시보드</div>
-  <div class="page-sub" id="adminGreet">파이어볼 사내 포털 관리 메뉴입니다.</div>
+  <div class="page-title">계정 관리</div>
+  <div class="page-sub">직원 계정을 등록하고 역할 및 접근 권한을 설정합니다.<br>역할: <b>관리자</b>(어드민 전용) | <b>관리부</b>(메인 전체 접근) | <b>직원</b>(권한 제한)</div>
 
-  <div class="section-label">직원 관리</div>
-  <div class="grid">
-    <a class="card" href="admin/ID.html">
-      <div class="card-icon">🔑</div>
-      <div class="card-title">계정 관리</div>
-      <div class="card-desc">직원 계정 생성 · 수정 · 권한 설정</div>
-    </a>
-    <a class="card" href="admin/Employees.html">
-      <div class="card-icon">👥</div>
-      <div class="card-title">직원 관리</div>
-      <div class="card-desc">팀별 직원 현황 · 입사일 · 담당 업무</div>
-    </a>
-    <a class="card" href="admin/PermLinks.html">
-      <div class="card-icon">🔗</div>
-      <div class="card-title">권한 링크 설정</div>
-      <div class="card-desc">권한별 접근 가능 페이지 URL 설정</div>
-    </a>
+  <div class="add-card">
+    <div class="add-title">신규 직원 추가</div>
+    <div class="add-row" style="grid-template-columns:1fr 1fr 1fr 110px">
+      <div class="field"><label>이름</label><input id="newName" placeholder="예: 김다영"></div>
+      <div class="field"><label>아이디</label><input id="newId" placeholder="예: dayoung"></div>
+      <div class="field"><label>비밀번호</label><input id="newPw" type="text" placeholder="비밀번호"></div>
+      <div class="field"><label>역할</label><select id="newRole" style="padding:8px 10px;border-radius:7px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;cursor:pointer"><option value="user">직원</option><option value="manager">관리부</option><option value="admin">관리자</option></select></div>
+    </div>
+    <div class="perm-label">접근 권한 (복수 선택 가능)</div>
+    <div class="perm-group" id="newPerms"></div>
+    <button class="add-btn" onclick="addUser()">직원 추가</button>
+    <div class="add-err" id="addErr"></div>
   </div>
 
-  <div class="section-label">포털 설정</div>
-  <div class="grid">
-    <div class="card" onclick="alert('준비 중입니다.')">
-      <div class="card-icon">📢</div>
-      <div class="card-title">공지사항 관리</div>
-      <div class="card-desc">공지 등록 · 수정 · 삭제</div>
+  <div class="count-bar">
+    <span class="count-text" id="countText">전체 0명</span>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div>#</div><div>이름</div><div>아이디</div>
+      <div>비밀번호</div><div>역할</div><div>권한</div><div>관리</div>
     </div>
-    <div class="card" onclick="alert('준비 중입니다.')">
-      <div class="card-icon">📅</div>
-      <div class="card-title">일정 관리</div>
-      <div class="card-desc">연차 · 출장 일정 등록 및 수정</div>
+    <div id="userList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editOverlay" style="display:none" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <div class="modal-title">직원 정보 수정</div>
+    <div class="modal-fields">
+      <div class="field"><label>이름</label><input id="eName" placeholder="이름"></div>
+      <div class="field"><label>아이디</label><input id="eId" placeholder="아이디"></div>
+      <div class="field"><label>비밀번호</label><input id="ePw" type="text" placeholder="비밀번호"></div>
+      <div class="field"><label>역할</label><select id="eRole" style="padding:8px 10px;border-radius:7px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13.5px;outline:none;cursor:pointer"><option value="user">직원</option><option value="manager">관리부</option><option value="admin">관리자</option></select></div>
+      <div>
+        <div class="perm-label" style="margin-top:4px">접근 권한</div>
+        <div class="perm-group" id="editPerms"></div>
+      </div>
     </div>
-    <a class="card" href="admin/Clock.html">
-      <div class="card-icon">🕐</div>
-      <div class="card-title">시계 설정</div>
-      <div class="card-desc">세계 시계 타임존 · 기본값 · 잠금 설정</div>
-    </a>
-    <div class="card" onclick="alert('준비 중입니다.')">
-      <div class="card-icon">⚙️</div>
-      <div class="card-title">시스템 설정</div>
-      <div class="card-desc">기타 포털 환경 설정</div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="saveEdit()">저장</button>
+      <button class="modal-btn sec" onclick="closeEdit()">취소</button>
     </div>
   </div>
 </div>
 
 <script>
-const user = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
-if (!user || user.role !== 'admin') { window.location.href = 'index.html'; }
-else { document.getElementById('adminGreet').textContent = user.id + ' 님, 환영합니다.'; }
+const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+if (!me || me.role !== 'admin') { window.location.href = '../index.html'; }
+
+const KEY_USERS = 'fb_accounts';
+const PERMS = ['관리자','재고조회','입출고관리','제품 신고 관리','원료관리'];
+const PERM_STYLE = {
+  '관리자':        { color:'#d95f5f', bg:'rgba(220,80,80,.15)',   border:'rgba(220,80,80,.35)' },
+  '재고조회':      { color:'#52a874', bg:'rgba(82,168,116,.15)',  border:'rgba(82,168,116,.35)' },
+  '입출고관리':    { color:'#6488e0', bg:'rgba(100,136,224,.15)', border:'rgba(100,136,224,.35)' },
+  '제품 신고 관리':{ color:'#c89a3c', bg:'rgba(200,154,60,.15)',  border:'rgba(200,154,60,.35)' },
+  '원료관리':      { color:'#b06ed6', bg:'rgba(176,110,214,.15)', border:'rgba(176,110,214,.35)' },
+};
+
+function getUsers()       { return JSON.parse(localStorage.getItem(KEY_USERS) || '[]'); }
+function saveUsers(list)  { localStorage.setItem(KEY_USERS, JSON.stringify(list)); }
+
+function renderPermBtns(containerId, selected = []) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  PERMS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'perm-btn' + (selected.includes(p) ? ' on' : '');
+    btn.textContent = p;
+    btn.onclick = () => btn.classList.toggle('on');
+    el.appendChild(btn);
+  });
+}
+
+function getSelectedPerms(containerId) {
+  return [...document.querySelectorAll(`#${containerId} .perm-btn.on`)].map(b => b.textContent);
+}
+
+function renderList() {
+  const users = getUsers();
+  const el = document.getElementById('userList');
+  document.getElementById('countText').textContent = `전체 ${users.length}명`;
+  if (users.length === 0) {
+    el.innerHTML = '<div class="empty-row">등록된 직원이 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = users.map((u, i) => {
+    const perms = u.perms || [];
+    const tags = perms.map(p => {
+      const s = PERM_STYLE[p] || { color:'#9b1b30', bg:'rgba(155,27,48,.15)', border:'rgba(155,27,48,.35)' };
+      return `<span class="perm-tag" style="color:${s.color};background:${s.bg};border:1px solid ${s.border}">${p}</span>`;
+    }).join('');
+    return `
+    <div class="tbl-row">
+      <div class="num">${i+1}</div>
+      <div>${u.name || '-'}</div>
+      <div style="font-weight:600">${u.id}</div>
+      <div class="pw-cell">
+        <span class="pw-text" id="pw-${i}">••••••</span>
+        <button class="eye-btn" onclick="togglePw(${i},'${u.pw}')">👁</button>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${roleLabelMap[u.role] || '직원'}</div>
+      <div class="perm-tags">${tags || '<span style="color:var(--text3);font-size:12px">없음</span>'}</div>
+      <div class="actions">
+        <button class="act-btn" onclick="openEdit(${i})">수정</button>
+        <button class="act-btn del" onclick="deleteUser(${i})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePw(i, pw) {
+  const el = document.getElementById('pw-' + i);
+  el.textContent = el.textContent === '••••••' ? pw : '••••••';
+}
+
+const roleLabelMap = { admin:'관리자', manager:'관리부', user:'직원' };
+const roleRedirectMap = { admin:'admin.html', manager:'main.html', user:'main.html' };
+
+function addUser() {
+  const name  = document.getElementById('newName').value.trim();
+  const id    = document.getElementById('newId').value.trim();
+  const pw    = document.getElementById('newPw').value.trim();
+  const role  = document.getElementById('newRole').value;
+  const perms = getSelectedPerms('newPerms');
+  const err   = document.getElementById('addErr');
+  if (!name) { err.textContent = '이름을 입력해 주세요.'; return; }
+  if (!id)   { err.textContent = '아이디를 입력해 주세요.'; return; }
+  if (!pw)   { err.textContent = '비밀번호를 입력해 주세요.'; return; }
+  const users = getUsers();
+  if (users.some(u => u.id === id)) { err.textContent = '이미 사용 중인 아이디입니다.'; return; }
+  users.push({ name, id, pw, role, perms, redirect: roleRedirectMap[role] });
+  saveUsers(users);
+  err.textContent = '';
+  document.getElementById('newName').value = '';
+  document.getElementById('newId').value = '';
+  document.getElementById('newPw').value = '';
+  document.getElementById('newRole').value = 'user';
+  renderPermBtns('newPerms');
+  renderList();
+}
+
+let editIdx = -1;
+function openEdit(i) {
+  const u = getUsers()[i];
+  editIdx = i;
+  document.getElementById('eName').value = u.name || '';
+  document.getElementById('eId').value   = u.id;
+  document.getElementById('ePw').value   = u.pw;
+  document.getElementById('eRole').value = u.role || 'user';
+  renderPermBtns('editPerms', u.perms || []);
+  document.getElementById('editOverlay').style.display = 'flex';
+}
+function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; editIdx = -1; }
+function saveEdit() {
+  if (editIdx < 0) return;
+  const name  = document.getElementById('eName').value.trim();
+  const id    = document.getElementById('eId').value.trim();
+  const pw    = document.getElementById('ePw').value.trim();
+  const role  = document.getElementById('eRole').value;
+  const perms = getSelectedPerms('editPerms');
+  if (!name || !id || !pw) { alert('모든 항목을 입력해 주세요.'); return; }
+  const users = getUsers();
+  if (users.some((u, i) => u.id === id && i !== editIdx)) { alert('이미 사용 중인 아이디입니다.'); return; }
+  users[editIdx] = { name, id, pw, role, perms, redirect: roleRedirectMap[role] };
+  saveUsers(users);
+  closeEdit();
+  renderList();
+}
+function deleteUser(i) {
+  const u = getUsers()[i];
+  if (!confirm(`'${u.name || u.id}' 계정을 삭제하시겠습니까?`)) return;
+  const users = getUsers(); users.splice(i, 1); saveUsers(users); renderList();
+}
 function toggleTheme() {
   const h = document.documentElement, dark = h.dataset.theme === 'dark';
   h.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('t-ico').textContent = dark ? '🌙' : '☀️';
 }
-function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = 'index.html'; }
+function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href = '../loge'; }
+
+renderPermBtns('newPerms');
+renderList();
 </script>
 </body>
 </html>
