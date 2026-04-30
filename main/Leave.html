@@ -4,34 +4,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>내부 일정 관리</title>
+<script>
+(function(){
+  var raw = sessionStorage.getItem('fb_user');
+  if (!raw) { window.location.replace('../index.html'); return; }
+  try {
+    var u = JSON.parse(raw);
+    if (!u || !u.id) { window.location.replace('../index.html'); return; }
+    if (u.role === 'admin') { window.location.replace('../admin.html'); return; }
+  } catch(e) { window.location.replace('../index.html'); }
+})();
+</script>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
 [data-theme="dark"] {
-  --bg:#111111; --bg2:#1c1c1c; --bg3:#272727;
-  --border:#2e2e2e; --border2:#3a3a3a;
-  --text:#e8e8e8; --text2:#888888; --text3:#4a4a4a;
-  --hover:#222222; --shadow:rgba(0,0,0,.5);
-  --input-bg:#242424; --input-border:#333;
+  --bg: #191919; --bg2: #202020; --bg3: #272727;
+  --border: #2e2e2e; --border2: #3a3a3a;
+  --text: #E8E8E8; --text2: #9B9B9B; --text3: #5a5a5a;
+  --hover: #252525; --tag-bg: #2a2a2a;
+  --cal-head: #1e1e1e; --today-bg: #2d2d2d;
+  --sel-border: #555; --sel-border-h: #7a7a7a;
+  --opt-bg: #1e1e1e; --opt-text: #fff;
+  --modal-bg: #1c1c1c; --modal-border: #333;
+  --hand: #f5f5f5; --center-dot: #f5f5f5;
+  --tick-major: rgba(245,245,245,0.9); --tick-minor: rgba(245,245,245,0.5);
 }
 [data-theme="light"] {
-  --bg:#f2f2f2; --bg2:#ffffff; --bg3:#efefed;
-  --border:#e0e0e0; --border2:#d0d0d0;
-  --text:#111111; --text2:#666666; --text3:#b0b0b0;
-  --hover:#f0f0ee; --shadow:rgba(0,0,0,.08);
-  --input-bg:#f7f7f7; --input-border:#d8d8d8;
+  --bg: #FFFFFF; --bg2: #F7F7F5; --bg3: #EFEFED;
+  --border: #E8E8E5; --border2: #D5D5D2;
+  --text: #1A1A1A; --text2: #787774; --text3: #AFAFAC;
+  --hover: #F0F0EE; --tag-bg: #EFEFED;
+  --cal-head: #F5F5F3; --today-bg: #F0F0EE;
+  --sel-border: #cfcfcf; --sel-border-h: #b8b8b8;
+  --opt-bg: #ffffff; --opt-text: #111111;
+  --modal-bg: #ffffff; --modal-border: #e0e0e0;
+  --hand: #111111; --center-dot: #111111;
+  --tick-major: rgba(17,17,17,0.9); --tick-minor: rgba(17,17,17,0.5);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s,color .2s; }
-.topbar { background:#9b1b30; padding:0 28px; height:52px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.3); }
-.topbar-title { font-size:15px; font-weight:700; color:#fff; }
-.topbar-right { display:flex; gap:8px; }
-.tb-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:6px; padding:5px 12px; font-size:12px; font-family:inherit; cursor:pointer; transition:background .15s; }
-.tb-btn:hover { background:rgba(255,255,255,.22); }
-.theme-btn { background:none; border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); border-radius:6px; padding:5px 10px; font-size:12px; font-family:inherit; cursor:pointer; }
-.topbar-badge { font-size:10.5px; background:rgba(255,255,255,.2); color:rgba(255,255,255,.9); padding:2px 8px; border-radius:20px; font-weight:600; margin-left:8px; }
-.container { max-width:960px; margin:0 auto; padding:36px 24px 60px; }
-.page-title { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
-.page-sub { font-size:13px; color:var(--text2); margin-bottom:28px; }
+body { font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.6; transition:background .18s,color .18s; }
+a { text-decoration:none; color:inherit; }
+button { font-family:inherit; cursor:pointer; }
+.layout { display:flex; min-height:100vh; }
+.sidebar { width:236px; flex-shrink:0; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
+.sb-logo { display:flex; align-items:center; gap:9px; padding:16px 12px 12px; }
+.sb-logo-icon { width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.sb-logo-name { font-size:14px; font-weight:700; }
+.sb-group-label { font-size:11.5px; font-weight:600; color:var(--text3); padding:10px 12px 3px; letter-spacing:0.01em; }
+.sb-item { display:flex; align-items:center; gap:7px; padding:4px 12px; font-size:13.5px; color:var(--text2); border-radius:4px; margin:1px 5px; cursor:pointer; transition:background .1s,color .1s; }
+.sb-item:hover, .sb-item.active { background:var(--hover); color:var(--text); }
+.sb-item .ico { font-size:13px; width:16px; text-align:center; flex-shrink:0; }
+.sb-indent { padding-left:22px; }
+.sb-footer { margin-top:auto; padding:12px; font-size:11.5px; color:var(--text3); border-top:1px solid var(--border); line-height:1.8; }
+.main { flex:1; display:flex; overflow:hidden; }
+.center { flex:1; padding:44px 52px 60px; overflow-y:auto; min-width:0; }
+.page-h1 { font-size:28px; font-weight:700; letter-spacing:-0.02em; margin-bottom:4px; }
+.page-desc { font-size:13px; color:var(--text2); margin-bottom:28px; }
 .toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
 .filter-row { display:flex; gap:8px; flex-wrap:wrap; }
 .filter-btn { padding:5px 14px; border-radius:20px; border:1.5px solid var(--border2); background:none; color:var(--text2); font-size:12.5px; font-family:inherit; cursor:pointer; transition:all .15s; }
@@ -40,7 +68,7 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 .add-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:background .15s; white-space:nowrap; }
 .add-btn:hover { background:#7e1627; }
 .tbl-wrap { border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-.tbl-head { display:grid; grid-template-columns:40px 110px 72px 1fr 100px 100px 90px; gap:8px; padding:8px 14px; background:var(--bg2); border-bottom:1px solid var(--border); font-size:11.5px; font-weight:600; color:var(--text3); }
+.tbl-head { display:grid; grid-template-columns:40px 110px 72px 1fr 100px 100px 90px; gap:8px; padding:8px 14px; background:var(--cal-head); border-bottom:1px solid var(--border); font-size:11.5px; font-weight:600; color:var(--text3); }
 .tbl-row { display:grid; grid-template-columns:40px 110px 72px 1fr 100px 100px 90px; gap:8px; padding:9px 14px; align-items:center; border-bottom:1px solid var(--border); font-size:13px; transition:background .1s; }
 .tbl-row:last-child { border-bottom:none; }
 .tbl-row:hover { background:var(--hover); }
@@ -55,8 +83,88 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 .actions { display:flex; gap:5px; }
 .empty-row { padding:32px; text-align:center; font-size:13px; color:var(--text3); }
 .count-bar { font-size:12px; color:var(--text2); margin-bottom:10px; }
+.rp { width:220px; flex-shrink:0; border-left:1px solid var(--border); background:var(--bg2); padding:52px 14px 20px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; }
+.rp-label { font-size:11.5px; font-weight:700; color:var(--text2); letter-spacing:0.05em; margin-bottom:7px; }
+.rp-link { display:flex; align-items:center; gap:7px; padding:4px 7px; border-radius:5px; font-size:13px; color:var(--text2); cursor:pointer; transition:background .1s; margin:0 -3px; }
+.rp-link:hover { background:var(--hover); color:var(--text); }
+.trip-now { display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:5px; background:rgba(74,138,244,.1); border:1px solid rgba(74,138,244,.2); font-size:12px; color:#4a8af4; margin-bottom:4px; }
+.trip-sub { font-size:11.5px; color:var(--text3); margin-bottom:2px; }
+.clock-wrapper { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.clock-face { position:relative; width:170px; height:170px; border-radius:50%; background:transparent; }
+.c-hand { position:absolute; left:50%; bottom:50%; transform-origin:bottom center; border-radius:999px; background:var(--hand); will-change:transform; backface-visibility:hidden; }
+.c-hand.hour   { width:3px; height:48px; margin-left:-1.5px; }
+.c-hand.minute { width:2px; height:70px; margin-left:-1px; }
+.c-hand.second { width:1px; height:78px; margin-left:-0.5px; }
+.c-center-dot { position:absolute; left:50%; top:50%; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--center-dot); z-index:5; }
+.c-digital-block { position:absolute; left:50%; top:62%; transform:translateX(-50%); text-align:center; pointer-events:none; white-space:nowrap; }
+.c-time-str { font-size:19px; font-weight:500; color:var(--text); letter-spacing:0.04em; line-height:1; }
+.c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
+.fixed-actions { position:fixed; top:12px; right:14px; z-index:999; display:flex; align-items:center; gap:6px; }
+.action-btn { width:32px; height:32px; border-radius:8px; background:var(--tag-bg); border:1px solid var(--border); color:var(--text2); cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s; }
+.action-btn:hover { background:var(--hover); color:var(--text); }
+.chat-float-btn { position:fixed; bottom:24px; right:24px; z-index:1400; width:48px; height:48px; border-radius:50%; background:#9b1b30; color:#fff; border:none; box-shadow:0 4px 18px rgba(155,27,48,.45); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s,transform .1s; }
+.chat-float-btn:hover { background:#7e1627; transform:scale(1.06); }
+.chat-popup { position:fixed; bottom:84px; right:24px; z-index:1500; width:320px; height:460px; background:var(--modal-bg); border:1px solid var(--modal-border); border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.35); display:none; flex-direction:column; overflow:hidden; animation:slideUp .22s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.chat-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#9b1b30; flex-shrink:0; border-radius:14px 14px 0 0; }
+.chat-header-title { font-size:13.5px; font-weight:700; color:#fff; }
+.chat-hbtn { background:rgba(255,255,255,.15); border:none; color:#fff; border-radius:6px; padding:3px 9px; font-size:11.5px; font-family:inherit; cursor:pointer; }
+.chat-hbtn:hover { background:rgba(255,255,255,.28); }
+.chat-rooms-view, .chat-room-view { display:flex; flex-direction:column; flex:1; min-height:0; }
+.room-list-body { flex:1; overflow-y:auto; padding:6px; }
+.room-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; cursor:pointer; transition:background .1s; }
+.room-item:hover { background:var(--hover); }
+.room-icon { font-size:18px; flex-shrink:0; }
+.room-name { font-size:13px; font-weight:600; color:var(--text); }
+.room-last { font-size:11.5px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.room-list-footer { padding:8px; display:flex; gap:6px; border-top:1px solid var(--border); flex-shrink:0; }
+.room-footer-btn { flex:1; padding:7px; border-radius:7px; border:1px solid var(--border); background:none; color:var(--text2); font-size:12px; font-family:inherit; cursor:pointer; transition:background .1s,color .1s; }
+.room-footer-btn:hover { background:var(--hover); color:var(--text); }
+.chat-room-header { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.chat-back-btn { background:none; border:none; color:var(--text2); font-size:18px; cursor:pointer; padding:2px 5px; border-radius:4px; transition:background .1s; line-height:1; }
+.chat-back-btn:hover { background:var(--hover); color:var(--text); }
+.chat-room-title { font-size:13px; font-weight:700; flex:1; }
+.chat-msgs { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:7px; }
+.msg-wrap { display:flex; flex-direction:column; }
+.msg-me { align-items:flex-end; }
+.msg-other { align-items:flex-start; }
+.msg-sender { font-size:10.5px; color:var(--text3); margin-bottom:2px; }
+.msg-bubble { max-width:195px; padding:7px 11px; font-size:13px; border-radius:12px; word-break:break-word; line-height:1.5; }
+.msg-bubble-me { background:#9b1b30; color:#fff; border-radius:12px 12px 3px 12px; }
+.msg-bubble-other { background:var(--bg3); color:var(--text); border-radius:12px 12px 12px 3px; }
+.msg-time { font-size:10px; color:var(--text3); margin-top:2px; }
+.chat-input-row { display:flex; gap:6px; padding:8px 10px; border-top:1px solid var(--border); flex-shrink:0; }
+.chat-input { flex:1; padding:8px 11px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border-color .15s; }
+.chat-input:focus { border-color:#9b1b30; }
+.chat-send-btn { padding:8px 12px; border-radius:8px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-family:inherit; cursor:pointer; transition:background .15s; }
+.chat-send-btn:hover { background:#7e1627; }
+.nr-overlay, .pf-overlay { position:fixed; inset:0; z-index:3000; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; }
+.nr-box, .pf-box { background:var(--modal-bg); border:1px solid var(--modal-border); border-radius:14px; padding:26px 24px; width:360px; max-width:95vw; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.pf-box { width:380px; position:relative; }
+.nr-title, .pf-title { font-size:15px; font-weight:700; margin-bottom:14px; }
+.nr-field, .pf-field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+.nr-label, .pf-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
+.nr-input, .pf-input { padding:9px 12px; border-radius:8px; border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border-color .15s; }
+.nr-input:focus, .pf-input:focus { border-color:#9b1b30; }
+.nr-users { border:1px solid var(--border); border-radius:8px; padding:8px 12px; max-height:130px; overflow-y:auto; background:var(--bg3); }
+.nr-actions, .pf-actions { display:flex; gap:8px; margin-top:16px; }
+.nr-btn, .pf-btn { flex:1; padding:9px; border-radius:8px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:background .15s; }
+.nr-btn:hover, .pf-btn:hover { background:#7e1627; }
+.nr-btn.sec, .pf-btn.sec { background:var(--bg3); color:var(--text2); border:1px solid var(--border); }
+.nr-btn.sec:hover, .pf-btn.sec:hover { background:var(--hover); color:var(--text); }
+.pf-header { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.pf-avatar { width:50px; height:50px; border-radius:50%; background:#9b1b30; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.pf-name { font-size:16px; font-weight:700; }
+.pf-meta { font-size:12px; color:var(--text2); margin-top:2px; }
+.pf-sec-title { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); margin-top:18px; }
+.pf-sec-title:first-of-type { margin-top:0; }
+.pf-msg { font-size:12px; min-height:16px; margin-bottom:8px; }
+.pf-full-btn { width:100%; padding:10px; border-radius:8px; border:none; background:#9b1b30; color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:8px; transition:background .15s; }
+.pf-full-btn:hover { background:#7e1627; }
+.leave-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.leave-val { font-weight:700; color:#52a874; font-size:15px; }
 .modal-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; }
-.modal { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:28px 24px; width:440px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+.modal { background:var(--modal-bg); border:1px solid var(--modal-border); border-radius:14px; padding:28px 24px; width:440px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,.4); }
 .modal-title { font-size:16px; font-weight:700; margin-bottom:20px; }
 .mfield { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
 .mfield label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
@@ -68,39 +176,108 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
 .m-btn:hover { background:#7e1627; }
 .m-btn.sec { background:var(--bg3); color:var(--text2); border:1px solid var(--border); }
 .m-btn.sec:hover { background:var(--hover); color:var(--text); }
+@media (max-width: 900px) { .rp { display:none; } .center { padding:28px 24px; } }
+@media (max-width: 620px) { .sidebar { display:none; } .center { padding:20px 16px; } }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <span class="topbar-title">내부 일정 관리</span>
-  <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location.href='../main.html'">← 메인으로</button>
-    <button class="theme-btn" onclick="toggleTheme()"><span id="t-ico">☀️</span></button>
-    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
-  </div>
+
+<div class="fixed-actions">
+  <button class="action-btn" onclick="openProfile()" title="내 프로필">👤</button>
 </div>
-<div class="container">
-  <div class="page-title">📅 내부 일정 관리</div>
-  <div class="page-sub">직원 연차·출장·반차·내부일정을 등록하고 관리합니다. 메인화면 캘린더와 현재 출장 목록에 자동 반영됩니다.</div>
-  <div class="toolbar">
-    <div class="filter-row" id="filterRow">
-      <button class="filter-btn on" onclick="setFilter(this,'all')">전체</button>
-      <button class="filter-btn" onclick="setFilter(this,'t')">출장</button>
-      <button class="filter-btn" onclick="setFilter(this,'l')">연차</button>
-      <button class="filter-btn" onclick="setFilter(this,'h')">반차</button>
-      <button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button>
+
+<button class="chat-float-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="sb-logo" style="cursor:pointer" onclick="window.location.href='../main.html'" title="메인으로 이동">
+    <div class="sb-logo-icon">
+      <svg viewBox="0 0 120 120" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="58" fill="#9b1b30"/>
+        <circle cx="60" cy="60" r="42" fill="white"/>
+        <rect x="33" y="32" width="14" height="56" fill="#9b1b30" rx="2"/>
+        <rect x="33" y="32" width="42" height="14" fill="#9b1b30" rx="2"/>
+        <circle cx="85" cy="73" r="11" fill="#9b1b30"/>
+      </svg>
     </div>
-    <button class="add-btn" onclick="openModal()">＋ 일정 추가</button>
+    <span class="sb-logo-name">파이어볼</span>
   </div>
-  <div class="count-bar" id="countBar"></div>
-  <div class="tbl-wrap">
-    <div class="tbl-head">
-      <div>#</div><div>이름</div><div>구분</div><div>내용</div>
-      <div>시작일</div><div>종료일</div><div>관리</div>
+  <div class="sb-group-label">사내 운영 관리</div>
+  <div class="sb-item" onclick="window.location.href='../main.html#notices'"><span class="ico">📢</span>공지사항</div>
+  <div class="sb-item" onclick="window.location.href='../main.html#org'"><span class="ico">👥</span>조직도</div>
+  <div class="sb-item active"><span class="ico">📅</span>내부 일정 관리</div>
+  <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
+  <div class="sb-item sb-indent" data-perm="재고조회"><span class="ico">📦</span>제품 관리</div>
+  <div class="sb-item sb-indent" data-perm="입출고관리"><span class="ico">🔄</span>제품 입고/출고/조정</div>
+  <div class="sb-item sb-indent" data-perm="제품 신고 관리"><span class="ico">📋</span>제품 신고 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">🚚</span>발주 진행 현황</div>
+  <div class="sb-item sb-indent" data-perm="원료관리"><span class="ico">🧪</span>원료 관리</div>
+  <div class="sb-item sb-indent"><span class="ico">🏷️</span>제품 포장 및 정보</div>
+  <div class="sb-group-label" style="margin-top:6px">디자인팀</div>
+  <div class="sb-item sb-indent"><span class="ico">🎨</span>디자인 업무분배</div>
+  <div class="sb-item sb-indent"><span class="ico">📝</span>회의록</div>
+  <div class="sb-group-label" style="margin-top:6px">개인 업무관리</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>김다영</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>최혜선</div>
+  <div class="sb-item sb-indent"><span class="ico">👤</span>송나겨</div>
+  <div class="sb-footer">
+    관리자 : 조상덕 과장, 박철완 과장<br>
+    페이지 제작자 : 김다영 대리
+  </div>
+</nav>
+
+<div class="main">
+  <div class="center">
+    <h1 class="page-h1">📅 내부 일정 관리</h1>
+    <p class="page-desc">직원 연차·출장·반차·내부일정을 등록하고 관리합니다. 메인화면 캘린더와 현재 출장 목록에 자동 반영됩니다.</p>
+    <div class="toolbar">
+      <div class="filter-row" id="filterRow">
+        <button class="filter-btn on" onclick="setFilter(this,'all')">전체</button>
+        <button class="filter-btn" onclick="setFilter(this,'t')">출장</button>
+        <button class="filter-btn" onclick="setFilter(this,'l')">연차</button>
+        <button class="filter-btn" onclick="setFilter(this,'h')">반차</button>
+        <button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button>
+      </div>
+      <button class="add-btn" onclick="openModal()">＋ 일정 추가</button>
     </div>
-    <div id="scheduleList"></div>
+    <div class="count-bar" id="countBar"></div>
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <div>#</div><div>이름</div><div>구분</div><div>내용</div>
+        <div>시작일</div><div>종료일</div><div>관리</div>
+      </div>
+      <div id="scheduleList"></div>
+    </div>
   </div>
+  <aside class="rp">
+    <div>
+      <div class="rp-label">★ 사용법 안내</div>
+      <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px">Update : 2026.04.10</div>
+      <div class="rp-link"><span>🏢</span>파이어볼 회사소개</div>
+      <div class="rp-link"><span>📖</span>파이어볼 기본 예절</div>
+    </div>
+    <div>
+      <div class="rp-label">✈️ 현재 출장</div>
+      <div id="tripNowList"></div>
+    </div>
+    <div>
+      <div class="clock-wrapper">
+        <select id="tzSel" style="display:none"></select>
+        <div id="tzLabelDisplay" style="font-size:12px;color:var(--text2);text-align:center;letter-spacing:0.02em;padding:2px 0"></div>
+        <div class="clock-face" id="clockFace">
+          <div class="c-digital-block">
+            <div class="c-time-str" id="timeStr">00:00:00</div>
+            <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
 </div>
+</div>
+
 <div class="modal-overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="modalTitle">일정 추가</div>
@@ -118,7 +295,171 @@ body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); 
     </div>
   </div>
 </div>
+
+<div class="chat-popup" id="chatPopup">
+  <div class="chat-header">
+    <span class="chat-header-title">💬 채팅</span>
+    <button class="chat-hbtn" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-rooms-view" id="chatRoomsView">
+    <div class="room-list-body" id="roomListBody"></div>
+    <div class="room-list-footer">
+      <button class="room-footer-btn" onclick="openNewRoomModal('dm')">💬 1:1 채팅</button>
+      <button class="room-footer-btn" onclick="openNewRoomModal('group')">👥 단체채팅</button>
+    </div>
+  </div>
+  <div class="chat-room-view" id="chatRoomView" style="display:none">
+    <div class="chat-room-header">
+      <button class="chat-back-btn" onclick="showRoomList()">‹</button>
+      <span class="chat-room-title" id="chatRoomTitle"></span>
+    </div>
+    <div class="chat-msgs" id="chatMsgBody"></div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="메시지 입력…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}">
+      <button class="chat-send-btn" onclick="sendMsg()">전송</button>
+    </div>
+  </div>
+</div>
+
+<div class="nr-overlay" id="newRoomModal" onclick="if(event.target===this)closeNewRoomModal()">
+  <div class="nr-box">
+    <input type="hidden" id="nrType">
+    <div class="nr-title" id="nrTitle">채팅방 만들기</div>
+    <div class="nr-field" id="nrNameField">
+      <div class="nr-label">방 이름</div>
+      <input class="nr-input" id="nrRoomName" placeholder="예: 디자인팀 회의방">
+    </div>
+    <div class="nr-field">
+      <div class="nr-label">참여자 선택</div>
+      <div class="nr-users" id="nrUsers"></div>
+    </div>
+    <div class="nr-actions">
+      <button class="nr-btn" onclick="createRoom()">만들기</button>
+      <button class="nr-btn sec" onclick="closeNewRoomModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box">
+    <button id="pfThemeBtn" onclick="toggleTheme()" title="테마 전환" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;opacity:.55;transition:opacity .15s;padding:3px;line-height:1;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55"><span id="pf-t-ico">☀️</span></button>
+    <div class="pf-header">
+      <div class="pf-avatar">👤</div>
+      <div>
+        <div class="pf-name" id="pfName"></div>
+        <div class="pf-meta" id="pfRoleLabel"></div>
+        <div class="pf-meta">아이디: <span id="pfId"></span></div>
+      </div>
+    </div>
+    <div class="pf-sec-title" style="margin-top:0">🔒 비밀번호 변경</div>
+    <div class="pf-field"><div class="pf-label">현재 비밀번호</div><input class="pf-input" id="pfPwOld" type="password" placeholder="현재 비밀번호"></div>
+    <div class="pf-field"><div class="pf-label">새 비밀번호</div><input class="pf-input" id="pfPwNew" type="password" placeholder="새 비밀번호 (4자 이상)"></div>
+    <div class="pf-field"><div class="pf-label">비밀번호 확인</div><input class="pf-input" id="pfPwConfirm" type="password" placeholder="새 비밀번호 재입력"></div>
+    <div class="pf-msg" id="pfPwMsg"></div>
+    <button class="pf-full-btn" onclick="changePw()">비밀번호 변경</button>
+    <div class="pf-sec-title">📅 연차 현황</div>
+    <div class="leave-row"><span>잔여 연차</span><span class="leave-val" id="leaveRemain">-</span></div>
+    <div style="font-size:11.5px;color:var(--text3);margin-top:8px">※ 연차 정보는 추후 연차 및 출장 페이지와 연동될 예정입니다.</div>
+    <button class="pf-full-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);margin-top:16px" onclick="closeProfile()">닫기</button>
+  </div>
+</div>
+
 <script>
+const ALL_TZ = [
+  {v:'Asia/Seoul',l:'대한민국 / 서울'},{v:'Asia/Tokyo',l:'일본 / 도쿄'},{v:'Asia/Shanghai',l:'중국 / 상하이'},
+  {v:'Asia/Singapore',l:'싱가포르'},{v:'Asia/Brunei',l:'브루나이'},{v:'Asia/Manila',l:'필리핀 / 마닐라'},
+  {v:'Asia/Ho_Chi_Minh',l:'베트남 / 호치민'},{v:'Asia/Bangkok',l:'태국 / 방콕'},{v:'Asia/Jakarta',l:'인도네시아 / 자카르타'},
+  {v:'Asia/Kolkata',l:'인도 / 뉴델리'},{v:'Asia/Tashkent',l:'우즈베키스탄 / 타슈켄트'},{v:'Asia/Dubai',l:'아랍에미리트 / 두바이'},
+  {v:'Europe/London',l:'영국 / 런던'},{v:'Europe/Paris',l:'프랑스 / 파리'},{v:'Europe/Berlin',l:'독일 / 베를린'},
+  {v:'America/New_York',l:'미국 / 뉴욕'},{v:'America/Los_Angeles',l:'미국 / 로스앤젤레스'}
+];
+const KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled', KEY_TZ='tz';
+const DEFAULT_TZ='Asia/Kolkata';
+function getDefaultTz(){ return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
+function getEnabledList(){ const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
+function buildTzDropdown(){
+  const sel=document.getElementById('tzSel');
+  const enabled=getEnabledList();
+  const current=sel.value||localStorage.getItem(KEY_TZ)||getDefaultTz();
+  sel.innerHTML='';
+  ALL_TZ.filter(t=>enabled.includes(t.v)).forEach(t=>{
+    const opt=document.createElement('option');
+    opt.value=t.v; opt.textContent=t.l; sel.appendChild(opt);
+  });
+  if([...sel.options].some(o=>o.value===current)) sel.value=current;
+  else sel.value=sel.options[0]?.value||'';
+  const lbl=document.getElementById('tzLabelDisplay');
+  if(lbl){ const found=ALL_TZ.find(t=>t.v===sel.value); lbl.textContent=found?found.l:sel.value; }
+}
+function toggleTheme(){
+  const h=document.documentElement,dark=h.dataset.theme==='dark';
+  h.dataset.theme=dark?'light':'dark';
+  const ico=document.getElementById('pf-t-ico');
+  if(ico) ico.textContent=dark?'🌙':'☀️';
+  if(window._applyTickColors) window._applyTickColors();
+}
+document.addEventListener('DOMContentLoaded',function(){
+  buildTzDropdown();
+  const face=document.getElementById('clockFace');
+  const tzSel=document.getElementById('tzSel');
+  const timeStr=document.getElementById('timeStr');
+  const dateStr=document.getElementById('dateStr');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;';
+  face.appendChild(svg);
+  function applyTickColors(){
+    const styles=getComputedStyle(document.documentElement);
+    const major=styles.getPropertyValue('--tick-major').trim();
+    const minor=styles.getPropertyValue('--tick-minor').trim();
+    [...svg.querySelectorAll('line')].forEach((line,i)=>{ line.setAttribute('stroke',i%3===0?major:minor); });
+  }
+  window._applyTickColors=applyTickColors;
+  function drawTicks(){
+    const SIZE=face.clientWidth,CX=SIZE/2,CY=SIZE/2;
+    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE); svg.innerHTML='';
+    for(let i=0;i<12;i++){
+      const rad=(i*30-90)*Math.PI/180;
+      const outerR=CX-(SIZE*0.033);
+      const len=i%3===0?SIZE*0.047:SIZE*0.03;
+      const innerR=outerR-len;
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',CX+outerR*Math.cos(rad));
+      line.setAttribute('y1',CY+outerR*Math.sin(rad));
+      line.setAttribute('x2',CX+innerR*Math.cos(rad));
+      line.setAttribute('y2',CY+innerR*Math.sin(rad));
+      line.setAttribute('stroke-width',i%3===0?'2':'1.5');
+      line.setAttribute('stroke-linecap','round');
+      svg.appendChild(line);
+    }
+    applyTickColors();
+  }
+  ['hour','minute','second'].forEach(cls=>{
+    const d=document.createElement('div'); d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
+  });
+  face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
+  function getTimeParts(tz){
+    const now=new Date();
+    const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+    const map={};
+    fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
+    return { month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds() };
+  }
+  function tick(){
+    const t=getTimeParts(tzSel.value||getDefaultTz());
+    const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
+    face._hour.style.transform=`rotate(${hh*30}deg)`;
+    face._minute.style.transform=`rotate(${mm*6}deg)`;
+    face._second.style.transform=`rotate(${ss*6}deg)`;
+    timeStr.textContent=[t.hour,t.minute,t.second].map(x=>String(x).padStart(2,'0')).join(':');
+    dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
+    requestAnimationFrame(tick);
+  }
+  tzSel.addEventListener('change',()=>{ localStorage.setItem(KEY_TZ,tzSel.value); });
+  window.addEventListener('resize',drawTicks);
+  drawTicks(); tick();
+});
+
 const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
 if (!me || !me.id) { window.location.href = '../index.html'; }
 const KEY = 'fb_schedule';
@@ -247,20 +588,213 @@ function saveEntry(){
   saveSchedule(list);
   closeModal();
   renderList();
+  renderTripNow();
 }
 function deleteEntry(id){
   const e=getSchedule().find(x=>x.id===id);
   if(!confirm(`'${e.l} (${e.w})' 일정을 삭제하시겠습니까?`))return;
   saveSchedule(getSchedule().filter(x=>x.id!==id));
   renderList();
+  renderTripNow();
 }
-function toggleTheme(){
-  const h=document.documentElement,dark=h.dataset.theme==='dark';
-  h.dataset.theme=dark?'light':'dark';
-  document.getElementById('t-ico').textContent=dark?'🌙':'☀️';
+
+function renderTripNow(){
+  const now=new Date();
+  const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  const trips=getSchedule().filter(e=>e.t==='t'&&e.s<=today&&(e.e?e.e>=today:e.s===today));
+  const el=document.getElementById('tripNowList');
+  if(!el)return;
+  if(!trips.length){el.innerHTML='<div class="trip-sub" style="color:var(--text3)">현재 출장 없음</div>';return;}
+  const flag=l=>{if(l.includes('중국')||l.includes('상하이')||l.includes('샤먼'))return'🇨🇳';if(l.includes('인도'))return'🇮🇳';if(l.includes('일본'))return'🇯🇵';if(l.includes('미국'))return'🇺🇸';if(l.includes('싱가포르'))return'🇸🇬';if(l.includes('베트남'))return'🇻🇳';return'✈️';};
+  el.innerHTML=trips.map(e=>'<div class="trip-now">'+flag(e.l)+' '+e.l+'</div><div class="trip-sub">'+e.w+'</div><div class="trip-sub">'+e.s+(e.e?' → '+e.e:'')+'</div>').join('');
 }
-function doLogout(){sessionStorage.removeItem('fb_user');window.location.href='../index.html';}
+
+// ============================================================
+// 사이드바 권한 기반 활성화 + 로그인 사용자 표시
+// ============================================================
+(function(){
+  const fbUser = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
+  if (!fbUser) { window.location.href = '../index.html'; return; }
+  if (fbUser.role === 'admin') { window.location.href = '../admin.html'; return; }
+  const footer = document.querySelector('.sb-footer');
+  if (footer) {
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:6px;';
+    const nameText = document.createElement('span');
+    nameText.textContent = '로그인: ' + (fbUser.name || fbUser.id) + ' (' + (fbUser.role === 'manager' ? '관리부' : '직원') + ')';
+    const logoutBtn = document.createElement('button');
+    logoutBtn.textContent = '로그아웃';
+    logoutBtn.style.cssText = 'background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text2);cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .1s,color .1s;';
+    logoutBtn.onmouseover = () => { logoutBtn.style.background='rgba(220,80,80,.12)'; logoutBtn.style.color='#d95f5f'; logoutBtn.style.borderColor='#d95f5f'; };
+    logoutBtn.onmouseout  = () => { logoutBtn.style.background='none'; logoutBtn.style.color='var(--text2)'; logoutBtn.style.borderColor='var(--border2)'; };
+    logoutBtn.onclick = () => doLogout();
+    nameEl.appendChild(nameText);
+    nameEl.appendChild(logoutBtn);
+    footer.appendChild(nameEl);
+  }
+  const permLinks = JSON.parse(localStorage.getItem('fb_perm_links') || '{}');
+  const userPerms = fbUser.perms || [];
+  const isManager = fbUser.role === 'manager';
+  document.querySelectorAll('.sb-item[data-perm]').forEach(item => {
+    const perm = item.dataset.perm;
+    const hasAccess = isManager || userPerms.includes(perm);
+    const url = permLinks[perm];
+    if (hasAccess) {
+      item.style.opacity = '1';
+      if (url) {
+        item.style.cursor = 'pointer';
+        item.onclick = (e) => { e.stopPropagation(); window.open(url, '_blank'); };
+        item.title = url;
+      }
+    } else {
+      item.style.opacity = '0.3';
+      item.style.pointerEvents = 'none';
+      item.title = '접근 권한이 없습니다.';
+    }
+  });
+})();
+
+// ============================================================
+// 채팅
+// ============================================================
+const KEY_ROOMS = 'fb_chat_rooms';
+const KEY_MSGS = rid => 'fb_chat_msgs_' + rid;
+const _cu = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+function getRooms() { return JSON.parse(localStorage.getItem(KEY_ROOMS) || '[]'); }
+function saveRooms(r) { localStorage.setItem(KEY_ROOMS, JSON.stringify(r)); }
+function getMsgs(rid) { return JSON.parse(localStorage.getItem(KEY_MSGS(rid)) || '[]'); }
+function addMsg(rid, msg) { const m = getMsgs(rid); m.push(msg); localStorage.setItem(KEY_MSGS(rid), JSON.stringify(m)); }
+function getAllUsers() { return JSON.parse(localStorage.getItem('fb_accounts') || '[]'); }
+let _chatRoomId = null;
+function toggleChat() {
+  const p = document.getElementById('chatPopup');
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  if (!open) showRoomList();
+}
+function showRoomList() {
+  _chatRoomId = null;
+  document.getElementById('chatRoomsView').style.display = 'flex';
+  document.getElementById('chatRoomView').style.display = 'none';
+  renderRoomList();
+}
+function renderRoomList() {
+  const rooms = getRooms().filter(r => r.members.includes(_cu.id));
+  const el = document.getElementById('roomListBody');
+  if (!rooms.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;font-size:12px;color:var(--text3)">채팅방이 없습니다.<br>아래 버튼으로 시작하세요.</div>';
+    return;
+  }
+  el.innerHTML = rooms.map(r => {
+    const msgs = getMsgs(r.id), last = msgs[msgs.length - 1];
+    const lt = last ? (last.name + ': ' + last.text).substring(0, 28) : '메시지 없음';
+    return `<div class="room-item" onclick="openRoom('${r.id}')"><div class="room-icon">${r.type === 'group' ? '👥' : '💬'}</div><div style="min-width:0"><div class="room-name">${r.name}</div><div class="room-last">${lt}</div></div></div>`;
+  }).join('');
+}
+function openRoom(rid) {
+  _chatRoomId = rid;
+  const r = getRooms().find(r => r.id === rid);
+  document.getElementById('chatRoomsView').style.display = 'none';
+  document.getElementById('chatRoomView').style.display = 'flex';
+  document.getElementById('chatRoomTitle').textContent = r.name;
+  renderMessages();
+}
+function renderMessages() {
+  if (!_chatRoomId) return;
+  const msgs = getMsgs(_chatRoomId), uid = _cu.id;
+  const el = document.getElementById('chatMsgBody');
+  el.innerHTML = msgs.map(m => {
+    const meM = m.from === uid;
+    return `<div class="msg-wrap ${meM ? 'msg-me' : 'msg-other'}">${!meM ? `<div class="msg-sender">${m.name}</div>` : ''}<div class="msg-bubble ${meM ? 'msg-bubble-me' : 'msg-bubble-other'}">${escH(m.text)}</div><div class="msg-time">${fmtTs(m.ts)}</div></div>`;
+  }).join('');
+  setTimeout(() => el.scrollTop = el.scrollHeight, 30);
+}
+function sendMsg() {
+  const inp = document.getElementById('chatInput'), text = inp.value.trim();
+  if (!text || !_chatRoomId) return;
+  addMsg(_chatRoomId, { from: _cu.id, name: _cu.name || _cu.id, text, ts: Date.now() });
+  inp.value = ''; renderMessages();
+}
+function escH(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function fmtTs(ts) {
+  const d = new Date(ts);
+  return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+}
+function openNewRoomModal(type) {
+  document.getElementById('nrType').value = type;
+  document.getElementById('nrTitle').textContent = type === 'dm' ? '1:1 채팅 시작' : '단체 채팅방 만들기';
+  document.getElementById('nrNameField').style.display = type === 'group' ? '' : 'none';
+  document.getElementById('nrRoomName').value = '';
+  document.getElementById('newRoomModal').style.display = 'flex';
+  const users = getAllUsers().filter(u => u.id !== _cu.id);
+  document.getElementById('nrUsers').innerHTML = users.length
+    ? users.map(u => `<label style="display:flex;align-items:center;gap:7px;padding:4px 0;cursor:pointer;font-size:13px"><input type="checkbox" value="${u.id}" data-name="${u.name || u.id}" style="accent-color:#9b1b30">${u.name || u.id} (${u.id})</label>`).join('')
+    : '<div style="font-size:12px;color:var(--text3)">다른 직원이 없습니다.</div>';
+  if (type === 'dm') {
+    document.querySelectorAll('#nrUsers input').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) document.querySelectorAll('#nrUsers input').forEach(o => { if (o !== cb) o.checked = false; });
+      });
+    });
+  }
+}
+function closeNewRoomModal() { document.getElementById('newRoomModal').style.display = 'none'; }
+function createRoom() {
+  const type = document.getElementById('nrType').value;
+  const checked = [...document.querySelectorAll('#nrUsers input:checked')];
+  if (!checked.length) { alert('참여자를 선택해주세요.'); return; }
+  let name = type === 'dm'
+    ? checked[0].dataset.name + '와의 대화'
+    : document.getElementById('nrRoomName').value.trim();
+  if (type === 'group' && !name) { alert('방 이름을 입력해주세요.'); return; }
+  const rooms = getRooms(), rid = 'room_' + Date.now();
+  rooms.push({ id: rid, name, type, members: [_cu.id, ...checked.map(c => c.value)], createdAt: Date.now() });
+  saveRooms(rooms); closeNewRoomModal(); openRoom(rid);
+}
+window.addEventListener('storage', e => {
+  if (_chatRoomId && e.key === KEY_MSGS(_chatRoomId)) renderMessages();
+  else if (!_chatRoomId && document.getElementById('chatPopup').style.display === 'flex') renderRoomList();
+  if (e.key === 'fb_schedule') { renderList(); renderTripNow(); }
+});
+
+// ============================================================
+// 프로필
+// ============================================================
+function openProfile() {
+  const u = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+  document.getElementById('pfName').textContent = u.name || u.id;
+  document.getElementById('pfId').textContent = u.id;
+  document.getElementById('pfRoleLabel').textContent = u.role === 'manager' ? '관리부' : '직원';
+  ['pfPwOld', 'pfPwNew', 'pfPwConfirm'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pfPwMsg').textContent = '';
+  document.getElementById('profileModal').style.display = 'flex';
+}
+function closeProfile() { document.getElementById('profileModal').style.display = 'none'; }
+function changePw() {
+  const u = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
+  const oldPw = document.getElementById('pfPwOld').value;
+  const newPw = document.getElementById('pfPwNew').value;
+  const cfm   = document.getElementById('pfPwConfirm').value;
+  const msg   = document.getElementById('pfPwMsg');
+  if (!oldPw || !newPw || !cfm) { msg.style.color = '#d95f5f'; msg.textContent = '모든 항목을 입력해주세요.'; return; }
+  if (newPw !== cfm)            { msg.style.color = '#d95f5f'; msg.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+  if (newPw.length < 4)         { msg.style.color = '#d95f5f'; msg.textContent = '4자 이상 입력해주세요.'; return; }
+  const accounts = JSON.parse(localStorage.getItem('fb_accounts') || '[]');
+  const idx = accounts.findIndex(a => a.id === u.id);
+  if (idx === -1)                     { msg.style.color = '#d95f5f'; msg.textContent = '계정 정보를 찾을 수 없습니다.'; return; }
+  if (accounts[idx].pw !== oldPw)     { msg.style.color = '#d95f5f'; msg.textContent = '현재 비밀번호가 올바르지 않습니다.'; return; }
+  accounts[idx].pw = newPw;
+  localStorage.setItem('fb_accounts', JSON.stringify(accounts));
+  msg.style.color = '#52a874'; msg.textContent = '✅ 비밀번호가 변경되었습니다.';
+  ['pfPwOld', 'pfPwNew', 'pfPwConfirm'].forEach(id => document.getElementById(id).value = '');
+}
+function doLogout() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  sessionStorage.removeItem('fb_user');
+  window.location.href = '../index.html';
+}
 renderList();
+renderTripNow();
 </script>
 </body>
 </html>
