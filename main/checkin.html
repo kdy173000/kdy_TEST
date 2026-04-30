@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출퇴근 기록 - 파이어볼</title>
+<script>
+(function(){
+  var raw = sessionStorage.getItem('fb_user');
+  if (!raw) { window.location.replace('index.html'); return; }
+  try { JSON.parse(raw); }
+  catch(e) { window.location.replace('index.html'); }
+})();
+</script>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+[data-theme="dark"] {
+  --bg: #111111; --bg2: #1c1c1c; --bg3: #272727;
+  --border: #2e2e2e; --text: #e8e8e8; --text2: #888888; --text3: #4a4a4a;
+  --hover: #222222; --shadow: rgba(0,0,0,0.5);
+  --card-bg: #1c1c1c; --card-border: #2e2e2e;
+  --modal-bg:#1c1c1c; --modal-border:#333;
+  --sel-border:#555;
+}
+[data-theme="light"] {
+  --bg: #f2f2f2; --bg2: #ffffff; --bg3: #efefed;
+  --border: #e0e0e0; --text: #111111; --text2: #666666; --text3: #b0b0b0;
+  --hover: #f0f0ee; --shadow: rgba(0,0,0,0.08);
+  --card-bg: #ffffff; --card-border: #e0e0e0;
+  --modal-bg:#ffffff; --modal-border:#e0e0e0;
+  --sel-border:#cfcfcf;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+
+/* Topbar */
+.topbar { background: #9b1b30; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,.3); }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+.topbar-badge { font-size: 10.5px; background: rgba(255,255,255,.2); color: rgba(255,255,255,.9); padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.tb-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: background .15s; }
+.tb-btn:hover { background: rgba(255,255,255,.22); }
+.tb-btn.danger { background: rgba(255,255,255,.08); }
+.tb-btn.danger:hover { background: rgba(255,80,80,.3); }
+.theme-btn { background: none; border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: inherit; cursor: pointer; }
+.back-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; text-decoration: none; display:flex; align-items:center; gap:4px; }
+.back-btn:hover { background: rgba(255,255,255,.2); }
+
+/* Layout */
+.container { max-width: 820px; margin: 0 auto; padding: 36px 24px 60px; }
+.page-header { margin-bottom: 28px; }
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: var(--text2); }
+
+/* Clock */
+.clock-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 24px; margin-bottom: 16px; text-align: center; }
+.clock-time { font-size: 52px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.clock-date { font-size: 14px; color: var(--text2); }
+.clock-day { display: inline-block; margin-top: 6px; font-size: 12px; background: var(--bg3); border: 1px solid var(--border); padding: 2px 10px; border-radius: 20px; color: var(--text2); }
+
+/* GPS Status */
+.gps-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px 22px; margin-bottom: 16px; }
+.gps-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gps-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.gps-dot-wrap { flex-shrink: 0; }
+.gps-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text3); }
+.gps-dot.searching { background: #d4a017; animation: pulse 1.2s ease-in-out infinite; }
+.gps-dot.ok { background: #52a874; animation: pulse 2s ease-in-out infinite; }
+.gps-dot.error { background: #d95f5f; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+.gps-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.gps-coords { font-size: 11.5px; color: var(--text2); margin-top: 2px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gps-refresh-btn { flex-shrink: 0; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 6px 14px; font-size: 12px; font-family: inherit; cursor: pointer; transition: background .15s, color .15s; }
+.gps-refresh-btn:hover { background: var(--hover); color: var(--text); }
+
+/* Workplace Zone */
+.zone-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px 22px; margin-bottom: 16px; }
+.zone-title { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .06em; margin-bottom: 14px; }
+.zone-list { display: flex; flex-direction: column; gap: 10px; }
+.zone-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; transition: border-color .2s; }
+.zone-item.active-zone { border-color: #52a874; background: rgba(82,168,116,.08); }
+.zone-item.active-zone .zone-name { color: #52a874; }
+.zone-left { display: flex; align-items: center; gap: 10px; }
+.zone-icon { font-size: 18px; }
+.zone-name { font-size: 13px; font-weight: 600; }
+.zone-addr { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.zone-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+.zone-badge.in { background: rgba(82,168,116,.15); color: #52a874; border: 1px solid rgba(82,168,116,.3); }
+.zone-badge.out { background: rgba(217,95,95,.08); color: var(--text3); border: 1px solid var(--border); }
+.zone-dist { font-size: 11px; color: var(--text2); }
+
+/* Action Buttons */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.action-btn { border-radius: 14px; border: none; padding: 22px 16px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform .1s, box-shadow .15s, opacity .15s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.action-btn:active { transform: scale(.97); }
+.action-btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+.action-btn .btn-icon { font-size: 28px; }
+.action-btn .btn-label { font-size: 15px; font-weight: 700; }
+.action-btn .btn-sub { font-size: 11px; font-weight: 400; opacity: .75; }
+.btn-checkin { background: #9b1b30; color: #fff; box-shadow: 0 4px 20px rgba(155,27,48,.3); }
+.btn-checkin:hover:not(:disabled) { box-shadow: 0 6px 28px rgba(155,27,48,.45); }
+.btn-checkout { background: var(--bg3); border: 1px solid var(--border) !important; color: var(--text); }
+.btn-checkout:hover:not(:disabled) { background: var(--hover); }
+
+/* Today Summary */
+.summary-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px 22px; margin-bottom: 16px; }
+.summary-title { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .06em; margin-bottom: 14px; }
+.summary-row { display: flex; gap: 0; }
+.summary-item { flex: 1; text-align: center; padding: 0 8px; }
+.summary-item + .summary-item { border-left: 1px solid var(--border); }
+.s-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.s-value { font-size: 20px; font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.s-value.green { color: #52a874; }
+.s-value.red { color: #9b1b30; }
+.s-value.orange { color: #d4a017; }
+.s-value.muted { color: var(--text3); }
+
+/* History */
+.hist-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; }
+.hist-header { padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.hist-title { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .06em; }
+.hist-filter { display: flex; gap: 6px; }
+.filter-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; cursor: pointer; transition: background .15s; }
+.filter-btn.active { background: #9b1b30; border-color: #9b1b30; color: #fff; }
+.hist-table { width: 100%; border-collapse: collapse; }
+.hist-table th { padding: 10px 22px; font-size: 10.5px; font-weight: 700; color: var(--text3); letter-spacing: .05em; text-align: left; background: var(--bg3); border-bottom: 1px solid var(--border); }
+.hist-table td { padding: 12px 22px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.hist-table tr:last-child td { border-bottom: none; }
+.hist-table tr { transition: background .1s; }
+.hist-table tr:hover td { background: var(--hover); }
+.status-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+.tag-normal { background: rgba(82,168,116,.12); color: #52a874; border: 1px solid rgba(82,168,116,.25); }
+.tag-late { background: rgba(212,160,23,.12); color: #d4a017; border: 1px solid rgba(212,160,23,.25); }
+.tag-early { background: rgba(155,27,48,.12); color: #c0304a; border: 1px solid rgba(155,27,48,.25); }
+.tag-absent { background: rgba(217,95,95,.1); color: #d95f5f; border: 1px solid rgba(217,95,95,.2); }
+.hist-empty { padding: 40px; text-align: center; font-size: 13px; color: var(--text3); }
+.work-dur { color: var(--text2); font-size: 12px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 30px var(--shadow); opacity: 0; transition: opacity .25s, transform .25s; z-index: 9999; pointer-events: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(82,168,116,.4); color: #52a874; }
+.toast.error { border-color: rgba(217,95,95,.4); color: #d95f5f; }
+.toast.warn { border-color: rgba(212,160,23,.4); color: #d4a017; }
+
+/* Responsive */
+@media (max-width: 500px) {
+  .container { padding: 20px 14px 50px; }
+  .clock-time { font-size: 40px; }
+  .action-btn .btn-icon { font-size: 22px; }
+  .action-btn .btn-label { font-size: 14px; }
+  .hist-table th, .hist-table td { padding: 10px 14px; }
+  .topbar { padding: 0 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="admin.html">← 뒤로</a>
+    <div class="topbar-title">출퇴근 관리</div>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-btn" onclick="toggleTheme()" title="테마"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn danger" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">출퇴근 기록</h1>
+    <p class="page-sub" id="userGreet">안녕하세요! GPS 위치를 기반으로 출퇴근을 기록합니다.</p>
+  </div>
+
+  <!-- Clock -->
+  <div class="clock-card">
+    <div class="clock-time" id="clockTime">00:00:00</div>
+    <div class="clock-date" id="clockDate"></div>
+    <div class="clock-day" id="clockDay"></div>
+  </div>
+
+  <!-- GPS Status -->
+  <div class="gps-card">
+    <div class="gps-row">
+      <div class="gps-info">
+        <div class="gps-dot-wrap"><div class="gps-dot searching" id="gpsDot"></div></div>
+        <div>
+          <div class="gps-label" id="gpsLabel">위치 확인 중...</div>
+          <div class="gps-coords" id="gpsCoords">GPS 신호를 요청하고 있습니다</div>
+        </div>
+      </div>
+      <button class="gps-refresh-btn" onclick="getLocation()">새로고침</button>
+    </div>
+  </div>
+
+  <!-- Workplace Zones -->
+  <div class="zone-card">
+    <div class="zone-title">등록된 사업장</div>
+    <div class="zone-list" id="zoneList"></div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-grid">
+    <button class="action-btn btn-checkin" id="btnCheckin" onclick="doCheckin()" disabled>
+      <div class="btn-icon">🟢</div>
+      <div class="btn-label">출근</div>
+      <div class="btn-sub" id="checkinSub">위치 확인 필요</div>
+    </button>
+    <button class="action-btn btn-checkout" id="btnCheckout" onclick="doCheckout()" disabled>
+      <div class="btn-icon">🔴</div>
+      <div class="btn-label">퇴근</div>
+      <div class="btn-sub" id="checkoutSub">출근 기록 필요</div>
+    </button>
+  </div>
+
+  <!-- Today Summary -->
+  <div class="summary-card">
+    <div class="summary-title">오늘 현황</div>
+    <div class="summary-row">
+      <div class="summary-item">
+        <div class="s-label">출근 시간</div>
+        <div class="s-value green" id="sumCheckin">—</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-label">퇴근 시간</div>
+        <div class="s-value red" id="sumCheckout">—</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-label">근무 시간</div>
+        <div class="s-value orange" id="sumDuration">—</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-label">상태</div>
+        <div class="s-value muted" id="sumStatus">미출근</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="hist-card">
+    <div class="hist-header">
+      <div class="hist-title">출퇴근 기록</div>
+      <div class="hist-filter">
+        <button class="filter-btn active" data-range="7" onclick="setFilter(this)">7일</button>
+        <button class="filter-btn" data-range="30" onclick="setFilter(this)">30일</button>
+        <button class="filter-btn" data-range="90" onclick="setFilter(this)">전체</button>
+      </div>
+    </div>
+    <table class="hist-table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>출근</th>
+          <th>퇴근</th>
+          <th>근무</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody id="histBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── 설정 ───────────────────────────────────────────────────────────────────
+const WORKPLACES = [
+  { name: '파이어볼 본사', addr: '부산 양산시 물금읍', lat: 35.2945, lng: 128.9741, radius: 300 },
+  { name: '파이어볼 2사무소', addr: '부산 해운대구 우동', lat: 35.1635, lng: 129.1653, radius: 200 },
+];
+const WORK_START = '09:00'; // 정규 출근 시간
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let currentUser = null;
+let currentLat = null, currentLng = null;
+let gpsOk = false;
+let inZone = false;
+let filterDays = 7;
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  const raw = sessionStorage.getItem('fb_user');
+  if (!raw) return;
+  currentUser = JSON.parse(raw);
+  document.getElementById('userGreet').textContent =
+    `안녕하세요, ${currentUser.name || currentUser.id}님! GPS 위치를 기반으로 출퇴근을 기록합니다.`;
+  renderZones([]);
+  renderHistory();
+  updateTodaySummary();
+  startClock();
+  getLocation();
+})();
+
+// ─── Clock ──────────────────────────────────────────────────────────────────
+function startClock() {
+  function tick() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clockTime').textContent = `${h}:${m}:${s}`;
+    const days = ['일','월','화','수','목','금','토'];
+    document.getElementById('clockDate').textContent =
+      `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+    document.getElementById('clockDay').textContent = `${days[now.getDay()]}요일`;
+    updateWorkTimer();
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+// ─── GPS ────────────────────────────────────────────────────────────────────
+function getLocation() {
+  const dot = document.getElementById('gpsDot');
+  const label = document.getElementById('gpsLabel');
+  const coords = document.getElementById('gpsCoords');
+  dot.className = 'gps-dot searching';
+  label.textContent = '위치 확인 중...';
+  coords.textContent = 'GPS 신호를 요청하고 있습니다';
+
+  if (!navigator.geolocation) {
+    dot.className = 'gps-dot error';
+    label.textContent = 'GPS 미지원';
+    coords.textContent = '이 브라우저는 위치 서비스를 지원하지 않습니다';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      currentLat = pos.coords.latitude;
+      currentLng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+      dot.className = 'gps-dot ok';
+      label.textContent = 'GPS 연결됨';
+      coords.textContent = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)} (정확도 ±${acc}m)`;
+      gpsOk = true;
+      checkZones();
+    },
+    err => {
+      dot.className = 'gps-dot error';
+      const msgs = { 1:'위치 권한이 거부되었습니다', 2:'위치 신호를 받을 수 없습니다', 3:'위치 요청 시간이 초과되었습니다' };
+      label.textContent = '위치 오류';
+      coords.textContent = msgs[err.code] || '알 수 없는 오류';
+      gpsOk = false;
+      renderZones([]);
+      updateButtons();
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function checkZones() {
+  if (!gpsOk) { inZone = false; renderZones([]); updateButtons(); return; }
+  const dists = WORKPLACES.map(wp => ({
+    ...wp,
+    dist: Math.round(haversineDistance(currentLat, currentLng, wp.lat, wp.lng)),
+    inside: haversineDistance(currentLat, currentLng, wp.lat, wp.lng) <= wp.radius
+  }));
+  inZone = dists.some(d => d.inside);
+  renderZones(dists);
+  updateButtons();
+}
+
+function renderZones(dists) {
+  const list = document.getElementById('zoneList');
+  list.innerHTML = WORKPLACES.map((wp, i) => {
+    const d = dists[i];
+    const inside = d ? d.inside : false;
+    const dist = d ? d.dist : null;
+    return `
+      <div class="zone-item ${inside ? 'active-zone' : ''}">
+        <div class="zone-left">
+          <div class="zone-icon">${inside ? '📍' : '🏢'}</div>
+          <div>
+            <div class="zone-name">${wp.name}</div>
+            <div class="zone-addr">${wp.addr} · 반경 ${wp.radius}m</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="zone-badge ${inside ? 'in' : 'out'}">${inside ? '범위 내' : '범위 외'}</div>
+          ${dist !== null ? `<div class="zone-dist" style="margin-top:4px">${dist >= 1000 ? (dist/1000).toFixed(1)+'km' : dist+'m'}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─── Attendance Storage ──────────────────────────────────────────────────────
+function storageKey() { return `fb_att_${currentUser?.id || 'anon'}`; }
+function loadRecords() { return JSON.parse(localStorage.getItem(storageKey()) || '[]'); }
+function saveRecords(records) { localStorage.setItem(storageKey(), JSON.stringify(records)); }
+function todayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+function getTodayRecord() {
+  const records = loadRecords();
+  return records.find(r => r.date === todayStr()) || null;
+}
+
+// ─── Checkin / Checkout ──────────────────────────────────────────────────────
+function doCheckin() {
+  if (!gpsOk) { showToast('warn','📡 GPS 위치 확인이 필요합니다'); return; }
+  if (!inZone) { showToast('error','❌ 사업장 범위 내에서만 출근 가능합니다'); return; }
+  const today = getTodayRecord();
+  if (today?.checkin) { showToast('warn','⚠️ 이미 출근 처리되었습니다'); return; }
+
+  const now = new Date();
+  const timeStr = fmtTime(now);
+  const rec = {
+    date: todayStr(),
+    checkin: now.toISOString(),
+    checkinTime: timeStr,
+    checkinLat: currentLat,
+    checkinLng: currentLng,
+    checkout: null,
+    checkoutTime: null,
+    status: isLate(now) ? 'late' : 'normal'
+  };
+  const records = loadRecords();
+  records.push(rec);
+  saveRecords(records);
+
+  showToast('success', `✅ 출근 완료 · ${timeStr}${isLate(now) ? ' (지각)' : ''}`);
+  updateTodaySummary();
+  renderHistory();
+  updateButtons();
+}
+
+function doCheckout() {
+  const today = getTodayRecord();
+  if (!today?.checkin) { showToast('warn','⚠️ 출근 기록이 없습니다'); return; }
+  if (today?.checkout) { showToast('warn','⚠️ 이미 퇴근 처리되었습니다'); return; }
+
+  const now = new Date();
+  const timeStr = fmtTime(now);
+  const records = loadRecords();
+  const idx = records.findIndex(r => r.date === todayStr());
+  if (idx === -1) return;
+  records[idx].checkout = now.toISOString();
+  records[idx].checkoutTime = timeStr;
+  if (records[idx].status !== 'late') {
+    records[idx].status = isEarlyLeave(now) ? 'early' : 'normal';
+  }
+  saveRecords(records);
+
+  const dur = calcDuration(records[idx].checkin, now.toISOString());
+  showToast('success', `🏠 퇴근 완료 · ${timeStr} (근무 ${dur})`);
+  updateTodaySummary();
+  renderHistory();
+  updateButtons();
+}
+
+function isLate(now) {
+  const [wH, wM] = WORK_START.split(':').map(Number);
+  return now.getHours() > wH || (now.getHours() === wH && now.getMinutes() > wM);
+}
+function isEarlyLeave(now) {
+  // 18시 이전 퇴근 = 조기퇴근
+  return now.getHours() < 18;
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+function updateButtons() {
+  const today = getTodayRecord();
+  const checkinBtn = document.getElementById('btnCheckin');
+  const checkoutBtn = document.getElementById('btnCheckout');
+  const checkinSub = document.getElementById('checkinSub');
+  const checkoutSub = document.getElementById('checkoutSub');
+
+  if (!gpsOk) {
+    checkinBtn.disabled = true;
+    checkoutBtn.disabled = true;
+    checkinSub.textContent = '위치 확인 필요';
+    checkoutSub.textContent = '위치 확인 필요';
+    return;
+  }
+  if (today?.checkin && !today?.checkout) {
+    checkinBtn.disabled = true;
+    checkoutBtn.disabled = false;
+    checkinSub.textContent = `출근 완료 · ${today.checkinTime}`;
+    checkoutSub.textContent = '퇴근하기';
+  } else if (today?.checkin && today?.checkout) {
+    checkinBtn.disabled = true;
+    checkoutBtn.disabled = true;
+    checkinSub.textContent = `출근 · ${today.checkinTime}`;
+    checkoutSub.textContent = `퇴근 · ${today.checkoutTime}`;
+  } else {
+    checkinBtn.disabled = !inZone;
+    checkoutBtn.disabled = true;
+    checkinSub.textContent = inZone ? '사업장 범위 내' : '사업장 범위 외';
+    checkoutSub.textContent = '출근 기록 필요';
+  }
+}
+
+// ─── Today Summary ───────────────────────────────────────────────────────────
+function updateTodaySummary() {
+  const today = getTodayRecord();
+  document.getElementById('sumCheckin').textContent = today?.checkinTime || '—';
+  document.getElementById('sumCheckout').textContent = today?.checkoutTime || '—';
+  if (today?.checkin && today?.checkout) {
+    document.getElementById('sumDuration').textContent = calcDuration(today.checkin, today.checkout);
+  } else if (today?.checkin) {
+    document.getElementById('sumDuration').textContent = '근무 중';
+  } else {
+    document.getElementById('sumDuration').textContent = '—';
+  }
+  const statusMap = { normal:'정상', late:'지각', early:'조기퇴근', absent:'결근' };
+  document.getElementById('sumStatus').textContent = today?.status ? (statusMap[today.status] || '-') : '미출근';
+}
+
+function updateWorkTimer() {
+  const today = getTodayRecord();
+  if (today?.checkin && !today?.checkout) {
+    document.getElementById('sumDuration').textContent = calcDuration(today.checkin, new Date().toISOString());
+  }
+}
+
+// ─── History ─────────────────────────────────────────────────────────────────
+function setFilter(el) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filterDays = parseInt(el.dataset.range);
+  renderHistory();
+}
+
+function renderHistory() {
+  const records = loadRecords().slice().reverse();
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - filterDays);
+  const filtered = filterDays === 90 ? records : records.filter(r => new Date(r.checkin || r.date) >= cutoff);
+
+  const body = document.getElementById('histBody');
+  if (!filtered.length) {
+    body.innerHTML = `<tr><td colspan="5" class="hist-empty">출퇴근 기록이 없습니다</td></tr>`;
+    return;
+  }
+  const statusLabel = { normal:'정상', late:'지각', early:'조기퇴근', absent:'결근' };
+  const statusClass = { normal:'tag-normal', late:'tag-late', early:'tag-early', absent:'tag-absent' };
+  body.innerHTML = filtered.map(r => {
+    const dur = r.checkin && r.checkout ? calcDuration(r.checkin, r.checkout) : r.checkin ? '<span style="color:#d4a017">근무 중</span>' : '—';
+    const [yyyy,mm,dd] = r.date.split('-');
+    const days = ['일','월','화','수','목','금','토'];
+    const dayOfWeek = days[new Date(r.date).getDay()];
+    return `<tr>
+      <td><span style="font-weight:600">${mm}/${dd}</span> <span style="color:var(--text2);font-size:11px">(${dayOfWeek})</span></td>
+      <td style="font-weight:500;color:#52a874">${r.checkinTime || '—'}</td>
+      <td style="font-weight:500;color:#c0304a">${r.checkoutTime || '—'}</td>
+      <td class="work-dur">${dur}</td>
+      <td><span class="status-tag ${statusClass[r.status] || 'tag-normal'}">${statusLabel[r.status] || '—'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+function fmtTime(date) {
+  return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+}
+function calcDuration(isoStart, isoEnd) {
+  const ms = new Date(isoEnd) - new Date(isoStart);
+  if (ms < 0) return '—';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return `${h}시간 ${String(m).padStart(2,'0')}분`;
+}
+
+function showToast(type, msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function toggleTheme() {
+  const h = document.documentElement, dark = h.dataset.theme === 'dark';
+  h.dataset.theme = dark ? 'light' : 'dark';
+  document.getElementById('t-ico').textContent = dark ? '🌙' : '☀️';
+}
+function doLogout() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  sessionStorage.removeItem('fb_user');
+  window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
