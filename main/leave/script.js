@@ -146,17 +146,20 @@ function setFilter(btn,f){
   renderList();
 }
 function renderList(){
-  const data=getSchedule().filter(e=>currentFilter==='all'||e.t===currentFilter);
+  const all=getSchedule(),today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),month=today.slice(0,7),q=document.getElementById('scheduleSearch').value.trim().toLowerCase(),selectedMonth=document.getElementById('scheduleMonth').value;
+  const counts=[all.filter(e=>e.s<=today&&(e.e||e.s)>=today).length,all.filter(e=>e.s.slice(0,7)<=month&&(e.e||e.s).slice(0,7)>=month).length,all.filter(e=>e.t==='t'&&e.s<=today&&(e.e||e.s)>=today).length,all.filter(e=>e.s>today).length];
+  ['summaryToday','summaryMonth','summaryTrip','summaryUpcoming'].forEach((id,i)=>document.getElementById(id).innerHTML=counts[i]+'<span>건</span>');
+  const data=all.filter(e=>(currentFilter==='all'||e.t===currentFilter)&&(!q||(e.w+' '+e.l).toLowerCase().includes(q))&&(!selectedMonth||(e.s.slice(0,7)<=selectedMonth&&(e.e||e.s).slice(0,7)>=selectedMonth)));
   data.sort((a,b)=>b.s.localeCompare(a.s));
   const el=document.getElementById('scheduleList');
   document.getElementById('countBar').textContent='총 '+data.length+'건';
-  if(!data.length){el.innerHTML='<div class="empty-row">등록된 일정이 없습니다.</div>';return;}
+  if(!data.length){el.innerHTML='<div class="empty-row">조건에 맞는 일정이 없습니다. 검색 조건을 바꾸거나 새 일정을 등록하세요.</div>';return;}
   el.innerHTML=data.map((e,i)=>`
     <div class="tbl-row">
       <div style="color:var(--text3);font-size:12px">${i+1}</div>
-      <div>${e.w}</div>
+      <div>${escH(e.w)}</div>
       <div><span class="type-badge ${TYPE_CLS[e.t]||'type-l'}">${TYPE_MAP[e.t]||e.t}</span></div>
-      <div>${e.l}</div>
+      <div>${escH(e.l)}</div>
       <div style="font-size:12.5px">${e.s}</div>
       <div style="font-size:12.5px;color:var(--text2)">${e.e||'-'}</div>
       <div class="actions">
@@ -213,6 +216,7 @@ function saveEntry(){
   const s=document.getElementById('mStart').value;
   const e=document.getElementById('mEnd').value||undefined;
   if(!w||!s){alert('이름과 시작일을 입력해주세요.');return;}
+  if(e&&e<s){alert('종료일은 시작일보다 빠를 수 없습니다.');return;}
   if(t==='l'){
     const sub=document.getElementById('mSub').value;
     if(sub==='ha'){t='h';if(!l)l='오전반차';}
@@ -234,7 +238,7 @@ function saveEntry(){
 }
 function deleteEntry(id){
   const e=getSchedule().find(x=>x.id===id);
-  if(!confirm(`'${e.l} (${e.w})' 일정을 삭제하시겠습니까?`))return;
+  if(!confirm(`'${escH(e.l)} (${escH(e.w)})' 일정을 삭제하시겠습니까?`))return;
   saveSchedule(getSchedule().filter(x=>x.id!==id));
   renderList();
   renderTripNow();
@@ -437,3 +441,6 @@ function doLogout() {
 }
 renderList();
 renderTripNow();
+
+function resetScheduleFilters(){document.getElementById('scheduleSearch').value='';document.getElementById('scheduleMonth').value='';setFilter(document.querySelector('.filter-btn'),'all');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('modal').style.display==='flex')closeModal();});

@@ -1,124 +1,43 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>내부 일정 관리</title>
+<title>파이어볼 · 내부 일정 관리</title>
 
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=schedule6">
 
-<script defer src="script.js"></script>
+<script defer src="script.js?v=schedule6"></script>
 </head>
 <body>
 
-<div class="fixed-actions">
-  <button class="action-btn" onclick="openProfile()" title="내 프로필">👤</button>
-</div>
-
+<header class="portal-header"><a class="portal-brand" href="../index.html">FIREBALL<span>내부 일정 관리</span></a><div class="portal-header-actions"><a class="portal-header-button" href="../index.html">운영 홈</a><button class="portal-header-button" onclick="openProfile()">내 프로필</button></div></header>
 <button class="chat-float-btn" id="chatToggleBtn" onclick="toggleChat()" title="채팅">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 
-<div class="layout">
-<nav class="sidebar">
-  <div class="sb-logo" style="cursor:pointer" onclick="window.location.href='../index.html'" title="메인으로 이동">
-    <div class="sb-logo-icon">
-      <svg viewBox="0 0 120 120" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="60" cy="60" r="58" fill="#9b1b30"/>
-        <circle cx="60" cy="60" r="42" fill="white"/>
-        <rect x="33" y="32" width="14" height="56" fill="#9b1b30" rx="2"/>
-        <rect x="33" y="32" width="42" height="14" fill="#9b1b30" rx="2"/>
-        <circle cx="85" cy="73" r="11" fill="#9b1b30"/>
-      </svg>
-    </div>
-    <span class="sb-logo-name">파이어볼</span>
-  </div>
-  <div class="sb-group-label">사내 운영 관리</div>
-  <div class="sb-item" onclick="window.location.href='../index.html#notices'"><span class="ico">📢</span>공지사항</div>
-  <div class="sb-item" onclick="window.location.href='../index.html#org'"><span class="ico">👥</span>조직도</div>
-  <div class="sb-item active"><span class="ico">📅</span>내부 일정 관리</div>
-  <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
-  <div class="sb-item sb-indent" data-perm="재고조회"><span class="ico">📦</span>제품 관리</div>
-  <div class="sb-item sb-indent" data-perm="입출고관리"><span class="ico">🔄</span>제품 입고/출고/조정</div>
-  <div class="sb-item sb-indent" data-perm="제품 신고 관리"><span class="ico">📋</span>제품 신고 관리</div>
-  <div class="sb-item sb-indent"><span class="ico">🚚</span>발주 진행 현황</div>
-  <div class="sb-item sb-indent" data-perm="원료관리"><span class="ico">🧪</span>원료 관리</div>
-  <div class="sb-item sb-indent"><span class="ico">🏷️</span>제품 포장 및 정보</div>
-  <div class="sb-group-label" style="margin-top:6px">디자인팀</div>
-  <div class="sb-item sb-indent"><span class="ico">🎨</span>디자인 업무분배</div>
-  <div class="sb-item sb-indent"><span class="ico">📝</span>회의록</div>
-  <div class="sb-group-label" style="margin-top:6px">개인 업무관리</div>
-  <div class="sb-item sb-indent"><span class="ico">👤</span>김다영</div>
-  <div class="sb-item sb-indent"><span class="ico">👤</span>최혜선</div>
-  <div class="sb-item sb-indent"><span class="ico">👤</span>송나겨</div>
-  <div class="sb-footer">
-    관리자 : 조상덕 과장, 박철완 과장<br>
-    페이지 제작자 : 김다영 대리
-  </div>
-</nav>
+<main class="schedule-page">
+<div class="schedule-heading"><div><p class="eyebrow">사내 운영 · 일정</p><h1>내부 일정 관리</h1><p class="page-desc">직원 일정을 한곳에서 확인하고 등록하세요.</p></div><button class="add-btn" onclick="openModal()">＋ 일정 등록</button></div>
+<div class="schedule-summary"><article><span>오늘 진행 중</span><strong id="summaryToday">0<span>건</span></strong></article><article><span>이번 달 일정</span><strong id="summaryMonth">0<span>건</span></strong></article><article><span>현재 출장</span><strong id="summaryTrip">0<span>건</span></strong></article><article><span>앞으로의 일정</span><strong id="summaryUpcoming">0<span>건</span></strong></article></div>
+<div class="schedule-workspace"><section class="schedule-panel"><div class="panel-heading"><div><h2>일정 목록</h2><p>연차·반차·출장·공휴일을 조회합니다.</p></div><span class="count-bar" id="countBar"></span></div>
+<div class="schedule-search"><label><span class="sr-only">담당자 또는 내용 검색</span><input id="scheduleSearch" placeholder="담당자 · 내용 · 장소 검색" oninput="renderList()"></label><label class="month-field"><span>조회 월</span><input id="scheduleMonth" type="month" onchange="renderList()"></label><button class="reset-btn" onclick="resetScheduleFilters()">초기화</button></div>
+<div class="filter-row" id="filterRow"><button class="filter-btn on" onclick="setFilter(this,'all')">전체</button><button class="filter-btn" onclick="setFilter(this,'t')">출장</button><button class="filter-btn" onclick="setFilter(this,'l')">연차</button><button class="filter-btn" onclick="setFilter(this,'h')">반차</button><button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button></div>
+<div class="tbl-wrap"><div class="tbl-head"><div>#</div><div>담당자</div><div>구분</div><div>내용 · 장소</div><div>시작일</div><div>종료일</div><div>관리</div></div><div id="scheduleList"></div></div>
+<p class="schedule-footnote">등록한 일정은 운영 홈의 캘린더와 현재 출장 목록에 반영됩니다.</p></section>
+<aside class="schedule-aside"><section class="side-card"><div class="side-card-heading"><span class="live-dot"></span><h2>현재 출장</h2></div><div id="tripNowList"></div></section><section class="side-card guide-card"><p class="eyebrow">일정 등록 안내</p><h2>팀의 일정을 공유하세요</h2><p>연차는 하루 또는 오전·오후 반차로 등록할 수 있어요. 여러 날의 출장에는 종료일을 함께 입력하세요.</p><button class="guide-button" onclick="openModal()">새 일정 등록 →</button></section><section class="side-card time-card"><div class="clock-wrapper"><select id="tzSel" style="display:none"></select><div id="tzLabelDisplay"></div><div class="clock-face" id="clockFace"><div class="c-digital-block"><div class="c-time-str" id="timeStr">00:00:00</div><div class="c-date-str" id="dateStr">--월 --일 (-)</div></div></div></div></section></aside></div></main>
 
-<div class="main">
-  <div class="center">
-    <h1 class="page-h1">📅 내부 일정 관리</h1>
-    <p class="page-desc">직원 연차·출장·반차·내부일정을 등록하고 관리합니다. 메인화면 캘린더와 현재 출장 목록에 자동 반영됩니다.</p>
-    <div class="toolbar">
-      <div class="filter-row" id="filterRow">
-        <button class="filter-btn on" onclick="setFilter(this,'all')">전체</button>
-        <button class="filter-btn" onclick="setFilter(this,'t')">출장</button>
-        <button class="filter-btn" onclick="setFilter(this,'l')">연차</button>
-        <button class="filter-btn" onclick="setFilter(this,'h')">반차</button>
-        <button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button>
-      </div>
-      <button class="add-btn" onclick="openModal()">＋ 일정 추가</button>
-    </div>
-    <div class="count-bar" id="countBar"></div>
-    <div class="tbl-wrap">
-      <div class="tbl-head">
-        <div>#</div><div>이름</div><div>구분</div><div>내용</div>
-        <div>시작일</div><div>종료일</div><div>관리</div>
-      </div>
-      <div id="scheduleList"></div>
-    </div>
-  </div>
-  <aside class="rp">
-    <div>
-      <div class="rp-label">★ 사용법 안내</div>
-      <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px">Update : 2026.04.10</div>
-      <div class="rp-link"><span>🏢</span>파이어볼 회사소개</div>
-      <div class="rp-link"><span>📖</span>파이어볼 기본 예절</div>
-    </div>
-    <div>
-      <div class="rp-label">✈️ 현재 출장</div>
-      <div id="tripNowList"></div>
-    </div>
-    <div>
-      <div class="clock-wrapper">
-        <select id="tzSel" style="display:none"></select>
-        <div id="tzLabelDisplay" style="font-size:12px;color:var(--text2);text-align:center;letter-spacing:0.02em;padding:2px 0"></div>
-        <div class="clock-face" id="clockFace">
-          <div class="c-digital-block">
-            <div class="c-time-str" id="timeStr">00:00:00</div>
-            <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
-</div>
-</div>
-
-<div class="modal-overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">일정 추가</div>
-    <div class="mfield"><label>이름 (담당자)</label><input id="mName" placeholder="예: 김다영·박철완"></div>
-    <div class="mfield"><label>구분</label><select id="mType" onchange="onTypeChange()"><option value="t">출장</option><option value="l">연차</option><option value="p">공휴일</option></select></div>
-    <div class="mfield" id="mSubRow" style="display:none"><label>연차 구분</label><select id="mSub"><option value="l">연차 (하루)</option><option value="ha">오전반차</option><option value="hp">오후반차</option></select></div>
-    <div class="mfield"><label>내용 / 장소</label><input id="mLabel" placeholder="예: 중국 샤먼 세미나"></div>
+    <div class="schedule-modal-head"><div><p class="eyebrow">팀 일정</p><h2 class="modal-title" id="modalTitle">일정 등록</h2></div><button class="modal-close" onclick="closeModal()" aria-label="일정 창 닫기">✕</button></div>
+    <div class="mfield"><label for="mName">이름 (담당자)</label><input id="mName" placeholder="예: 김다영·박철완"></div>
+    <div class="mfield"><label for="mType">구분</label><select id="mType" onchange="onTypeChange()"><option value="t">출장</option><option value="l">연차</option><option value="p">공휴일</option></select></div>
+    <div class="mfield" id="mSubRow" style="display:none"><label for="mSub">연차 구분</label><select id="mSub"><option value="l">연차 (하루)</option><option value="ha">오전반차</option><option value="hp">오후반차</option></select></div>
+    <div class="mfield"><label for="mLabel">내용 / 장소</label><input id="mLabel" placeholder="예: 중국 샤먼 세미나"></div>
     <div class="mrow2">
-      <div class="mfield"><label>시작일</label><input id="mStart" type="date"></div>
-      <div class="mfield"><label>종료일 (없으면 비워두세요)</label><input id="mEnd" type="date"></div>
+      <div class="mfield"><label for="mStart">시작일</label><input id="mStart" type="date"></div>
+      <div class="mfield"><label for="mEnd">종료일 (없으면 비워두세요)</label><input id="mEnd" type="date"></div>
     </div>
     <div class="modal-actions">
       <button class="m-btn" onclick="saveEntry()">저장</button>
