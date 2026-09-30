@@ -493,10 +493,10 @@ html, body { height: 100%; overflow: hidden; }
   <div class="sb-item" onclick="go('org')"><span class="ico">👥</span>조직도</div>
   <div class="sb-item" onclick="window.location.href='main/Leave.html'"><span class="ico">📅</span>내부 일정 관리</div>
   <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
-  <div class="sb-item sb-indent" data-perm="재고조회" data-default-url="inventory.html"><span class="ico">📦</span>부자재 · BOM 관리</div>
+  <div class="sb-item sb-indent" data-perm="재고조회" data-default-url="inventory.html"><span class="ico">📦</span>자재 입출고</div>
   <div class="sb-item sb-indent" data-perm="입출고관리"><span class="ico">🔄</span>제품 입고/출고/조정</div>
   <div class="sb-item sb-indent" data-perm="제품 신고 관리"><span class="ico">📋</span>제품 신고 관리</div>
-  <div class="sb-item sb-indent"><span class="ico">🚚</span>발주 진행 현황</div>
+  <div class="sb-item sb-indent" data-perm="입출고관리" data-default-url="procurement.html"><span class="ico">🚚</span>부자재 발주 관리</div>
   <div class="sb-item sb-indent" data-perm="원료관리"><span class="ico">🧪</span>원료 관리</div>
   <div class="sb-item sb-indent"><span class="ico">🏷️</span>제품 포장 및 정보</div>
   <div class="sb-group-label" style="margin-top:6px">디자인팀</div>
@@ -1151,4 +1151,5 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')togglePortal
 document.querySelectorAll('.sb-item').forEach(item=>{if(item.style.pointerEvents==='none')return;item.tabIndex=0;item.setAttribute('role','button');item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();item.click();}});});
 </script></body>
 </html>
+
 
