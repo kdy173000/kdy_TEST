@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이어볼 관리자</title>
+
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
+<link rel="stylesheet" href="style.css">
+
+<script defer src="script.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">파이어볼 관리자</div>
+    <div class="topbar-badge">ADMIN</div>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-btn" onclick="toggleTheme()" title="테마"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn icon" onclick="openProfile()" title="내 프로필">👤</button>
+    <button class="tb-btn danger" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <h1 class="page-title">관리자 대시보드</h1>
+  <p class="page-sub">파이어볼 사내 포털 관리 메뉴입니다.</p>
+
+  <div class="section-label">직원 관리</div>
+  <div class="grid">
+    <a class="card" href="../accounts/index.html"><div class="card-icon">🔑</div><div class="card-title">계정 관리</div><div class="card-desc">직원 계정 생성 · 수정 · 권한 설정</div></a>
+    <a class="card" href="../employees/index.html"><div class="card-icon">👥</div><div class="card-title">직원 관리</div><div class="card-desc">팀별 직원 현황 · 입사일 · 담당 업무</div></a>
+    <a class="card" href="../materials/index.html"><div class="card-icon">📦</div><div class="card-title">부자재·BOM 설정</div><div class="card-desc">부자재 목록 · 버전 · 생산 기본 구성 설정</div></a>
+    <a class="card" href="../../procurement/index.html"><div class="card-icon">🚚</div><div class="card-title">부자재 발주 관리</div><div class="card-desc">발주 · 실제 입고 · 수기 재고 차감</div></a>
+    <a class="card" href="../../inventory/index.html"><div class="card-icon">📋</div><div class="card-title">자재 입출고</div><div class="card-desc">재고 내역 · BOM 생산 · 자동 차감</div></a>
+    <a class="card" href="../permissions/index.html"><div class="card-icon">🔗</div><div class="card-title">권한 링크 설정</div><div class="card-desc">권한별 접근 가능 페이지 URL 설정</div></a>
+  </div>
+
+  <div class="section-label">포털 설정</div>
+  <div class="grid">
+    <div class="card" onclick="alert('준비 중입니다.')"><div class="card-icon">📢</div><div class="card-title">공지사항 관리</div><div class="card-desc">공지 등록 · 수정 · 삭제</div></div>
+    <a class="card" href="../../main/leave/index.html"><div class="card-icon">📅</div><div class="card-title">일정 관리</div><div class="card-desc">연차 · 출장 일정 등록 및 수정</div></a>
+    <a class="card" href="../clock/index.html"><div class="card-icon">🕐</div><div class="card-title">시계 설정</div><div class="card-desc">세계 시계 타임존 · 기본값 설정</div></a>
+    <div class="card" onclick="alert('준비 중입니다.')"><div class="card-icon">⚙️</div><div class="card-title">시스템 설정</div><div class="card-desc">기타 포털 환경 설정</div></div>
+  </div>
+</div>
+
+<!-- 프로필 -->
+<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box">
+    <div class="pf-header">
+      <div class="pf-avatar">👑</div>
+      <div>
+        <div class="pf-name" id="pfName"></div>
+        <div class="pf-meta">관리자</div>
+        <div class="pf-meta">아이디: <span id="pfId"></span></div>
+      </div>
+    </div>
+    <div class="pf-sec-title">🔒 비밀번호 변경</div>
+    <div class="pf-field"><div class="pf-label">현재 비밀번호</div><input class="pf-input" id="pfPwOld" type="password" placeholder="현재 비밀번호"></div>
+    <div class="pf-field"><div class="pf-label">새 비밀번호</div><input class="pf-input" id="pfPwNew" type="password" placeholder="새 비밀번호 (4자 이상)"></div>
+    <div class="pf-field"><div class="pf-label">비밀번호 확인</div><input class="pf-input" id="pfPwConfirm" type="password" placeholder="새 비밀번호 재입력"></div>
+    <div class="pf-msg" id="pfPwMsg"></div>
+    <button class="pf-full-btn" onclick="changePw()">비밀번호 변경</button>
+    <div class="pf-sec-title">🖥️ 로그인 기록 (최근 50건)</div>
+    <div class="log-wrap"><table class="log-tbl"><thead><tr><th>일시</th><th>PC / 환경</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    <button class="pf-full-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);margin-top:16px" onclick="closeProfile()">닫기</button>
+  </div>
+</div>
+
+
+</body>
+</html>
+

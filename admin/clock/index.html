@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시계 설정</title>
+
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
+<link rel="stylesheet" href="style.css">
+
+<script defer src="script.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">🕐 시계 설정</div>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="window.location.href='../main/index.html'">← 뒤로</button>
+    <button class="theme-btn" onclick="toggleTheme()" title="테마"><span id="t-ico">☀️</span></button>
+    <button class="tb-btn icon" onclick="openProfile()" title="내 프로필">👤</button>
+    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="clock-section">
+    <div class="preview-label">미리보기</div>
+    <div class="clock-face" id="clockFace">
+      <div class="c-digital-block">
+        <div class="c-time-str" id="timeStr">00:00:00</div>
+        <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
+      </div>
+    </div>
+    <div class="preview-tz-label" id="previewTzLabel"></div>
+    <div class="preview-note">메인 페이지 직원 시계와<br>동일한 디자인입니다.</div>
+  </div>
+
+  <div class="settings-section">
+    <h1 class="page-title">시계 설정</h1>
+    <p class="page-sub">변경 사항은 즉시 저장되어 메인 페이지에 반영됩니다.</p>
+
+    <div class="card">
+      <div class="card-title">기본 타임존</div>
+      <div class="field-help">메인 페이지 로드 시 처음 표시되는 타임존입니다.</div>
+      <div class="field">
+        <select id="defaultTzSel" onchange="saveDefault()"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">표시할 타임존</div>
+      <div class="field-help">체크된 타임존만 메인 페이지에서 사용 가능합니다.</div>
+      <div class="tz-list" id="tzList"></div>
+      <div class="live-msg" id="liveMsg">✅ 저장됨</div>
+    </div>
+  </div>
+</div>
+
+<!-- 프로필 -->
+<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box">
+    <div class="pf-header">
+      <div class="pf-avatar">👑</div>
+      <div>
+        <div class="pf-name" id="pfName"></div>
+        <div class="pf-meta">관리자</div>
+        <div class="pf-meta">아이디: <span id="pfId"></span></div>
+      </div>
+    </div>
+    <div class="pf-sec-title">🔒 비밀번호 변경</div>
+    <div class="pf-field"><div class="pf-label">현재 비밀번호</div><input class="pf-input" id="pfPwOld" type="password" placeholder="현재 비밀번호"></div>
+    <div class="pf-field"><div class="pf-label">새 비밀번호</div><input class="pf-input" id="pfPwNew" type="password" placeholder="새 비밀번호 (4자 이상)"></div>
+    <div class="pf-field"><div class="pf-label">비밀번호 확인</div><input class="pf-input" id="pfPwConfirm" type="password" placeholder="새 비밀번호 재입력"></div>
+    <div class="pf-msg" id="pfPwMsg"></div>
+    <button class="pf-full-btn" onclick="changePw()">비밀번호 변경</button>
+    <div class="pf-sec-title">🖥️ 로그인 기록 (최근 50건)</div>
+    <div class="log-wrap"><table class="log-tbl"><thead><tr><th>일시</th><th>PC / 환경</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    <button class="pf-full-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border);margin-top:16px" onclick="closeProfile()">닫기</button>
+  </div>
+</div>
+
+
+</body>
+</html>

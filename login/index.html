@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이어볼 사내 운영 포털</title>
+
+
+<link rel="stylesheet" href="style.css">
+
+<script defer src="script.js"></script>
+</head>
+<body>
+
+<header class="portal-header"><a class="portal-brand" href="index.html">FIREBALL<span>사내 운영 포털</span></a><div class="portal-header-actions"><button class="portal-header-button" onclick="toggleTheme()"><span id="t-ico">◐</span> <span id="t-lbl">다크 모드</span></button></div></header><main class="login-stage">
+
+<div class="card">
+
+  <div class="card-header">
+
+    <h1 class="card-header-title">로그인</h1>
+    <p class="card-header-sub">사내 계정으로 운영 포털에 접속하세요.</p>
+  </div>
+
+  <div class="card-body">
+    <div class="field">
+      <label for="userId">아이디</label>
+      <input type="text" id="userId" placeholder="아이디 입력" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('userPw').focus()">
+    </div>
+    <div class="field">
+      <label for="userPw">비밀번호</label>
+      <input type="password" id="userPw" placeholder="비밀번호 입력" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="err-msg" id="errMsg" role="alert"></div>
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+  </div>
+
+  <div class="card-footer">
+    파이어볼 주식회사 &copy; 2026<br>
+    문의 : 관리자에게 연락해 주세요
+  </div>
+
+</div>
+
+</main>
+</body>
+</html>
+
