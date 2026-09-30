@@ -1,17 +1,19 @@
 /* procurement.js */
 'use strict';
 (()=>{
-  const {$,esc,fmt}=UI;let category='',mode='',target='';
+  const {$,esc,fmt}=UI;let category='',mode='',target='',selected='cap';
   const material=id=>FB.data.materials.find(m=>m.id===id);
   function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>(!m.archived||$('purchaseArchived').checked)&&(!category||m.slot===category)&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
   function render(){
     const items=filtered(),ids=new Set(items.map(m=>m.id));
-    $('categoryButtons').innerHTML=[['','전체'],...FB.slots.map(s=>[s,s])].map(([v,t])=>`<button data-category="${esc(v)}" class="${category===v?'active':''}">${esc(t)}</button>`).join('');
+    if(!items.some(m=>m.id===selected))selected=items[0]?.id||'';
     $('stockCount').textContent=items.length+'종';
-    $('purchaseMaterials').innerHTML=items.map(m=>{const pending=FB.data.orders.filter(o=>o.mid===m.id).reduce((n,o)=>n+UI.remaining(o),0),usable=!m.archived&&m.versions.some(v=>v.state==='사용');return `<tr><td><strong>${esc(m.name)}</strong><br><small>${esc(m.id)}${m.archived?' · 중단':''}</small></td><td>${esc(m.slot)}</td><td class="num">${fmt(UI.quantity(m,true))}</td><td class="num">${fmt(UI.quantity(m))}</td><td class="num">${fmt(pending)}</td><td class="action-cell"><button data-detail="${esc(m.id)}">재고 상세</button><button data-order="${esc(m.id)}" ${usable?'':'disabled'}>발주</button><button data-adjust="${esc(m.id)}" ${usable?'':'disabled'}>수기 차감</button></td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">해당하는 부자재가 없습니다.</td></tr>';
+    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" data-select="${esc(m.id)}"><strong>${esc(m.name)}</strong><span>${esc(m.slot)} · ${esc(m.id)}${m.archived?' · 중단':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
+    if(selected)detail(selected);
     const orders=FB.data.orders.filter(o=>ids.has(o.mid)&&!o.closed&&o.received<o.qty);
     $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.supplier)}</td><td>${esc(o.date)}<br><small>예정 ${esc(o.due)||'—'}</small></td><td class="num">${fmt(o.qty)}</td><td class="num">${fmt(o.received)}</td><td class="num">${fmt(UI.remaining(o))}${o.closed?`<br><small>마감 ${fmt(o.qty-o.received)}</small>`:''}</td><td>${o.closed?'잔량 마감':o.received===o.qty?'입고 완료':o.received?'부분 입고':'발주 완료'}${!o.closed&&o.received<o.qty?`<br><button data-receive="${o.id}">입고 완료</button><button data-close-order="${o.id}">잔량 마감</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">입고 대기 중인 발주가 없습니다.</td></tr>';
-    $('purchaseHistory').innerHTML=FB.data.transactions.filter(t=>ids.has(t.mid)).slice().reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.name)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">등록된 재고 변경 내역이 없습니다.</td></tr>';
+
   }
   const field=(label,html)=>`<label class="field"><span>${label}</span>${html}</label>`;
   function open(kind,id){mode=kind;target=id;const order=kind==='receive'?FB.data.orders.find(o=>o.id===id):null,m=material(order?order.mid:id);
@@ -28,12 +30,21 @@
     $('purchaseSave').textContent=kind==='receive'?'입고 완료':kind==='order'?'발주 등록':'차감 등록';
     $('purchaseFields').innerHTML=fields;$('purchaseError').textContent='';$('purchaseDialog').showModal();
   }
-  function detail(id){target=id;const m=material(id);$('stockTitle').textContent=m.name+' · 재고 상세';$('stockMemo').textContent=m.memo||'등록된 관리 메모가 없습니다.';$('stockVersions').innerHTML=m.versions.map(v=>`<tr><td>${esc(v.id)}</td><td>${v.state}</td><td class="num">${fmt(v.qty)}개</td><td class="num">${fmt(FB.data.orders.filter(o=>o.mid===m.id&&o.vid===v.id).reduce((n,o)=>n+UI.remaining(o),0))}개</td></tr>`).join('');$('stockHistory').innerHTML=UI.history(FB.data.transactions.filter(t=>t.mid===id));$('stockOrders').innerHTML=FB.data.orders.filter(o=>o.mid===id&&o.received>0).slice().reverse().map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.supplier)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.date)}</td><td class="num">${fmt(o.qty)}개</td><td class="num">${fmt(o.received)}개</td><td>${o.closed?'잔량 마감':o.received===o.qty?'입고 완료':'부분 입고 · '+fmt(UI.remaining(o))+'개 대기'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">입고된 발주가 없습니다.</td></tr>';}
-  $('categoryButtons').onclick=e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;render();}};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
-  $('purchaseMaterials').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.order)open('order',b.dataset.order);if(b.dataset.adjust)open('adjust',b.dataset.adjust);if(b.dataset.detail){detail(b.dataset.detail);$('stockDialog').showModal();}};
+  function detail(id){const m=material(id),usable=!m.archived&&m.versions.some(v=>v.state==='사용');
+    const pending=vid=>FB.data.orders.filter(o=>o.mid===id&&(!vid||o.vid===vid)).reduce((n,o)=>n+UI.remaining(o),0);
+    $('stockTitle').textContent=m.name;$('stockKind').textContent=m.slot;$('stockCode').textContent=m.id+(m.archived?' · 사용 중단':'');
+    $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
+    $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;
+    $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
+    $('stockVersions').innerHTML=m.versions.map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p></div>`).join('');
+    $('stockHistory').innerHTML=UI.history(FB.data.transactions.filter(t=>t.mid===id));$('stockOrders').innerHTML=FB.data.orders.filter(o=>o.mid===id&&o.received>0).slice().reverse().map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.supplier)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.date)}</td><td class="num">${fmt(o.qty)}개</td><td class="num">${fmt(o.received)}개</td><td>${o.closed?'잔량 마감':o.received===o.qty?'입고 완료':'부분 입고 · '+fmt(UI.remaining(o))+'개 대기'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">입고된 발주가 없습니다.</td></tr>';}
+  $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...FB.slots.map(s=>[s,s])],'');
+  $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
+  $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
+  $('orderMaterial').onclick=()=>open('order',selected);$('adjustMaterial').onclick=()=>open('adjust',selected);
   $('purchaseOrders').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.receive)open('receive',b.dataset.receive);if(b.dataset.closeOrder){try{FB.closeOrder(b.dataset.closeOrder);UI.toast('입고 대기 잔량을 마감했습니다. 입고된 재고는 유지됩니다.');}catch(err){UI.toast(err.message);}}};
-  $('closePurchase').onclick=()=>$('purchaseDialog').close();$('closeStock').onclick=()=>$('stockDialog').close();
+  $('closePurchase').onclick=()=>$('purchaseDialog').close();
   $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='order')FB.createOrder({...input,mid:target});else if(mode==='receive')FB.receiveOrder({...input,id:target});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='order'?'발주를 등록했습니다. 입고 전에는 재고가 늘지 않습니다.':mode==='receive'?'실제 입고 수량을 재고에 반영했습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
-  window.addEventListener('fb-data',()=>{render();if($('stockDialog').open)detail(target);});render();
+  window.addEventListener('fb-data',render);render();
 })();
 
