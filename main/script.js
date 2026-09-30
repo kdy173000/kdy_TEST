@@ -497,3 +497,6 @@ renderCal();renderTripNow();
 function togglePortalMenu(force){const nav=document.getElementById('portalSidebar'),btn=document.getElementById('portalMenuBtn');const open=typeof force==='boolean'?force:!nav.classList.contains('open');nav.classList.toggle('open',open);btn.setAttribute('aria-expanded',String(open));document.getElementById('portalNavBackdrop').hidden=!open;}
 document.addEventListener('keydown',event=>{if(event.key==='Escape')togglePortalMenu(false);});
 document.querySelectorAll('.sb-item').forEach(item=>{if(item.style.pointerEvents==='none')return;item.tabIndex=0;item.setAttribute('role','button');item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();item.click();}});});
+
+window.addEventListener('DOMContentLoaded',()=>{if(location.hash==='#profile')openProfile();});
+window.addEventListener('hashchange',()=>{if(location.hash==='#profile')openProfile();});

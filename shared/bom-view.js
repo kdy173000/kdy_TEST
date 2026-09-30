@@ -5,7 +5,7 @@ window.BOMView=(()=>{
   const product=()=>FB.data.products.find(p=>p.id===pid),current=()=>product().boms[index];
   const mat=id=>FB.data.materials.find(m=>m.id===id),ver=r=>mat(r.mid).versions.find(v=>v.id===r.vid);
   function render(){
-    const p=product(),b=current();
+    const p=product(),b=current();if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
     $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
     $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family&&(!x.archived||x.id===pid)).map(x=>[x.id,x.name]),p.id);
     $('bomSelect').innerHTML=UI.options(p.boms.map((b,i)=>[i,b.name+(b.locked?' · 사용됨':' · 기본 구성')]),index);
