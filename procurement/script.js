@@ -3,12 +3,12 @@
 (()=>{
   const {$,esc,fmt}=UI;let category='',mode='',target='',selected='cap';
   const material=id=>FB.data.materials.find(m=>m.id===id);
-  function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>(!m.archived||$('purchaseArchived').checked)&&(!category||m.slot===category)&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
+  function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>(!m.archived||$('purchaseArchived').checked)&&(!category||(category==='라벨'?['전면 라벨','후면 라벨'].includes(m.slot):m.slot===category))&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
   function render(){
     const items=filtered(),ids=new Set(items.map(m=>m.id));
     if(!items.some(m=>m.id===selected))selected=items[0]?.id||'';
     $('stockCount').textContent=items.length+'종';
-    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" data-select="${esc(m.id)}"><strong>${esc(m.name)}</strong><span>${esc(m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" data-select="${esc(m.id)}"><strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
     if(selected)detail(selected);
     const orders=FB.data.orders.filter(o=>ids.has(o.mid)&&!o.closed&&o.received<o.qty);
@@ -39,7 +39,7 @@
     $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
     $('stockVersions').innerHTML=m.versions.map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p></div>`).join('');
     $('stockHistory').innerHTML=UI.history(FB.data.transactions.filter(t=>t.mid===id));$('stockOrders').innerHTML=FB.data.orders.filter(o=>o.mid===id&&o.received>0).slice().reverse().map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.supplier)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.date)}</td><td class="num">${fmt(o.qty)}개</td><td class="num">${fmt(o.received)}개</td><td>${o.closed?'잔량 마감':o.received===o.qty?'입고 완료':'부분 입고 · '+fmt(UI.remaining(o))+'개 대기'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">입고된 발주가 없습니다.</td></tr>';}
-  $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...FB.slots.map(s=>[s,s])],'');
+  $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
   $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
   $('orderMaterial').onclick=()=>open('order',selected);$('adjustMaterial').onclick=()=>open('adjust',selected);
