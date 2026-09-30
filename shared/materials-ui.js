@@ -11,3 +11,10 @@ window.UI={
   remaining(o){return o.closed?0:o.qty-o.received;}
 };
 document.querySelectorAll('[data-admin-link]').forEach(a=>a.hidden=!FB.canAdmin());
+
+UI.bindVersionAddition=function(selected){
+  const {$}=UI;let target='';
+  $('addMaterialVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('관리자 계정으로 로그인하면 버전을 추가할 수 있습니다.');return;}const m=selected();if(!m||m.archived){UI.toast('사용 중인 부자재를 선택하세요.');return;}target=m.id;$('versionMaterial').textContent=m.name;$('versionName').value='';$('addVersionError').textContent='';$('versionDialog').showModal();};
+  $('closeVersion').onclick=()=>$('versionDialog').close();
+  $('addVersionForm').onsubmit=e=>{e.preventDefault();try{FB.addVersion(target,$('versionName').value);$('versionDialog').close();UI.toast('새 버전을 추가했습니다. 초기 재고는 0개입니다.');}catch(err){$('addVersionError').textContent=err.message;}};
+};
