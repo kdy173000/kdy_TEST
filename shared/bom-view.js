@@ -6,8 +6,8 @@ window.BOMView=(()=>{
   const mat=id=>FB.data.materials.find(m=>m.id===id),ver=r=>mat(r.mid).versions.find(v=>v.id===r.vid);
   function render(){
     const p=product(),b=current();
-    $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]),p.family);
-    $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family).map(x=>[x.id,x.name]),p.id);
+    $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
+    $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family&&(!x.archived||x.id===pid)).map(x=>[x.id,x.name]),p.id);
     $('bomSelect').innerHTML=UI.options(p.boms.map((b,i)=>[i,b.name+(b.locked?' · 사용됨':' · 기본 구성')]),index);
     $('bomState').textContent=b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성';
     $('copyBom').hidden=!editable;
@@ -27,7 +27,7 @@ window.BOMView=(()=>{
     if($('finishedSummary'))$('finishedSummary').textContent='완제품 재고 '+fmt(product().finished)+'개';
   }
   function bind(edit=false){editable=edit&&FB.canAdmin();
-    $('familySelect').onchange=e=>{pid=FB.data.products.find(p=>p.family===Number(e.target.value)).id;index=product().boms.length-1;render();};
+    $('familySelect').onchange=e=>{pid=FB.data.products.find(p=>p.family===Number(e.target.value)&&!p.archived).id;index=product().boms.length-1;render();};
     $('finishedProductSelect').onchange=e=>{pid=e.target.value;index=product().boms.length-1;render();};
     $('bomSelect').onchange=e=>{index=Number(e.target.value);render();};$('productionQty').oninput=update;
     $('copyBom').onclick=()=>{try{index=FB.copyBom(pid,index);render();UI.toast('새 BOM을 만들었습니다.');}catch(e){$('bomError').textContent=e.message;}};
