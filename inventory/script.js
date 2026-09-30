@@ -12,12 +12,11 @@
     $('materialKind').textContent=m.slot;$('productName').textContent=m.name;$('productCode').textContent=m.id+(m.archived?' · 단종':'');$('total').textContent=fmt(UI.quantity(m))+'개';$('available').textContent=fmt(UI.quantity(m,true))+'개';$('versionCount').textContent=m.versions.length+'개';
     $('versions').innerHTML=m.versions.map(v=>`<article class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="badge">${v.state}</span></div><strong>${fmt(v.qty)}<small> 개</small></strong><p>${m.archived||v.state!=='사용'?'사용 중단된 부자재 또는 버전입니다.':'생산·출고에 사용할 수 있습니다.'}</p><button data-out="${esc(v.id)}" ${m.archived||v.state!=='사용'?'disabled':''}>출고</button></article>`).join('');
     const filter=$('filter').value;$('filter').innerHTML=UI.options([['','전체 버전'],...m.versions.map(v=>[v.id,v.id])],filter);$('history').innerHTML=UI.history(FB.data.transactions.filter(t=>t.mid===m.id&&(!$('filter').value||t.vid===$('filter').value)));
-    $('recordBtn').disabled=m.archived||!m.versions.some(v=>v.state==='사용');
   }
   function openOut(vid){const m=selected();$('outProduct').textContent=m.name;$('outVersion').innerHTML=UI.options(m.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),vid);$('outQty').value='';$('outNote').value='';$('outDate').value=FB.day();$('outPerson').value=FB.user()?.name||'';$('outError').textContent='';$('outDialog').showModal();}
   $('inventoryArchived').onchange=render;$('search').oninput=render;$('categoryFilter').onchange=render;$('filter').onchange=render;
   $('products').onclick=e=>{const b=e.target.closest('[data-material]');if(b){selectedId=b.dataset.material;$('filter').value='';render();}};
-  $('versions').onclick=e=>{const b=e.target.closest('[data-out]');if(b)openOut(b.dataset.out);};$('recordBtn').onclick=()=>openOut();$('closeOut').onclick=()=>$('outDialog').close();
+  $('versions').onclick=e=>{const b=e.target.closest('[data-out]');if(b)openOut(b.dataset.out);};$('closeOut').onclick=()=>$('outDialog').close();
   $('outForm').onsubmit=e=>{e.preventDefault();try{FB.stockMovement({mid:selectedId,vid:$('outVersion').value,type:'출고',qty:Number($('outQty').value),date:$('outDate').value,person:$('outPerson').value,note:$('outNote').value});$('outDialog').close();UI.toast('출고와 재고를 반영했습니다.');}catch(err){$('outError').textContent=err.message;render();}};
   BOMView.bind(false);
   function history(){
