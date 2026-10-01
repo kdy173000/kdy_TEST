@@ -1,0 +1,38 @@
+/* Common task-oriented components. */
+button:disabled{opacity:.5;cursor:not-allowed}
+.portal-with-nav input:focus-visible,.portal-with-nav select:focus-visible,.portal-with-nav textarea:focus-visible{outline:2px solid var(--accent,#9b1b30);outline-offset:2px}
+.portal-with-nav input[readonly]{background:var(--bg3,#f0f2f5);color:var(--text2,#46505e)}
+.portal-with-nav .field>span{font-weight:600;color:var(--text,#24272c)}
+.portal-with-nav [role=alert]:empty{display:none}
+.portal-with-nav [role=alert]:not(:empty){padding:10px 12px;border-radius:7px;background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30)}
+.portal-with-nav .materials-nav a[aria-current=page]{background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30);border-color:#e2bac1;font-weight:700}
+.workflow-guide{margin:0 0 20px;border:1px solid var(--border,#e4e7eb);border-radius:10px;background:var(--bg2,#fff);padding:12px 16px;color:var(--text2,#46505e);font-size:13px;line-height:1.8}
+.workflow-guide summary{cursor:pointer;font-weight:600;color:var(--text,#24272c)}
+.workflow-guide p{margin:10px 0 0}
+.access-note{margin:0 0 18px;font-size:13px;color:var(--text2,#46505e)}
+.section-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:28px 0 14px}
+.section-toolbar h3{margin:0!important}
+.history-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.history-filters input{width:220px}.history-filters select{width:130px}
+.filter-reset{margin-top:10px;padding:5px 8px;font-size:12px;background:transparent;color:var(--text2,#46505e)}
+.portal-with-nav .empty{color:var(--text2,#46505e);line-height:1.8}
+.portal-with-nav .product strong{display:block;font-size:14px;line-height:1.7}
+.portal-with-nav .product>span{display:block;font-size:12px;color:var(--text2,#46505e);margin-top:4px}
+.portal-with-nav .product[aria-pressed=true]{border-color:#e2bac1;background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30)}
+.portal-with-nav .detail table .num,.portal-with-nav .settings-panel .num,.portal-with-nav .manager-grid .num{text-align:center;font-variant-numeric:tabular-nums}
+.portal-with-nav .detail td{white-space:normal;overflow-wrap:anywhere;line-height:1.7}
+.portal-with-nav .detail th{color:var(--text2,#46505e);font-weight:600}
+.portal-with-nav .detail tbody tr:hover{background:var(--hover,#f3f4f6)}
+.dialog-intro{background:var(--bg3,#f0f2f5);padding:12px 14px;border-radius:8px;margin:0 0 20px;color:var(--text2,#46505e);line-height:1.7;font-size:13px}
+.dialog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}
+.dialog-grid .field{margin:0;min-width:0}.dialog-grid .wide{grid-column:1/-1}
+.dialog-grid textarea{min-height:68px}
+.portal-with-nav .out-dialog.task-dialog{width:680px}
+.portal-with-nav .out-dialog h2{font-size:22px}
+.portal-with-nav .out-dialog .modalfoot{justify-content:flex-end}
+.portal-with-nav .out-dialog small{font-size:12px;color:var(--text2,#46505e);line-height:1.6}
+.portal-with-nav .production-input{border:1px solid var(--border,#e4e7eb)}
+.home-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
+.home-shortcuts a{padding:10px 16px;border:1px solid var(--border,#e4e7eb);border-radius:8px;text-decoration:none;color:var(--text,#24272c);background:var(--bg2,#fff);font-weight:600;font-size:14px}
+.home-shortcuts a:hover{border-color:var(--accent,#9b1b30);color:var(--accent,#9b1b30)}
+@media(max-width:800px){.section-toolbar{align-items:flex-start;flex-direction:column;gap:10px}.history-filters{width:100%}.history-filters input{flex:1;min-width:120px}.dialog-grid{grid-template-columns:1fr}.home-shortcuts a{flex:1;text-align:center}.portal-with-nav .detail td{padding:12px 8px}}

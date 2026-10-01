@@ -18,3 +18,10 @@ UI.bindVersionAddition=function(selected){
   $('closeVersion').onclick=()=>$('versionDialog').close();
   $('addVersionForm').onsubmit=e=>{e.preventDefault();try{FB.addVersion(target,$('versionName').value);$('versionDialog').close();UI.toast('새 버전을 추가했습니다. 초기 재고는 0개입니다.');}catch(err){$('addVersionError').textContent=err.message;}};
 };
+
+// Shared permission and closing behavior across material workflows.
+UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 재고관리자 권한을 부여받으세요.');return false;};
+UI.applyAccess=function(){const writable=FB.canAdmin();const note=this.$('accessNote');if(note)note.textContent=writable?'재고관리자 · 등록과 수정이 가능합니다.':'조회 모드 · 등록과 수정은 재고관리자 권한이 필요합니다.';
+ document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'재고관리자 권한이 필요합니다.';});};
+document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
+document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});
