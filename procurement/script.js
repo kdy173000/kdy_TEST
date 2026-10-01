@@ -41,7 +41,7 @@
     $('stockVersions').innerHTML=m.versions.map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p></div>`).join('');
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>r.t.mid===id).reverse().map(({t,index})=>{
 const editable=!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
-return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}">수정</button><button class="delete-button" data-delete-transaction="${index}">삭제</button></div>`:'<small>생산 내역에서 관리</small>'}</td></tr>`;
+return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 ${esc(FB.data.orders.find(o=>o.id===t.order)?.vid||t.vid)}<br>입고 ${esc(t.vid)}`:esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}">수정</button><button class="delete-button" data-delete-transaction="${index}">삭제</button></div>`:'<small>생산 내역에서 관리</small>'}</td></tr>`;
 }).join('')||'<tr><td colspan="7" class="empty">등록된 내역이 없습니다.</td></tr>';}
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
@@ -50,10 +50,10 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td>
 
   let closingId='';
   function previewReceipt(){const o=FB.data.orders.find(o=>o.id===closingId);if(!o)return;const q=Number($('closeActual').value),bad=Number($('closeDefective').value),good=q-bad,remaining=Math.max(0,o.qty-o.received-Math.max(0,good)),missing=Math.max(0,o.qty-(o.delivered??o.received)-Math.max(0,q)),extra=Math.max(0,o.received+good-o.qty);$('closeRemaining').value=missing;$('closeReceiptSummary').textContent=bad>q?'불량 수량은 입고 수량 이하로 입력하세요.':'이번 정상 입고 '+fmt(Math.max(0,good))+'개 · 정상 수량 기준 추가 입고 필요 '+fmt(remaining)+'개'+(extra?' · 정상 수량 초과 '+fmt(extra)+'개':'');}
-  $('purchaseOrders').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.editDue)open('due',b.dataset.editDue);if(b.dataset.receive){closingId=b.dataset.receive;const o=FB.data.orders.find(o=>o.id===closingId);$('closeOrderName').textContent=o.id+' · '+o.name;$('closeOrdered').textContent=fmt(o.qty)+'개';$('closeReceived').textContent=fmt(o.received)+'개';$('closeActual').value='';$('closeDefective').value=0;$('closeReceiptDate').value=FB.day();$('closeReceiptPerson').value=FB.user()?.name||'';$('closeReceiptNote').value='';$('closeOrderError').textContent='';previewReceipt();$('closeOrderDialog').showModal();}};
+  $('purchaseOrders').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.editDue)open('due',b.dataset.editDue);if(b.dataset.receive){closingId=b.dataset.receive;const o=FB.data.orders.find(o=>o.id===closingId);$('closeOrderName').textContent=o.id+' · '+o.name;$('closeOrdered').textContent=fmt(o.qty)+'개';$('closeReceived').textContent=fmt(o.received)+'개';$('closeOrderedVersion').value=o.vid;$('closeReceiptVersion').innerHTML=UI.options(material(o.mid).versions.filter(v=>v.state==='사용'||v.id===o.vid).map(v=>[v.id,v.id]),o.vid);$('closeActual').value='';$('closeDefective').value=0;$('closeReceiptDate').value=FB.day();$('closeReceiptPerson').value=FB.user()?.name||'';$('closeReceiptNote').value='';$('closeOrderError').textContent='';previewReceipt();$('closeOrderDialog').showModal();}};
   for(const id of ['dismissCloseOrder','keepOrder'])$(id).onclick=()=>$('closeOrderDialog').close();
   $('closeActual').oninput=previewReceipt;$('closeDefective').oninput=previewReceipt;
-  $('closeReceiptForm').onsubmit=e=>{e.preventDefault();try{const o=FB.data.orders.find(o=>o.id===closingId);selected=o.mid;FB.receiveOrder({id:closingId,qty:Number($('closeActual').value),defective:Number($('closeDefective').value),finish:false,date:$('closeReceiptDate').value,person:$('closeReceiptPerson').value,note:$('closeReceiptNote').value});$('closeOrderDialog').close();UI.toast('실제 입고 수량과 비고를 저장했습니다.');}catch(err){$('closeOrderError').textContent=err.message;}};
+  $('closeReceiptForm').onsubmit=e=>{e.preventDefault();try{const o=FB.data.orders.find(o=>o.id===closingId);selected=o.mid;FB.receiveOrder({id:closingId,vid:$('closeReceiptVersion').value,qty:Number($('closeActual').value),defective:Number($('closeDefective').value),finish:false,date:$('closeReceiptDate').value,person:$('closeReceiptPerson').value,note:$('closeReceiptNote').value});$('closeOrderDialog').close();UI.toast('실제 입고 수량과 비고를 저장했습니다.');}catch(err){$('closeOrderError').textContent=err.message;}};
   $('closePurchase').onclick=()=>$('purchaseDialog').close();
   $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='due')FB.updateOrderDue({...input,id:target});else if(mode==='order')FB.createOrder({...input,mid:target});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='due'?'입고 예정일을 수정했습니다.':mode==='order'?'발주를 등록했습니다. 입고 전에는 재고가 늘지 않습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
 
@@ -81,8 +81,9 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td>
     $('transactionTitle').textContent=receipt?'입고 내역 수정':'입출고 내역 수정';
     $('transactionDialog').classList.toggle('receipt-dialog',receipt);$('transactionForm').classList.toggle('receipt-fields',receipt);
     $('transactionQuantities').className=receipt?'receipt-quantities receipt-wide':'';
-    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary'])$(id).hidden=!receipt;
+    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary','transactionOrderedVersionField','transactionReceiptVersionField'])$(id).hidden=!receipt;
     $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고':'사유 · 비고';
+    if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionOrderedVersion').value=o?.vid||t.vid;$('transactionReceiptVersion').innerHTML=UI.options(material(t.mid).versions.filter(v=>v.state==='사용'||v.id===t.vid).map(v=>[v.id,v.id]),t.vid);}
     $('transactionQtyLabel').textContent=receipt?'입고 수량':'수량';
     $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
     $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
@@ -90,7 +91,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td>
   };
   $('closeTransaction').onclick=$('cancelTransaction').onclick=()=>$('transactionDialog').close();
   $('transactionForm').onsubmit=e=>{e.preventDefault();try{
-    FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
+    FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,vid:$('transactionReceiptVersion').value,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
     $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
   }catch(err){$('transactionError').textContent=err.message;}};
   UI.bindVersionAddition(()=>material(selected));
