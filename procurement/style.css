@@ -37,3 +37,6 @@
 .receipt-fields .modalfoot{margin-top:0;padding-top:16px}
 #closeOrderError{color:#9b1b30;margin:0;font-size:13px}
 @media(max-width:600px){.receipt-fields{grid-template-columns:1fr;gap:14px}.receipt-dialog .stats{padding:14px}.receipt-dialog .stats div{padding-left:10px}.receipt-dialog .stats strong{font-size:22px}}
+
+/* Align numeric column headings and values consistently. */
+.detail table .num,.panel table .num{text-align:center;font-variant-numeric:tabular-nums}
