@@ -14,3 +14,10 @@
 .detail .action-group{flex-wrap:wrap;justify-content:flex-end}
 #stockOrders,#stockHistory{font-size:13px}
 @media(max-width:700px){.workspace>aside{display:block}.purchase-list{display:flex;gap:8px;height:auto;max-height:none;overflow-x:auto}.purchase-list .product{flex:0 0 190px}.action-group{gap:6px}}
+
+.pending-orders .order-actions{display:flex;flex-direction:column;align-items:flex-end;gap:5px;margin-top:8px}
+.pending-orders button,.history-actions button{font-size:12px;padding:5px 9px;border-radius:6px;min-height:28px;line-height:1.4;white-space:nowrap}
+.pending-orders td:last-child{text-align:right}
+.history-actions{display:flex;justify-content:flex-end;gap:5px}
+.history-actions .delete-button{color:#9b1b30}
+#transactionError{color:#9b1b30;font-size:13px}

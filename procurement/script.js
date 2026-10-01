@@ -12,7 +12,7 @@
     $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
     if(selected)detail(selected);
     const orders=FB.data.orders.filter(o=>o.mid===selected&&!o.closed&&o.received<o.qty);
-    $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.supplier)}</td><td>${esc(o.date)}<br><small>예정 ${esc(o.due)||'—'}</small><br><button data-edit-due="${o.id}">예정일 수정</button></td><td class="num">${fmt(o.qty)}</td><td class="num">${fmt(o.received)}</td><td class="num">${fmt(UI.remaining(o))}${o.closed?`<br><small>마감 ${fmt(o.qty-o.received)}</small>`:''}</td><td>${o.closed?'미입고 '+fmt(o.qty-o.received)+'개 취소':o.received===o.qty?'입고 완료':o.received?'부분 입고':'발주 완료'}${!o.closed&&o.received<o.qty?`<br><button data-receive="${o.id}">입고 완료</button><button data-close-order="${o.id}">남은 발주 취소</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">입고 대기 중인 발주가 없습니다.</td></tr>';
+    $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.supplier)}</td><td>${esc(o.date)}<br><small>예정 ${esc(o.due)||'—'}</small><br><button data-edit-due="${o.id}">예정일 수정</button></td><td class="num">${fmt(o.qty)}</td><td class="num">${fmt(o.received)}</td><td class="num">${fmt(UI.remaining(o))}${o.closed?`<br><small>마감 ${fmt(o.qty-o.received)}</small>`:''}</td><td>${o.closed?'미입고 '+fmt(o.qty-o.received)+'개 취소':o.received===o.qty?'입고 완료':o.received?'부분 입고':'발주 완료'}${!o.closed&&o.received<o.qty?`<div class="order-actions"><button data-receive="${o.id}">입고 완료</button><button data-close-order="${o.id}">남은 발주 취소</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">입고 대기 중인 발주가 없습니다.</td></tr>';
 
     const completed=FB.data.orders.filter(o=>ids.has(o.mid)&&(o.closed||o.received>=o.qty));
     $('stockOrders').innerHTML=completed.slice().reverse().map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.name)}<br><small>${esc(o.supplier)} · ${esc(o.vid)}</small></td><td>${esc(o.date)}</td><td class="num">${fmt(o.qty)}개</td><td class="num">${fmt(o.received)}개</td><td class="num">${fmt(o.defective||0)}개</td><td>${o.received>=o.qty?(o.received>o.qty?'입고 완료 · 초과 '+fmt(o.received-o.qty)+'개':'입고 완료'):'미입고 '+fmt(Math.max(0,o.qty-o.received))+'개 취소'}${o.closeNote?'<br><small>'+esc(o.closeNote)+'</small>':''}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">입고·취소된 발주가 없습니다.</td></tr>';
@@ -42,7 +42,10 @@
     $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;
     $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
     $('stockVersions').innerHTML=m.versions.map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p></div>`).join('');
-    $('stockHistory').innerHTML=UI.history(FB.data.transactions.filter(t=>t.mid===id));}
+    $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>r.t.mid===id).reverse().map(({t,index})=>{
+const editable=!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
+return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}">수정</button><button class="delete-button" data-delete-transaction="${index}">삭제</button></div>`:'<small>생산 내역에서 관리</small>'}</td></tr>`;
+}).join('')||'<tr><td colspan="7" class="empty">등록된 내역이 없습니다.</td></tr>';}
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
   $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
@@ -56,6 +59,28 @@
   $('closeReceiptForm').onsubmit=e=>{e.preventDefault();try{const o=FB.data.orders.find(o=>o.id===closingId);selected=o.mid;FB.receiveOrder({id:closingId,qty:Number($('closeActual').value),defective:Number($('closeDefective').value),finish:$('closeDisposition').value==='close',date:$('closeReceiptDate').value,person:$('closeReceiptPerson').value,note:$('closeReceiptNote').value});$('closeOrderDialog').close();UI.toast('실제 입고와 남은 수량 처리를 저장했습니다.');}catch(err){$('closeOrderError').textContent=err.message;}};
   $('closePurchase').onclick=()=>$('purchaseDialog').close();
   $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='due')FB.updateOrderDue({...input,id:target});else if(mode==='order')FB.createOrder({...input,mid:target});else if(mode==='receive')FB.receiveOrder({...input,id:target,defective:Number(input.defective||0),finish:input.disposition==='close'});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='due'?'입고 예정일을 수정했습니다.':mode==='order'?'발주를 등록했습니다. 입고 전에는 재고가 늘지 않습니다.':mode==='receive'?'실제 입고 수량을 재고에 반영했습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
+
+  let transactionIndex=-1,transactionRevision=-1;
+  $('stockHistory').onclick=e=>{
+    const button=e.target.closest('button');if(!button)return;
+    const index=Number(button.dataset.editTransaction??button.dataset.deleteTransaction),t=FB.data.transactions[index];if(!t)return;
+    if(button.dataset.deleteTransaction!==undefined){
+      const revision=FB.data.revision;
+      if(!confirm(t.date+' · '+t.type+' '+fmt(t.qty)+'개 기록을 삭제할까요?\n이 기록의 재고 반영을 되돌리고, 연결 발주 수량도 수정합니다.'))return;
+      try{FB.deleteMaterialTransaction({index,revision});UI.toast('기록을 삭제하고 재고를 다시 계산했습니다.');}catch(err){UI.toast(err.message);}return;
+    }
+    transactionIndex=index;transactionRevision=FB.data.revision;
+    $('transactionTarget').textContent=t.name+' · '+t.vid+' · '+t.type;
+    $('transactionQtyLabel').textContent=t.order?'당시 받은 전체 수량':'수량';
+    $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
+    $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
+    $('transactionDate').value=t.date;$('transactionPerson').value=t.person;$('transactionNote').value=t.note||'';$('transactionError').textContent='';$('transactionDialog').showModal();
+  };
+  $('closeTransaction').onclick=()=>$('transactionDialog').close();
+  $('transactionForm').onsubmit=e=>{e.preventDefault();try{
+    FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
+    $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
+  }catch(err){$('transactionError').textContent=err.message;}};
   UI.bindVersionAddition(()=>material(selected));
   window.addEventListener('fb-data',render);render();
 })();
