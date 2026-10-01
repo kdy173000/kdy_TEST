@@ -48,17 +48,30 @@
     content.before(shell);
     shell.append(nav, content);
   }
-  let toggle = document.querySelector('.portal-menu-button');
-  if (!toggle) {
-    toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'portal-header-button portal-nav-toggle'; toggle.textContent = '메뉴';
-    toggle.setAttribute('aria-label','사내 운영 메뉴 열기');
-    document.querySelector('.portal-header-actions')?.prepend(toggle);
+
+  // Move existing menu nodes so their click handlers and permission state survive.
+  const nodes = Array.from(nav.children);
+  let group = null, items = null;
+  for (const node of nodes) {
+    if (node.classList.contains('sb-group-label')) {
+      group = document.createElement('details');
+      group.className = 'top-nav-group';
+      const heading = document.createElement('summary');
+      heading.className = 'sb-group-label';
+      heading.textContent = node.textContent;
+      items = document.createElement('div');
+      items.className = 'top-nav-items';
+      group.append(heading, items);
+      nav.append(group);
+      node.remove();
+      heading.addEventListener('click', () => {
+        nav.querySelectorAll('details[open]').forEach(other => { if (other !== heading.parentElement) other.open = false; });
+      });
+    } else if (node.classList.contains('sb-item') && items) {
+      items.append(node);
+      node.addEventListener('click', () => { nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
+    } else if (node.classList.contains('sb-footer')) node.remove();
   }
-  // Mobile menus expand in document flow and share the page scroll.
-  toggle.removeAttribute('onclick');
-  {
-    toggle.setAttribute('aria-expanded','false');
-    toggle.addEventListener('click', () => { nav.classList.toggle('open'); toggle.setAttribute('aria-expanded',String(nav.classList.contains('open'))); });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') { nav.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); } });
-  }
+  document.addEventListener('click', event => { if (!nav.contains(event.target)) nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
 })();
