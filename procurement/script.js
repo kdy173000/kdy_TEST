@@ -58,6 +58,15 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td>
   $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='due')FB.updateOrderDue({...input,id:target});else if(mode==='order')FB.createOrder({...input,mid:target});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='due'?'입고 예정일을 수정했습니다.':mode==='order'?'발주를 등록했습니다. 입고 전에는 재고가 늘지 않습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
 
   let transactionIndex=-1,transactionRevision=-1;
+  function previewTransactionReceipt(){
+    const t=FB.data.transactions[transactionIndex],o=FB.data.orders.find(o=>o.id===t?.order);if(!o)return;
+    const actual=Number($('transactionQty').value),bad=Number($('transactionDefective').value),good=Math.max(0,actual-bad);
+    const otherGood=o.received-t.qty,otherDelivered=(o.delivered??o.received)-(t.delivered??t.qty+(t.defective||0));
+    $('transactionOrdered').textContent=fmt(o.qty)+'개';$('transactionReceived').textContent=fmt(otherGood)+'개';
+    $('transactionRemaining').value=Math.max(0,o.qty-otherDelivered-actual);
+    $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'정상 입고 '+fmt(good)+'개 · 추가 정상 입고 필요 '+fmt(Math.max(0,o.qty-otherGood-good))+'개'+(otherGood+good>o.qty?' · 초과 정상 입고 '+fmt(otherGood+good-o.qty)+'개':'');
+  }
+  $('transactionQty').oninput=previewTransactionReceipt;$('transactionDefective').oninput=previewTransactionReceipt;
   $('stockHistory').onclick=e=>{
     const button=e.target.closest('button');if(!button)return;
     const index=Number(button.dataset.editTransaction??button.dataset.deleteTransaction),t=FB.data.transactions[index];if(!t)return;
@@ -68,12 +77,18 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td>
     }
     transactionIndex=index;transactionRevision=FB.data.revision;
     $('transactionTarget').textContent=t.name+' · '+t.vid+' · '+t.type;
-    $('transactionQtyLabel').textContent=t.order?'당시 받은 전체 수량':'수량';
+    const receipt=!!t.order;
+    $('transactionTitle').textContent=receipt?'입고 내역 수정':'입출고 내역 수정';
+    $('transactionDialog').classList.toggle('receipt-dialog',receipt);$('transactionForm').classList.toggle('receipt-fields',receipt);
+    $('transactionQuantities').className=receipt?'receipt-quantities receipt-wide':'';
+    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary'])$(id).hidden=!receipt;
+    $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고':'사유 · 비고';
+    $('transactionQtyLabel').textContent=receipt?'입고 수량':'수량';
     $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
     $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
-    $('transactionDate').value=t.date;$('transactionPerson').value=t.person;$('transactionNote').value=t.note||'';$('transactionError').textContent='';$('transactionDialog').showModal();
+    $('transactionDate').value=t.date;$('transactionPerson').value=t.person;$('transactionNote').value=t.note||'';$('transactionError').textContent='';previewTransactionReceipt();$('transactionDialog').showModal();
   };
-  $('closeTransaction').onclick=()=>$('transactionDialog').close();
+  $('closeTransaction').onclick=$('cancelTransaction').onclick=()=>$('transactionDialog').close();
   $('transactionForm').onsubmit=e=>{e.preventDefault();try{
     FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
     $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
