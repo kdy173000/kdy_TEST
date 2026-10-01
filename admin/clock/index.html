@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +7,13 @@
 
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=settings9">
 
 <script defer src="script.js"></script>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-title">🕐 시계 설정</div>
-  <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location.href='../main/index.html'">← 뒤로</button>
-    <button class="theme-btn" onclick="toggleTheme()" title="테마"><span id="t-ico">☀️</span></button>
-    <button class="tb-btn icon" onclick="openProfile()" title="내 프로필">👤</button>
-    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
-  </div>
-</div>
+<header class="portal-header"><a class="portal-brand" href="../main/index.html">FIREBALL<span>시계 설정</span></a><div class="portal-header-actions"><a class="portal-header-button" href="../main/index.html">관리자 홈</a><button class="portal-header-button" onclick="toggleTheme()" aria-label="테마 전환"><span id="t-ico">☀️</span></button><button class="portal-header-button" onclick="openProfile()">내 프로필</button><button class="portal-header-button" onclick="doLogout()">로그아웃</button></div></header>
 
 <div class="container">
   <div class="clock-section">
@@ -37,7 +29,7 @@
   </div>
 
   <div class="settings-section">
-    <h1 class="page-title">시계 설정</h1>
+    <p class="eyebrow">사내 운영 · 관리자</p><h1 class="page-title">시계 설정</h1>
     <p class="page-sub">변경 사항은 즉시 저장되어 메인 페이지에 반영됩니다.</p>
 
     <div class="card">
@@ -58,8 +50,8 @@
 </div>
 
 <!-- 프로필 -->
-<div class="pf-overlay" id="profileModal" onclick="if(event.target===this)closeProfile()">
-  <div class="pf-box">
+<div class="pf-overlay" role="dialog" aria-modal="true" aria-labelledby="profileTitle" id="profileModal" onclick="if(event.target===this)closeProfile()">
+  <div class="pf-box"><div class="popup-title-row"><h2 id="profileTitle">내 프로필</h2><button class="popup-close" onclick="closeProfile()" aria-label="프로필 창 닫기">✕</button></div>
     <div class="pf-header">
       <div class="pf-avatar">👑</div>
       <div>

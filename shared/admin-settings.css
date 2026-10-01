@@ -1,0 +1,13 @@
+@import url('../main/style.css?v=settings9');
+:root{--input-bg:var(--bg2);--input-border:var(--border2);--drag-over:var(--accent-soft)}
+.container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px}
+.eyebrow{margin:0 0 8px;color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.04em}
+.page-title{font-size:30px;font-weight:700;letter-spacing:-.8px;margin:0 0 8px}
+.page-sub{font-size:14px;color:var(--text2);margin:0 0 28px;line-height:1.8}
+.field label{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:0}
+.field input,.field select{min-height:44px;background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font:inherit;width:100%}
+.field input:focus,.field select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.modal-overlay{padding:20px}.modal{background:var(--bg2);color:var(--text);border-radius:16px;width:460px;max-width:100%;max-height:calc(100dvh - 40px);overflow-y:auto;box-shadow:0 20px 60px #18202c30;padding:28px}
+.modal-title{font-size:22px;letter-spacing:-.5px}.modal-btn{min-height:44px}
+.log-wrap{max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px}.log-tbl{width:100%;border-collapse:collapse;font-size:12px}.log-tbl th,.log-tbl td{padding:10px;text-align:left;border-bottom:1px solid var(--border)}.log-tbl th{background:var(--bg3);color:var(--text2)}.log-empty{padding:20px;color:var(--text3);text-align:center}
+@media(max-width:700px){.page-title{font-size:26px}.container{padding-top:26px}.portal-brand span{display:none}.portal-header-actions{gap:5px}.portal-header-button{padding:7px 8px}.modal{padding:22px}}

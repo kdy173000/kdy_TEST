@@ -1,35 +1,27 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>권한 링크 설정</title>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=settings9">
 
 <script defer src="script.js"></script>
 </head>
 <body>
 
-<div class="topbar">
-  <span class="topbar-title">권한 링크 설정</span>
-  <div class="topbar-right">
-    <button class="tb-btn" onclick="window.location.href='../accounts/index.html'">← 계정 관리</button>
-    <button class="tb-btn" onclick="window.location.href='../main/index.html'">관리자 홈</button>
-    <button class="tb-btn" onclick="doLogout()">로그아웃</button>
-  </div>
-</div>
+<header class="portal-header"><a class="portal-brand" href="../main/index.html">FIREBALL<span>권한 링크 설정</span></a><div class="portal-header-actions"><a class="portal-header-button" href="../main/index.html">관리자 홈</a><a class="portal-header-button" href="../accounts/index.html">계정 관리</a><button class="portal-header-button" onclick="doLogout()">로그아웃</button></div></header>
 
 <div class="container">
-  <div class="page-title">권한 링크 설정</div>
+  <p class="eyebrow">사내 운영 · 관리자</p><h1 class="page-title">권한 링크 설정</h1>
   <div class="page-sub">
-    각 권한에 해당하는 접근 가능 페이지 URL을 설정합니다.<br>
-    권한이 부여된 직원은 해당 링크의 페이지에 접근할 수 있습니다.
+    권한별로 연결할 페이지 URL을 입력하세요. 테스트로 링크를 확인한 후 저장하면 반영됩니다.
   </div>
 
   <div class="add-item-card">
-    <span class="add-item-label">새 항목 이름</span>
+    <label class="add-item-label" for="newPermName">새 권한 항목</label>
     <input class="add-item-input" id="newPermName" placeholder="예: 디자인팀, 영업팀 …"
       onkeydown="if(event.key==='Enter')addCustomPerm()">
     <button class="add-item-btn" onclick="addCustomPerm()">+ 항목 추가</button>
