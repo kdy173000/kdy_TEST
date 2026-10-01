@@ -72,6 +72,43 @@
       node.addEventListener('click', () => { nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
     } else if (node.classList.contains('sb-footer')) node.remove();
   }
+  const header = document.querySelector('.portal-header');
+  const actions = header?.querySelector('.portal-header-actions');
+  if (header && actions) {
+    header.insertBefore(nav, actions);
+    if (!Array.from(actions.children).some(item => item.textContent.includes('내 프로필'))) {
+      const profile = document.createElement('a');
+      profile.className = 'portal-header-button';
+      profile.href = to('main/index.html#profile');
+      profile.textContent = '내 프로필';
+      actions.append(profile);
+    }
+    if (!Array.from(actions.children).some(item => item.textContent.includes('로그아웃'))) {
+      const logout = document.createElement('button');
+      logout.type = 'button';
+      logout.className = 'portal-header-button logout-button';
+      logout.textContent = '로그아웃';
+      logout.addEventListener('click', () => {
+        if (typeof doLogout === 'function') doLogout();
+        else { sessionStorage.removeItem('fb_user'); location.href = to('login/index.html'); }
+      });
+      actions.append(logout);
+    }
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'portal-header-button header-nav-toggle';
+    toggle.textContent = '메뉴';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-label','사내 운영 메뉴 열기');
+    toggle.addEventListener('click', () => {
+      nav.classList.toggle('header-nav-open');
+      toggle.setAttribute('aria-expanded', String(nav.classList.contains('header-nav-open')));
+    });
+    actions.prepend(toggle);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { nav.classList.remove('header-nav-open'); toggle.setAttribute('aria-expanded','false'); }
+    });
+  }
   document.addEventListener('click', event => { if (!nav.contains(event.target)) nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
 })();
