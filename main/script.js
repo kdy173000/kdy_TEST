@@ -338,8 +338,8 @@ function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;rend
 
   document.querySelectorAll('.sb-item[data-perm]').forEach(item => {
     const perm = item.dataset.perm;
-    const hasAccess = isManager || userPerms.includes(perm);
-    const url = permLinks[perm] || item.dataset.defaultUrl;
+    const hasAccess = isManager || userPerms.includes(perm) || (perm === '재고관리자' && userPerms.some(p=>['입출고관리','입출고 관리자'].includes(p))) || (perm === '재고조회' && userPerms.includes('재고관리자'));
+    const url = permLinks[perm] || (perm==='재고관리자'&&permLinks['입출고관리']) || item.dataset.defaultUrl;
     if (hasAccess) {
       item.style.opacity = '1';
       if (url) {

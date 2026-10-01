@@ -40,3 +40,8 @@
 
 /* Align numeric column headings and values consistently. */
 .detail table .num,.panel table .num{text-align:center;font-variant-numeric:tabular-nums}
+
+.pending-orders .tablewrap{overflow:visible;max-height:none;height:auto}
+.pending-orders table{table-layout:fixed;white-space:normal}
+.pending-orders th,.pending-orders td{white-space:normal;overflow-wrap:anywhere;padding:12px 8px}
+.pending-orders button{white-space:normal}

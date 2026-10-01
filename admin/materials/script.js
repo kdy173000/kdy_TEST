@@ -1,9 +1,7 @@
-try{const u=JSON.parse(sessionStorage.getItem('fb_user')||'null');if(u?.role!=='admin')location.replace('../../login/index.html');}catch{location.replace('../../login/index.html');}
-
 /* admin-materials.js */
 'use strict';
 (()=>{
-  if(!FB.canAdmin())return;
+  if(!FB.canAdmin()){location.replace('../../login/index.html');return;}
   const {$,esc,fmt}=UI;let id=null;
   $('adminSettingsRoot').hidden=false;
   $('materialCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
@@ -24,11 +22,12 @@ try{const u=JSON.parse(sessionStorage.getItem('fb_user')||'null');if(u?.role!=='
   $('showBom').onclick=()=>{$('productSettings').hidden=true;$('showProducts').classList.remove('active');$('catalogSettings').hidden=true;$('bomSettings').hidden=false;$('showBom').classList.add('active');$('showCatalog').classList.remove('active');BOMView.render();};
   let productId='';
   function productList(){$('adminProductList').innerHTML=FB.data.products.filter(p=>!p.archived||$('showProductArchived').checked).map(p=>`<button class="product" data-product="${esc(p.id)}"><strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'}${p.archived?' · 단종':''}</span></button>`).join('');}
-  function selectProduct(id){productId=id||'';const p=FB.data.products.find(p=>p.id===id);$('adminProductName').value=p?.name||'';$('adminProductFamily').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]),p?.family||0);$('adminProductSample').value=String(p?.sample||false);$('archiveProduct').hidden=!p;$('archiveProduct').textContent=p?.archived?'단종 해제':'단종 처리';$('productError').textContent='';}
+  function selectProduct(id){productId=id||'';const p=FB.data.products.find(p=>p.id===id);$('adminProductName').value=p?.name||'';$('adminProductFamily').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]),p?.family||0);$('adminProductCategory').innerHTML=UI.options(FB.data.productCategories.map(x=>[x,x]),p?.category||'파이어볼');$('adminProductSample').value=String(p?.sample||false);$('archiveProduct').hidden=!p;$('archiveProduct').textContent=p?.archived?'단종 해제':'단종 처리';$('productError').textContent='';}
   $('showProducts').onclick=()=>{$('productSettings').hidden=false;$('catalogSettings').hidden=true;$('bomSettings').hidden=true;$('showProducts').classList.add('active');$('showCatalog').classList.remove('active');$('showBom').classList.remove('active');productList();selectProduct(FB.data.products[0]?.id);};
   $('newProduct').onclick=()=>selectProduct();$('showProductArchived').onchange=productList;$('adminProductList').onclick=e=>{const b=e.target.closest('[data-product]');if(b)selectProduct(b.dataset.product);};
-  $('productForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveProduct({id:productId,name:$('adminProductName').value,family:$('adminProductFamily').value,sample:$('adminProductSample').value==='true'});productList();selectProduct(id);UI.toast('완제품을 저장했습니다. BOM에서 부자재를 연결하세요.');}catch(err){$('productError').textContent=err.message;}};
+  $('productForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveProduct({id:productId,name:$('adminProductName').value,family:$('adminProductFamily').value,category:$('adminProductCategory').value,sample:$('adminProductSample').value==='true'});productList();selectProduct(id);UI.toast('완제품을 저장했습니다. BOM에서 부자재를 연결하세요.');}catch(err){$('productError').textContent=err.message;}};
   $('archiveProduct').onclick=()=>{try{FB.toggleProduct(productId);productList();selectProduct(productId);}catch(err){$('productError').textContent=err.message;}};
+  $('categoryForm').onsubmit=e=>{e.preventDefault();try{const name=FB.addProductCategory($('newCategoryName').value);$('newCategoryName').value='';$('categoryError').textContent='';const p=FB.data.products.find(p=>p.id===productId);$('adminProductCategory').innerHTML=UI.options(FB.data.productCategories.map(x=>[x,x]),p?.category||name);UI.toast('완제품 분류를 추가했습니다.');}catch(err){$('categoryError').textContent=err.message;}};
   BOMView.bind(true);window.addEventListener('fb-data',()=>{list();stock();$('archiveMaterial').textContent=current()?.archived?'단종 해제':'단종 처리';});select(FB.data.materials[0].id);
 })();
 

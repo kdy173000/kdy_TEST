@@ -11,7 +11,7 @@ window.BOMView=(()=>{
     $('bomSelect').innerHTML=UI.options(p.boms.map((b,i)=>[i,b.name+(b.locked?' · 사용됨':' · 기본 구성')]),index);
     $('bomState').textContent=b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성';
     $('copyBom').hidden=!editable;
-    $('bomHelp').textContent=p.sample?'샘플 구성입니다. 실제 사양은 관리자 설정에서 변경하세요.':editable?(b.locked?'사용된 구성입니다. 복사 후 수정하세요.':'종류·버전·개당 수량을 변경하면 기본 구성이 저장됩니다.'):'관리자가 등록한 BOM입니다. 부자재 구성 변경은 관리자 설정에서 가능합니다.';
+    $('bomHelp').textContent=p.sample?'샘플 구성입니다. 실제 사양은 재고관리자 설정에서 변경하세요.':editable?(b.locked?'사용된 구성입니다. 복사 후 수정하세요.':'종류·버전·개당 수량을 변경하면 기본 구성이 저장됩니다.'):'재고관리자가 등록한 BOM입니다. 부자재 구성 변경은 재고관리자 설정에서 가능합니다.';
     $('bomLines').innerHTML=b.rows.map((r,i)=>{
       const m=mat(r.mid),v=ver(r),disabled=!editable||b.locked;
       const candidates=FB.data.materials.filter(x=>x.id===r.mid||(!x.archived&&x.slot===m.slot&&(!x.scope||x.scope===p.id)&&x.versions.some(v=>v.state==='사용')));

@@ -3,11 +3,11 @@
 (()=>{
   const {$,esc,fmt}=UI;let selectedId=FB.data.products[0].id;
   const selected=()=>FB.data.products.find(p=>p.id===selectedId);
-  $('categoryFilter').innerHTML=UI.options([['','전체 포장 유형'],...FB.families.map((f,i)=>[i,f])],'');
-  function render(){const q=$('search').value.toLowerCase(),family=$('categoryFilter').value;
-    const list=FB.data.products.filter(p=>(!p.archived||$('inventoryArchived').checked)&&(family===''||p.family===Number(family))&&(p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)));
+  function categories(){const value=$('categoryFilter').value;$('categoryFilter').innerHTML=UI.options([['','전체 포장 유형'],...FB.data.productCategories.map(f=>[f,f])],value);}
+  function render(){categories();const q=$('search').value.toLowerCase(),family=$('categoryFilter').value;
+    const list=FB.data.products.filter(p=>(!p.archived||$('inventoryArchived').checked)&&(family===''||p.category===family)&&(p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)));
     if(!list.some(p=>p.id===selectedId))selectedId=list[0]?.id||'';const p=selected();
-    $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<button class="product ${p.id===selectedId?'active':''}" data-material="${esc(p.id)}"><strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(FB.families[p.family])}${p.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<button class="product ${p.id===selectedId?'active':''}" data-material="${esc(p.id)}"><strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(p.category)}${p.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('inventoryContent').hidden=!p;$('inventoryEmpty').hidden=!!p;if(!p)return;
     $('materialKind').textContent=p.sample?'샘플':'본품';$('productName').textContent=p.name;$('productCode').textContent=p.id+(p.archived?' · 단종':'');$('total').textContent=fmt(p.finished)+'개';$('productVersions').innerHTML=p.versions.map(v=>`<article class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="badge">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small> 개</small></strong></article>`).join('');
     const productions=FB.data.productions.filter(x=>x.pid===p.id),shipments=FB.data.transactions.filter(t=>t.pid===p.id&&t.type==='완제품 출고');
@@ -22,7 +22,7 @@
   $('recordBtn').onclick=openOut;$('closeOut').onclick=()=>$('outDialog').close();
   $('outForm').onsubmit=e=>{e.preventDefault();try{FB.shipProduct({pid:selectedId,vid:$('outVersion').value,qty:Number($('outQty').value),date:$('outDate').value,person:$('outPerson').value,note:$('outNote').value});$('outDialog').close();UI.toast('완제품 출고와 재고를 반영했습니다.');}catch(err){$('outError').textContent=err.message;render();}};
   let versionTarget='';
-  $('addProductVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('관리자 계정에서 버전을 추가할 수 있습니다.');return;}const p=selected();if(!p||p.archived){UI.toast('사용 중인 완제품을 선택하세요.');return;}versionTarget=p.id;$('productVersionName').textContent=p.name;$('newProductVersion').value='';$('productVersionError').textContent='';$('productVersionDialog').showModal();};
+  $('addProductVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('재고관리자 권한으로 버전을 추가할 수 있습니다.');return;}const p=selected();if(!p||p.archived){UI.toast('사용 중인 완제품을 선택하세요.');return;}versionTarget=p.id;$('productVersionName').textContent=p.name;$('newProductVersion').value='';$('productVersionError').textContent='';$('productVersionDialog').showModal();};
   $('closeProductVersion').onclick=()=>$('productVersionDialog').close();$('productVersionForm').onsubmit=e=>{e.preventDefault();try{FB.addProductVersion(versionTarget,$('newProductVersion').value);$('productVersionDialog').close();UI.toast('완제품 버전을 추가했습니다.');}catch(err){$('productVersionError').textContent=err.message;}};
   BOMView.bind(false);
   function history(){
