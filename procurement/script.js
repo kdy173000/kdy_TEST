@@ -14,8 +14,6 @@
     const orders=FB.data.orders.filter(o=>o.mid===selected&&!o.closed&&o.received<o.qty);
     $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}<br><small>${esc(o.vid)}</small></td><td>${esc(o.supplier)}</td><td>${esc(o.date)}<br><small>예정 ${esc(o.due)||'—'}</small><br><button data-edit-due="${o.id}">예정일 수정</button></td><td class="num">${fmt(o.qty)}</td><td class="num">${fmt(o.received)}</td><td class="num">${fmt(UI.remaining(o))}${o.closed?`<br><small>마감 ${fmt(o.qty-o.received)}</small>`:''}</td><td>${o.closed?'미입고 '+fmt(o.qty-o.received)+'개 취소':o.received===o.qty?'입고 완료':o.received?'부분 입고':'발주 완료'}${!o.closed&&o.received<o.qty?`<div class="order-actions"><button data-receive="${o.id}">입고 완료</button></div>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">입고 대기 중인 발주가 없습니다.</td></tr>';
 
-    const completed=FB.data.orders.filter(o=>ids.has(o.mid)&&(o.closed||o.received>=o.qty));
-    $('stockOrders').innerHTML=completed.slice().reverse().map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.name)}<br><small>${esc(o.supplier)} · ${esc(o.vid)}</small></td><td>${esc(o.date)}</td><td class="num">${fmt(o.qty)}개</td><td class="num">${fmt(o.received)}개</td><td class="num">${fmt(o.defective||0)}개</td><td>${o.received>=o.qty?(o.received>o.qty?'입고 완료 · 초과 '+fmt(o.received-o.qty)+'개':'입고 완료'):'미입고 '+fmt(Math.max(0,o.qty-o.received))+'개 취소'}${o.closeNote?'<br><small>'+esc(o.closeNote)+'</small>':''}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">입고·취소된 발주가 없습니다.</td></tr>';
 
   }
   const field=(label,html)=>`<label class="field"><span>${label}</span>${html}</label>`;
