@@ -99,6 +99,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 
     FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,vid:$('transactionReceiptVersion').value,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
     $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
   }catch(err){$('transactionError').textContent=err.message;}};
+  CatalogEditor.bind({kind:'material',selected:()=>material(selected),saved:id=>{$('purchaseSearch').value='';$('purchaseCategory').value='';category='';$('purchaseArchived').checked=!!material(id)?.archived;selected=id;render();}});
   UI.bindVersionAddition(()=>material(selected));
   window.addEventListener('fb-data',render);render();
 })();

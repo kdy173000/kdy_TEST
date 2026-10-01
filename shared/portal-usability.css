@@ -36,3 +36,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .home-shortcuts a{padding:10px 16px;border:1px solid var(--border,#e4e7eb);border-radius:8px;text-decoration:none;color:var(--text,#24272c);background:var(--bg2,#fff);font-weight:600;font-size:14px}
 .home-shortcuts a:hover{border-color:var(--accent,#9b1b30);color:var(--accent,#9b1b30)}
 @media(max-width:800px){.section-toolbar{align-items:flex-start;flex-direction:column;gap:10px}.history-filters{width:100%}.history-filters input{flex:1;min-width:120px}.dialog-grid{grid-template-columns:1fr}.home-shortcuts a{flex:1;text-align:center}.portal-with-nav .detail td{padding:12px 8px}}
+
+/* Editors opened from the selected stock item. */
+#newCatalogItem{margin:12px 0 4px;width:100%;color:var(--accent,#9b1b30)}
+#catalogDialog .field{margin-bottom:14px}
+#catalogDialog .workflow-guide{margin:20px 0 0}
+#catalogDialog h3{margin:22px 0 12px}
+.catalog-version{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border,#e4e7eb)}
+.catalog-version span{flex:1;font-size:13px}.catalog-version button{font-size:12px;padding:6px 9px}
+.bom-settings-mode .production-grid{grid-template-columns:minmax(0,1fr)}
+.bom-settings-mode .production-header p{display:none}
+.bom-settings-mode .bom-table{min-width:850px}
