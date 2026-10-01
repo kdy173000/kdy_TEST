@@ -38,7 +38,21 @@ function addVersion(id,name){admin();return mutate(d=>{const m=mid(d,id),vid=req
 function toggleVersion(id,vid){admin();return mutate(d=>{const v=version(mid(d,id),vid);v.state=v.state==='사용'?'중단':'사용';});}
 function stockMovement(input){return mutate(d=>{const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);const qty=integer(Number(input.qty)),person=required(input.person,'담당자'),date=required(input.date,'날짜'),note=required(input.note,'차감 사유');if(!['출고','재고 조정'].includes(input.type))throw Error('차감 유형을 확인하세요.');if(v.qty<qty)throw Error('차감 가능한 재고가 부족합니다.');v.qty-=qty;transaction(d,{mid:m.id,vid:v.id,qty,type:input.type,date,person,note});});}
 function createOrder(input){return mutate(d=>{const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);const qty=integer(Number(input.qty)),supplier=required(input.supplier,'거래처'),date=required(input.date,'발주 날짜'),person=required(input.person,'담당자');const id='PO-'+String(d.orders.length+1).padStart(4,'0');d.orders.push({id,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplier,date,due:input.due||'',person,note:input.note||'',closed:false});return id;});}
-function receiveOrder(input){return mutate(d=>{const order=d.orders.find(o=>o.id===input.id);if(!order||order.closed)throw Error('입고 가능한 발주가 아닙니다.');const q=integer(Number(input.qty));if(q>order.qty-order.received)throw Error('미입고 수량보다 많이 입고할 수 없습니다.');const m=mid(d,order.mid),v=version(m,order.vid),person=required(input.person,'담당자'),date=required(input.date,'입고 날짜');if(!Number.isSafeInteger(v.qty+q))throw Error('수량이 너무 큽니다.');v.qty+=q;order.received+=q;transaction(d,{mid:m.id,vid:v.id,qty:q,type:'입고',date,person,note:order.id+' · '+(input.note||'발주 입고'),order:order.id});});}
+function receiveOrder(input){return mutate(d=>{
+const order=d.orders.find(o=>o.id===input.id);
+if(!order||order.closed||order.received>=order.qty)throw Error('입고 가능한 발주가 아닙니다.');
+const delivered=integer(Number(input.qty),0),defective=integer(Number(input.defective||0),0),finish=input.finish===true;
+if(defective>delivered)throw Error('불량 수량은 이번에 받은 전체 수량보다 많을 수 없습니다.');
+if(!delivered&&!finish)throw Error('이번에 받은 수량을 입력하거나 남은 수량 취소를 선택하세요.');
+const good=delivered-defective,m=mid(d,order.mid),v=version(m,order.vid),person=required(input.person,'담당자'),date=required(input.date,'입고 날짜'),note=String(input.note||'').trim();
+if(!Number.isSafeInteger(v.qty+good)||!Number.isSafeInteger(order.received+good))throw Error('수량이 너무 큽니다.');
+const prior=order.received;v.qty+=good;order.received+=good;
+order.delivered=(order.delivered??prior)+delivered;order.defective=(order.defective||0)+defective;
+if(!Number.isSafeInteger(order.delivered)||!Number.isSafeInteger(order.defective))throw Error('수량이 너무 큽니다.');
+order.receipts=order.receipts||[];order.receipts.push({date,person,delivered,defective,good,note,finish});
+if(delivered)transaction(d,{mid:m.id,vid:v.id,qty:good,type:good?'입고':'불량 입고',date,person,note:order.id+' · 전체 '+delivered+'개 / 정상 '+good+'개 / 불량 '+defective+'개'+(note?' · '+note:''),order:order.id,delivered,defective});
+if(finish){order.closed=true;order.closedDate=date;order.closedPerson=person;order.closeNote=note;}
+});}
 function updateOrderDue(input){return mutate(d=>{const o=d.orders.find(o=>o.id===input.id);if(!o||o.closed||o.received>=o.qty)throw Error('입고 대기 발주만 예정일을 수정할 수 있습니다.');const due=String(input.due||'');if(due&&(!/^\d{4}-\d{2}-\d{2}$/.test(due)||Number.isNaN(Date.parse(due))||new Date(due).toISOString().slice(0,10)!==due))throw Error('올바른 입고 예정일을 입력하세요.');o.due=due;});}
 function closeOrder(id){return mutate(d=>{const o=d.orders.find(o=>o.id===id);if(!o||o.closed||o.received===o.qty)throw Error('마감 가능한 미입고 발주가 없습니다.');o.closed=true;});}
 function saveProduct(input){admin();return mutate(d=>{const name=required(input.name,'완제품명'),family=Number(input.family);if(name.length>80)throw Error('완제품명은 80자 이내로 입력하세요.');if(!Number.isInteger(family)||family<0||family>=families.length)throw Error('포장 유형을 확인하세요.');if(d.products.some(p=>p.id!==input.id&&p.name===name))throw Error('같은 이름의 완제품이 있습니다.');if(input.id){const p=d.products.find(p=>p.id===input.id);if(!p)throw Error('완제품을 찾을 수 없습니다.');Object.assign(p,{name,family,sample:input.sample===true});return p.id;}const id='PROD-'+String(d.products.length+1).padStart(4,'0');d.products.push({id,name,family,sample:input.sample===true,archived:false,finished:0,versions:[{id:'V01',qty:0,state:'사용'}],boms:[{name:'BOM 01',locked:false,rows:[]}]});return id;});}
