@@ -1,4 +1,4 @@
-@import url('../../main/style.css?v=type10');
+@import url('../../main/style.css?v=profile11');
 .dashboard{max-width:1360px;margin:36px auto 60px;padding:0 var(--page-gutter)}
 .dashboard-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:38px}.dashboard-heading h1{font-size:30px;line-height:1.4;letter-spacing:-1px}.eyebrow{font-size:12px;color:var(--text3);margin-bottom:8px;letter-spacing:.04em}.dashboard-heading h1+p{font-size:13px;color:var(--text2);margin-top:8px}.admin-state{font-size:12px;border:1px solid rgba(155,27,48,.15);background:rgba(155,27,48,.06);color:#9b1b30;padding:8px 12px;border-radius:7px;white-space:nowrap}.logout-button{color:#9b1b30}
 .dashboard-section{margin-bottom:32px}.dashboard-section-heading{display:flex;align-items:center;gap:16px;margin-bottom:16px}.dashboard-section-heading h2{font-size:18px;letter-spacing:-.4px}.dashboard-section-heading p{font-size:12px;color:var(--text3)}

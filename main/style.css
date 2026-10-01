@@ -1,4 +1,4 @@
-@import url('../shared/portal.css?v=type10');
+@import url('../shared/portal.css?v=profile11');
 
 /* Home typography: title 30/700, section 18/700, content 14–15/500. */
 .portal-home{--text:#24272c;--text2:#46505e;--text3:#596371;font-size:14px;font-weight:500;}
@@ -306,7 +306,11 @@ font-weight:500;}
 /* ─ Modals (new room + profile) ─ */
 .nr-overlay, .pf-overlay{position:fixed;inset:0;z-index:3000;background:rgba(24,32,44,.44);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
 .nr-box, .pf-box{width:440px;max-width:100%;max-height:calc(100dvh - 40px);overflow-y:auto;position:relative;padding:28px;background:var(--bg2,#fff);color:var(--text,#24272c);border:1px solid var(--border,#e4e7eb);border-radius:16px;box-shadow:0 20px 60px rgba(24,32,44,.22);}
-.pf-box { width: 380px; position: relative; }
+.pf-box{width:760px;position:relative;}
+.pf-password-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.pf-password-grid .pf-field{min-width:0;margin-bottom:12px;}
+.pf-password-grid .pf-input{width:100%;min-width:0;}
+@media(max-width:700px){.pf-password-grid{grid-template-columns:1fr;gap:0;}}
 .nr-title, .pf-title{font-size:22px;font-weight:700;letter-spacing:-.6px;margin-bottom:22px;}
 .nr-field, .pf-field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
 .nr-label, .pf-label{font-size:13px;font-weight:500;color:var(--text2);}

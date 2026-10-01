@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=settings9');
+@import url('../../shared/admin-settings.css?v=profile11');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:32px;align-items:start;}
 .clock-section{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;position:sticky;top:calc(var(--header-height) + 30px);}
 .settings-section{min-width:0;}

@@ -1,4 +1,4 @@
-@import url('../main/style.css?v=type10');
+@import url('../main/style.css?v=profile11');
 :root{--input-bg:var(--bg2);--input-border:var(--border2);--drag-over:var(--accent-soft)}
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px}
 .eyebrow{margin:0 0 8px;color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.04em}
