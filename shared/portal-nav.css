@@ -1,7 +1,9 @@
 
-/* Persistent operating menu shared by all portal pages. */
-.portal-with-nav{--nav-width:218px}
-.portal-with-nav .app-side-nav{position:fixed;left:0;top:var(--header-height,78px);bottom:0;width:var(--nav-width);height:auto;max-height:none;overflow-y:auto;background:var(--bg2,#fff);border:0;border-right:1px solid var(--border,#e4e7eb);border-radius:0;padding:16px 12px;z-index:1700;display:flex;flex-direction:column;gap:0;transform:none;font-size:14px;line-height:1.6}
+/* One document scroll for the operating menu and page content. */
+html{min-height:100%;overflow-y:auto}
+.portal-with-nav{--nav-width:218px;min-height:100vh;overflow:visible}
+.portal-page-shell{display:grid;grid-template-columns:var(--nav-width) minmax(0,1fr);min-height:calc(100vh - var(--header-height,78px));align-items:stretch}
+.portal-with-nav .app-side-nav{position:static;inset:auto;width:auto;height:auto;max-height:none;overflow:visible;background:var(--bg2,#fff);border:0;border-right:1px solid var(--border,#e4e7eb);border-radius:0;padding:16px 12px;display:flex;flex-direction:column;gap:0;transform:none;font-size:14px;line-height:1.6}
 .app-side-nav .sb-group-label{display:block;margin:12px 0 5px;padding:12px 10px 8px;border-bottom:1px solid var(--border,#e4e7eb);color:var(--accent,#9b1b30);font-size:13px;font-weight:700;letter-spacing:0}
 .app-side-nav .sb-group-label:first-child{margin-top:0}
 .app-side-nav .sb-item{display:flex;align-items:center;text-decoration:none;padding:11px 10px;margin:2px 0;border:0;border-radius:7px;background:transparent;color:var(--text,#24272c);font-size:14px;font-weight:500;line-height:1.6;cursor:pointer;text-align:left;width:100%}
@@ -9,12 +11,12 @@
 .app-side-nav .sb-item.active{background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30);font-weight:600}
 .app-side-nav .sb-item[aria-disabled=true]{color:var(--text3,#596371);cursor:default}
 .app-side-nav .sb-footer{margin-top:auto;padding:24px 10px 8px;color:var(--text2,#616976);font-size:12px;line-height:1.9}
-.portal-with-nav>.layout{max-width:none;margin:26px 0 50px var(--nav-width);padding:0 24px;min-width:0;display:block}
-.portal-with-nav>.layout>.main{width:100%}
-.portal-with-nav>main,.portal-with-nav>.container{width:calc(100% - var(--nav-width));max-width:none;margin-left:var(--nav-width);margin-right:0;padding-left:26px;padding-right:26px}
+.portal-page-shell>.layout{max-width:none;margin:26px 0 50px;padding:0 24px;min-width:0;display:block}
+.portal-page-shell>.layout>.main{width:100%}
+.portal-page-shell>main,.portal-page-shell>.container{width:100%;min-width:0;max-width:none;margin-left:0;margin-right:0;padding-left:26px;padding-right:26px}
 .portal-with-nav .listhead{padding-bottom:14px;margin-bottom:6px;border-bottom:1px solid var(--border,#e4e7eb)}
 .portal-with-nav .listhead h2{color:var(--accent,#9b1b30);font-size:18px;font-weight:700}
 .portal-nav-toggle{display:none}
 @media(max-width:1100px){.portal-with-nav .rp{width:auto;border-left:0;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-radius:0 0 14px 14px}}
-@media(max-width:800px){.portal-with-nav{--nav-width:190px}.portal-with-nav>.layout{padding:0 16px}.portal-with-nav>main,.portal-with-nav>.container{padding-left:18px;padding-right:18px}}
-@media(max-width:700px){.portal-with-nav .app-side-nav{width:240px;transform:translateX(-100%);transition:transform .2s}.portal-with-nav .app-side-nav.open{transform:translateX(0)}.portal-with-nav>.layout{margin:24px 0 40px;padding:0 16px}.portal-with-nav>main,.portal-with-nav>.container{width:100%;margin-left:0}.portal-nav-toggle{display:block}.portal-with-nav .rp{grid-template-columns:1fr}.portal-with-nav .portal-brand span{display:none}}
+@media(max-width:800px){.portal-with-nav{--nav-width:190px}.portal-page-shell>.layout{padding:0 16px}.portal-page-shell>main,.portal-page-shell>.container{padding-left:18px;padding-right:18px}}
+@media(max-width:700px){.portal-page-shell{display:block}.portal-with-nav .app-side-nav{display:none;width:100%;border-right:0;border-bottom:1px solid var(--border)}.portal-with-nav .app-side-nav.open{display:flex}.portal-page-shell>.layout{margin:24px 0 40px;padding:0 16px}.portal-nav-toggle,.portal-with-nav .portal-menu-button{display:block}.portal-with-nav .rp{grid-template-columns:1fr}.portal-with-nav .portal-brand span{display:none}}

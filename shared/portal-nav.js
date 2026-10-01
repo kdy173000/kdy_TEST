@@ -41,14 +41,22 @@
     const footer = document.createElement('div'); footer.className = 'sb-footer'; footer.textContent = '사내 운영 포털'; nav.append(footer);
     document.body.append(nav);
   }
+  const content = document.querySelector('body > .layout, body > main, body > .container');
+  if (content) {
+    const shell = document.createElement('div');
+    shell.className = 'portal-page-shell';
+    content.before(shell);
+    shell.append(nav, content);
+  }
   let toggle = document.querySelector('.portal-menu-button');
   if (!toggle) {
     toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'portal-header-button portal-nav-toggle'; toggle.textContent = '메뉴';
     toggle.setAttribute('aria-label','사내 운영 메뉴 열기');
     document.querySelector('.portal-header-actions')?.prepend(toggle);
   }
-  // Keep the existing home drawer handler; provide the same control on other pages.
-  if (!toggle.hasAttribute('onclick')) {
+  // Mobile menus expand in document flow and share the page scroll.
+  toggle.removeAttribute('onclick');
+  {
     toggle.setAttribute('aria-expanded','false');
     toggle.addEventListener('click', () => { nav.classList.toggle('open'); toggle.setAttribute('aria-expanded',String(nav.classList.contains('open'))); });
     document.addEventListener('keydown', event => { if (event.key === 'Escape') { nav.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); } });
