@@ -49,6 +49,18 @@
     shell.append(nav, content);
   }
 
+  const companyTitle = document.createElement('div');
+  companyTitle.className = 'sb-group-label';
+  companyTitle.textContent = '회사 안내';
+  const companyItems = ['파이어볼 회사소개','파이어볼 기본예절'].map(label => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'sb-item';
+    item.textContent = label;
+    item.addEventListener('click', () => alert('연결할 페이지가 아직 설정되지 않았습니다.'));
+    return item;
+  });
+  nav.prepend(companyTitle, ...companyItems);
   // Move existing menu nodes so their click handlers and permission state survive.
   const nodes = Array.from(nav.children);
   let group = null, items = null;
