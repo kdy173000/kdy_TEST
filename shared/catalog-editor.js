@@ -2,7 +2,7 @@
 window.CatalogEditor=(()=>{
  const {$,esc}=UI;let itemId='',config;
  const item=()=> (config.kind==='product'?FB.data.products:FB.data.materials).find(x=>x.id===itemId);
- function versions(){const m=item();if(!m||config.kind!=='material')return;$('catalogVersionList').innerHTML=m.versions.map(v=>`<div class="catalog-version"><strong>${esc(v.id)}</strong><span>${esc(v.state)} · ${UI.fmt(v.qty)}개</span><button type="button" data-catalog-version="${esc(v.id)}">${v.state==='사용'?'사용 중단':'사용 재개'}</button></div>`).join('');}
+ function versions(){const m=item();if(!m||config.kind!=='material')return;$('catalogVersionList').innerHTML=m.versions.filter(v=>!v.deleted).map(v=>`<div class="catalog-version"><strong>${esc(v.id)}</strong><span>${esc(v.state)} · ${UI.fmt(v.qty)}개</span><button type="button" data-catalog-version="${esc(v.id)}">${v.state==='사용'?'사용 중단':'사용 재개'}</button></div>`).join('');}
  function open(id=''){
   if(!UI.allowWrite())return;itemId=id;const x=item();$('catalogTitle').textContent=(x?'정보 수정':'새 '+(config.kind==='product'?'완제품':'부자재')+' 등록');
   if(config.kind==='product'){
