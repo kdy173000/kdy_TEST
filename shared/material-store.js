@@ -95,8 +95,22 @@ function cancelProduction(id){return mutate(d=>{const r=d.productions.find(p=>p.
 function addBomRow(pid,index,materialId){admin();return mutate(d=>{const {p,b}=getBom(d,pid,index);if(b.locked)throw Error('BOM을 복사한 뒤 수정하세요.');const m=mid(d,materialId),v=m.versions.find(v=>v.state==='사용');if(m.archived||!v||m.scope&&m.scope!==p.id)throw Error('사용 가능한 부자재를 선택하세요.');if(b.rows.some(r=>r.mid===m.id))throw Error('이미 포함된 부자재입니다.');b.rows.push({slot:m.slot,mid:m.id,vid:v.id,each:1});});}
 function removeBomRow(pid,index,row){admin();return mutate(d=>{const {b}=getBom(d,pid,index);if(b.locked||b.rows.length<=1)throw Error('잠긴 BOM 또는 마지막 구성품은 삭제할 수 없습니다.');if(!b.rows[row])throw Error('구성품을 찾을 수 없습니다.');b.rows.splice(row,1);});}
 function addProductCategory(name){return mutate(d=>{const value=required(name,'분류명');if(value.length>30||d.productCategories.some(x=>x.toLowerCase()===value.toLowerCase()))throw Error('30자 이내의 중복되지 않는 분류명을 입력하세요.');d.productCategories.push(value);return value;});}
+function manageVersion(input){return mutate(d=>{
+const product=input.kind==='product',entity=(product?d.products:d.materials).find(x=>x.id===input.id);if(!entity)throw Error('항목을 찾을 수 없습니다.');const v=version(entity,input.vid);if(v.deleted)throw Error('삭제된 버전입니다.');
+if(input.remove){
+if(v.qty!==0)throw Error('재고가 0개인 버전만 삭제할 수 있습니다.');
+if(!product&&d.orders.some(o=>o.mid===entity.id&&o.vid===v.id&&!o.closed&&o.received<o.qty))throw Error('입고 대기 발주가 있는 버전입니다. 입고를 먼저 처리하세요.');
+if(!product&&d.products.some(p=>p.boms.some(b=>!b.locked&&b.rows.some(r=>r.mid===entity.id&&r.vid===v.id))))throw Error('현재 BOM에 연결된 버전입니다. BOM을 다른 버전으로 변경한 뒤 삭제하세요.');
+v.deleted=true;v.state='중단';return;}
+const name=required(input.name,'버전명');if(name.length>20||entity.versions.some(x=>x!==v&&x.id.toLowerCase()===name.toLowerCase()))throw Error('20자 이내의 중복되지 않는 버전명을 입력하세요.');
+const old=v.id;v.id=name;
+for(const t of d.transactions)if(product?t.pid===entity.id:t.mid===entity.id){if(t.vid===old)t.vid=name;if(t.orderedVid===old)t.orderedVid=name;}
+for(const p of d.productions){if(product&&p.pid===entity.id&&p.vid===old)p.vid=name;for(const row of p.rows||[])if(!product&&row.mid===entity.id&&row.vid===old)row.vid=name;}
+if(!product){for(const p of d.products)for(const b of p.boms)for(const row of b.rows)if(row.mid===entity.id&&row.vid===old)row.vid=name;for(const o of d.orders)if(o.mid===entity.id){if(o.vid===old)o.vid=name;for(const row of o.receipts||[]){if(row.vid===old)row.vid=name;if(row.orderedVid===old)row.orderedVid=name;}}}
+d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity.id,before:old,after:name,date:day(),person:user()?.name||''});
+});}
 const slots=['캡','용기','스웨이드','어플리케이터','전면 라벨','후면 라벨','속지','케이스'];
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
 window.addEventListener('storage',e=>{if(e.key===KEY){state=read();window.dispatchEvent(new Event('fb-data'));}});
-return {get data(){return state;},slots,families,day,user,canAdmin,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
+return {get data(){return state;},slots,families,day,user,canAdmin,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
 })();

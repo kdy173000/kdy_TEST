@@ -41,7 +41,7 @@
     $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
     $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;
     $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
-    $('stockVersions').innerHTML=m.versions.map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p></div>`).join('');
+    $('stockVersions').innerHTML=m.versions.filter(v=>!v.deleted).map(v=>`<div class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="state ${v.state==='사용'?'':'blocked'}">${esc(v.state)}</span></div><strong>${fmt(v.qty)}<small>개</small></strong><p>입고 대기 ${fmt(pending(v.id))}개</p>${UI.versionActions('material',m.id,v.id)}</div>`).join('');
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>{const t=r.t,type=$('historyType').value,q=$('historySearch').value.trim().toLowerCase();return t.mid===id&&(!type||(type==='입고'?['입고','불량 입고'].includes(t.type):type==='생산'?!!t.production:UI.minus(t.type)&&!t.production))&&[t.vid,t.person,t.note,t.date].join(' ').toLowerCase().includes(q);}).reverse().map(({t,index})=>{
 const editable=FB.canAdmin()&&!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
 return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 ${esc(FB.data.orders.find(o=>o.id===t.order)?.vid||t.vid)}<br>입고 ${esc(t.vid)}`:esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}">수정</button><button class="delete-button" data-delete-transaction="${index}">삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
@@ -100,6 +100,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 
     $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
   }catch(err){$('transactionError').textContent=err.message;}};
   CatalogEditor.bind({kind:'material',selected:()=>material(selected),saved:id=>{$('purchaseSearch').value='';$('purchaseCategory').value='';category='';$('purchaseArchived').checked=!!material(id)?.archived;selected=id;render();}});
+  UI.bindVersionManagement('stockVersions','material');
   UI.bindVersionAddition(()=>material(selected));
   window.addEventListener('fb-data',render);render();
 })();
