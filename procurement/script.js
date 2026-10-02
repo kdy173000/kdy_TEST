@@ -3,7 +3,7 @@
 (()=>{
   const {$,esc,fmt}=UI;let category='',mode='',target='',selected='cap';
   const material=id=>FB.data.materials.find(m=>m.id===id);
-  function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>(!m.archived||$('purchaseArchived').checked)&&(!category||(category==='라벨'?['전면 라벨','후면 라벨'].includes(m.slot):m.slot===category))&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
+  function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>!m.deleted&&(!m.archived||$('purchaseArchived').checked)&&(!category||(category==='라벨'?['전면 라벨','후면 라벨'].includes(m.slot):m.slot===category))&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
   function render(){
     const items=filtered();
     if(!items.some(m=>m.id===selected))selected=items[0]?.id||'';
