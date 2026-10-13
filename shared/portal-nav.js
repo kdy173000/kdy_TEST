@@ -41,6 +41,25 @@
     const footer = document.createElement('div'); footer.className = 'sb-footer'; footer.textContent = '사내 운영 포털'; nav.append(footer);
     document.body.append(nav);
   }
+  // Known material pages are readable; their own controls enforce write permissions.
+  const materialPages = {
+    '자재 관리': 'inventory/index.html',
+    '제품 입고/출고/조정': 'inventory/index.html',
+    '부자재 관리': 'procurement/index.html'
+  };
+  for (const item of Array.from(nav.querySelectorAll('.sb-item'))) {
+    const path = materialPages[item.textContent.trim()];
+    if (!path) continue;
+    const link = document.createElement('a');
+    link.className = 'sb-item';
+    link.textContent = item.textContent;
+    link.href = to(path);
+    if (new URL(link.href).pathname === location.pathname) {
+      link.classList.add('active');
+      link.setAttribute('aria-current', 'page');
+    }
+    item.replaceWith(link);
+  }
   const content = document.querySelector('body > .layout, body > main, body > .container');
   if (content) {
     const shell = document.createElement('div');
