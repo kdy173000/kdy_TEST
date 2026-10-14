@@ -18,9 +18,9 @@ html{min-height:100%;overflow-y:auto}
 .portal-subnav .sb-item{display:block;flex-shrink:0;width:auto;margin:0;padding:10px 16px;text-decoration:none;border:0;border-radius:7px;background:transparent;color:var(--text);font:inherit;font-size:14px;white-space:nowrap;cursor:pointer}
 .portal-subnav .sb-item:not(:disabled):hover{background:var(--hover)}
 .portal-subnav .sb-item.active{color:var(--accent);background:var(--accent-soft);font-weight:600}
-.portal-subnav.is-preview{background:var(--accent-soft,#fff0f0);border-top-color:var(--accent,#9b1b30)}
-.portal-subnav.is-preview .sb-item:not([aria-disabled=true]){color:var(--accent,#9b1b30)}
-.portal-subnav.is-preview .sb-item:not(:disabled):hover{background:var(--bg2,#fff)}
+.portal-subnav.is-preview{background:var(--bg2,#fff);border-top-color:var(--text3,#777f8b);box-shadow:inset 0 -1px var(--border,#e4e7eb)}
+.portal-subnav.is-preview .sb-item:not([aria-disabled=true]){color:var(--text,#24272c)}
+.portal-subnav.is-preview .sb-item:not(:disabled):hover{background:var(--hover,#f3f4f6)}
 .portal-subnav .sb-item[aria-disabled=true]{color:var(--text3,#777f8b);cursor:default;opacity:.65}
 .portal-with-nav .logout-button{color:var(--accent);border-color:var(--border2)}
 .app-side-nav .sb-footer{display:none}
