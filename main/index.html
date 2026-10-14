@@ -7,11 +7,12 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=home-calendar35">
+<link rel="stylesheet" href="style.css?v=notices36">
 
+<script defer src="../shared/notices.js?v=notices36"></script>
 <script defer src="script.js?v=ux28"></script>
 <link rel="stylesheet" href="../shared/portal-nav.css?v=home-calendar35">
-<script defer src="../shared/portal-nav.js?v=material-links34"></script>
+<script defer src="../shared/portal-nav.js?v=notices36"></script>
 </head>
 <body class="portal-home">
 
@@ -65,12 +66,11 @@
 <nav class="sidebar app-side-nav" id="portalSidebar" aria-label="사내 운영 메뉴">
 
   <div class="sb-group-label">사내 운영 관리</div>
-  <div class="sb-item active" onclick="go('notices')">공지사항</div>
+  <a class="sb-item" href="notices/index.html">공지사항</a>
   <div class="sb-item" onclick="go('org')">조직도</div>
   <div class="sb-item" onclick="window.location.href='leave/index.html'">내부 일정 관리</div>
-  <div class="sb-group-label" style="margin-top:6px">자재 관리</div>
+  <div class="sb-group-label" style="margin-top:6px">재고관리</div>
   <div class="sb-item sb-indent" data-perm="재고조회" data-default-url="../inventory/index.html">자재 관리</div>
-  <div class="sb-item sb-indent" data-perm="재고관리자">제품 입고/출고/조정</div>
   <div class="sb-item sb-indent" data-perm="제품 신고 관리">제품 신고 관리</div>
   <div class="sb-item sb-indent" data-perm="재고관리자" data-default-url="../procurement/index.html">부자재 관리</div>
   <div class="sb-item sb-indent" data-perm="원료관리">원료 관리</div>
@@ -122,16 +122,8 @@
     </div>
     <div class="home-side">
       <div class="home-notices" id="notices">
-      <div class="sec-title">공지사항</div>
-      <div class="home-notice-list">
-        <div class="home-notice-row"><span class="tag tp">제품공지</span><div><div class="row-title">5월 출시 제품</div><div class="row-sum">5월에 출시되는 신제품 목록에는 나노코트 V3 50ml와 왁스부스터 50ml가 포함되어 있습니다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">5월 도시락 담당</div><div class="row-sum">5월 도시락 담당자는 철완, 다영, 해연이다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">4월 도시락 담당</div><div class="row-sum">4월 도시락 담당자는 준유, 혜선, 수빈입니다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">슬리퍼 관련 공지사항</div><div class="row-sum">안전사고 예방을 위해 슬리퍼 착용에 대한 규정이 있습니다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">6월 도시락 담당</div><div class="row-sum">6월 도시락 담당자는 상덕, 나겸, 현지로 지정되었습니다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">3월 도시락 담당</div><div class="row-sum">3월 도시락 담당자는 김과장님, 선우, 리암입니다.</div></div><div class="home-notice-author">관리자</div></div>
-        <div class="home-notice-row"><span class="tag tg">일반공지</span><div><div class="row-title">산업안전보건교육</div><div class="row-sum">신입사원들을 위한 산업안전보건교육이 2026년 3월 31일 화요일 7시 55분에 진행됩니다.</div></div><div class="home-notice-author">관리자</div></div>
-      </div>
+      <div class="sec-title">공지사항 <a class="home-notice-more" href="notices/index.html">전체 보기</a></div>
+      <div class="home-notice-list" data-notice-list></div>
     </div>
         <aside class="home-status">
 

@@ -1,0 +1,8 @@
+.notice-page{width:100%;min-width:0}
+.notice-heading{margin-bottom:24px}
+.notice-heading .page-desc{margin-bottom:0}
+.notice-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:8px 28px}
+.notice-panel .home-notice-row{padding:24px 0}
+.notice-panel .row-title{font-size:18px}
+.notice-panel .row-sum{font-size:14px;line-height:1.8;margin-top:8px}
+@media(max-width:600px){.notice-panel{padding:4px 18px}.notice-panel .home-notice-row{padding:20px 0}.notice-panel .row-title{font-size:16px}}

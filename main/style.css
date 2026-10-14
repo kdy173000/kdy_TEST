@@ -354,7 +354,9 @@ font-weight:500;}
 .home-calendar .sec-title{flex-wrap:wrap}
 .home-calendar .cal-cell{min-height:110px}
 .home-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-.home-notices .sec-title{margin-bottom:6px}
+.home-notices .sec-title{margin-bottom:6px;justify-content:space-between}
+.home-notice-more{font-size:12px;font-weight:500;color:var(--text2);text-decoration:none}
+.home-notice-more:hover{color:var(--accent)}
 .home-notice-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:16px 0;border-bottom:1px solid var(--border)}
 .home-notice-row:last-child{border-bottom:0;padding-bottom:0}
 .home-notice-row>.tag{grid-column:1;justify-self:start}
