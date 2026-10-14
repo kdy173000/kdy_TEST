@@ -7,10 +7,10 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=direct-logo31">
+<link rel="stylesheet" href="style.css?v=home-calendar35">
 
 <script defer src="script.js?v=ux28"></script>
-<link rel="stylesheet" href="../shared/portal-nav.css?v=restored-menu32">
+<link rel="stylesheet" href="../shared/portal-nav.css?v=home-calendar35">
 <script defer src="../shared/portal-nav.js?v=material-links34"></script>
 </head>
 <body class="portal-home">
@@ -88,26 +88,13 @@
   </div>
 </nav>
 
-<div class="main">
-  <div class="center">
+<main class="home-dashboard">
+  <div class="home-heading">
     <h1 class="page-h1">사내 운영 포털</h1>
-    <p class="page-desc">공지사항과 직원 일정을 한눈에 확인하세요.</p>
-
-    <nav class="home-shortcuts" aria-label="자주 사용하는 업무"><a href="../inventory/index.html">자재 관리</a><a href="../procurement/index.html">부자재 관리</a><a href="leave/index.html">내부 일정</a></nav><div class="sec" id="notices">
-      <div class="sec-title">공지사항</div>
-      <div class="tbl">
-        <div class="tbl-head"><div>공지사항</div><div>제목</div><div style="text-align:right">생성자</div></div>
-        <div class="tbl-row"><span class="tag tp">제품공지</span><div><div class="row-title">5월 출시 제품</div><div class="row-sum">5월에 출시되는 신제품 목록에는 나노코트 V3 50ml와 왁스부스터 50ml가 포함되어 있습니다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag ti">사내공지</span><div><div class="row-title">5월 도시락 담당</div><div class="row-sum">5월 도시락 담당자는 철완, 다영, 해연이다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag ti">사내공지</span><div><div class="row-title">4월 도시락 담당</div><div class="row-sum">4월 도시락 담당자는 준유, 혜선, 수빈입니다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag ti">사내공지</span><div><div class="row-title">슬리퍼 관련 공지사항</div><div class="row-sum">안전사고 예방을 위해 슬리퍼 착용에 대한 규정이 있습니다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag ti">사내공지</span><div><div class="row-title">6월 도시락 담당</div><div class="row-sum">6월 도시락 담당자는 상덕, 나겸, 현지로 지정되었습니다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag ti">사내공지</span><div><div class="row-title">3월 도시락 담당</div><div class="row-sum">3월 도시락 담당자는 김과장님, 선우, 리암입니다.</div></div><div class="row-auth">관리자</div></div>
-        <div class="tbl-row"><span class="tag tg">일반공지</span><div><div class="row-title">산업안전보건교육</div><div class="row-sum">신입사원들을 위한 산업안전보건교육이 2026년 3월 31일 화요일 7시 55분에 진행됩니다.</div></div><div class="row-auth">관리자</div></div>
-      </div>
-    </div>
-
-    <div class="sec" id="calendar">
+    <p class="page-desc">직원 일정과 공지사항을 한눈에 확인하세요.</p>
+  </div>
+  <div class="home-grid">
+    <div class="home-calendar" id="calendar">
       <div class="sec-title">
         직원 일정
         <div class="cal-legend" style="margin-left:auto;font-weight:400">
@@ -133,9 +120,20 @@
         <div id="cal-body"></div>
       </div>
     </div>
-  </div>
-
-  <aside class="rp">
+    <div class="home-side">
+      <div class="home-notices" id="notices">
+      <div class="sec-title">공지사항</div>
+      <div class="home-notice-list">
+        <div class="home-notice-row"><span class="tag tp">제품공지</span><div><div class="row-title">5월 출시 제품</div><div class="row-sum">5월에 출시되는 신제품 목록에는 나노코트 V3 50ml와 왁스부스터 50ml가 포함되어 있습니다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">5월 도시락 담당</div><div class="row-sum">5월 도시락 담당자는 철완, 다영, 해연이다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">4월 도시락 담당</div><div class="row-sum">4월 도시락 담당자는 준유, 혜선, 수빈입니다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">슬리퍼 관련 공지사항</div><div class="row-sum">안전사고 예방을 위해 슬리퍼 착용에 대한 규정이 있습니다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">6월 도시락 담당</div><div class="row-sum">6월 도시락 담당자는 상덕, 나겸, 현지로 지정되었습니다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag ti">사내공지</span><div><div class="row-title">3월 도시락 담당</div><div class="row-sum">3월 도시락 담당자는 김과장님, 선우, 리암입니다.</div></div><div class="home-notice-author">관리자</div></div>
+        <div class="home-notice-row"><span class="tag tg">일반공지</span><div><div class="row-title">산업안전보건교육</div><div class="row-sum">신입사원들을 위한 산업안전보건교육이 2026년 3월 31일 화요일 7시 55분에 진행됩니다.</div></div><div class="home-notice-author">관리자</div></div>
+      </div>
+    </div>
+        <aside class="home-status">
 
     <div>
       <div class="rp-label">현재 출장</div>
@@ -156,7 +154,9 @@
       </div>
     </div>
   </aside>
-</div>
+    </div>
+  </div>
+</main>
 </div>
 
 <!-- 채팅 팝업 -->

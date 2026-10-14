@@ -13,7 +13,6 @@ html{min-height:100%;overflow-y:auto}
 .top-nav-group{position:relative;min-width:0}
 .app-side-nav .sb-group-label{display:block;margin:0;padding:16px 4px;border:0;color:var(--text,#24272c);font-size:14px;font-weight:600;letter-spacing:0;cursor:pointer;list-style:none}
 .app-side-nav .sb-group-label::-webkit-details-marker{display:none}
-.app-side-nav .sb-group-label::after{content:'⌄';margin-left:9px;color:var(--text2,#616976);font-size:12px}
 .top-nav-group[open]>.sb-group-label,.top-nav-group:has(.active)>.sb-group-label{color:var(--accent,#9b1b30)}
 .top-nav-items{position:absolute;top:100%;left:0;min-width:220px;padding:8px;background:var(--bg2,#fff);border:1px solid var(--border,#e4e7eb);border-radius:10px;box-shadow:0 12px 30px #18202c18}
 .app-side-nav .sb-item{display:flex;align-items:center;text-decoration:none;padding:11px 12px;margin:2px 0;border:0;border-radius:7px;background:transparent;color:var(--text,#24272c);font-size:14px;font-weight:500;line-height:1.6;cursor:pointer;text-align:left;width:100%;white-space:nowrap}

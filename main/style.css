@@ -344,3 +344,25 @@ font-weight:500;}
 @media(max-width:600px){.nr-box,.pf-box{padding:22px}.chat-popup{height:520px;width:380px;max-width:calc(100vw - 32px)}.msg-bubble{max-width:calc(100vw - 120px)}}
 
 [data-theme="dark"] .ev-bar-l{color:#99ddb2}[data-theme="dark"] .ev-bar-t{color:#a5c7ff}[data-theme="dark"] .ev-bar-h{color:#f2d28c}[data-theme="dark"] .ev-bar-p,[data-theme="dark"] .ev-hol{color:#ffadb9}
+
+/* Main dashboard: calendar first, notices in a compact right column. */
+.home-dashboard{min-width:0}
+.home-heading{margin-bottom:24px}
+.home-heading .page-desc{margin-bottom:0}
+.home-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.home-calendar,.home-notices,.home-status{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:14px;padding:24px}
+.home-calendar .sec-title{flex-wrap:wrap}
+.home-calendar .cal-cell{min-height:110px}
+.home-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.home-notices .sec-title{margin-bottom:6px}
+.home-notice-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:16px 0;border-bottom:1px solid var(--border)}
+.home-notice-row:last-child{border-bottom:0;padding-bottom:0}
+.home-notice-row>.tag{grid-column:1;justify-self:start}
+.home-notice-row>div:not(.home-notice-author){grid-column:1/-1;grid-row:2}
+.home-notice-author{grid-column:2;grid-row:1;font-size:12px;color:var(--text3);align-self:center}
+.home-notice-row .row-title{font-size:14px;line-height:1.5}
+.home-notice-row .row-sum{font-size:12px;line-height:1.65;margin-top:5px}
+.home-status{display:flex;flex-direction:column;gap:22px}
+@media(max-width:1100px){.home-grid{grid-template-columns:minmax(0,1fr) 280px;gap:18px}.home-calendar,.home-notices,.home-status{padding:20px}.home-calendar .cal-legend{width:100%;margin-left:0!important}}
+@media(max-width:850px){.home-grid{grid-template-columns:minmax(0,1fr)}.home-side{display:grid;grid-template-columns:minmax(0,1fr) 240px;align-items:start}}
+@media(max-width:600px){.home-heading{margin-bottom:20px}.home-calendar,.home-notices,.home-status{padding:18px 14px}.home-side{display:flex}.home-calendar .cal-cell{min-height:80px}}
