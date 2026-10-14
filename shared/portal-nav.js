@@ -32,8 +32,9 @@
           if (path && new URL(to(path)).pathname === location.pathname) { item.classList.add('active'); item.setAttribute('aria-current','page'); }
         } else {
           item.type = 'button';
-          if (!permitted) { item.disabled = true; item.setAttribute('aria-disabled','true'); item.title = '접근 권한이 없습니다.'; }
-          else item.addEventListener('click', () => alert('연결할 페이지가 아직 설정되지 않았습니다.'));
+          item.disabled = true;
+          item.setAttribute('aria-disabled','true');
+          item.title = permitted ? '준비 중인 페이지입니다.' : '접근 권한이 없습니다.';
         }
         nav.append(item);
       }
@@ -90,83 +91,104 @@
     item.type = 'button';
     item.className = 'sb-item';
     item.textContent = label;
-    item.addEventListener('click', () => alert('연결할 페이지가 아직 설정되지 않았습니다.'));
+    item.disabled = true;
+    item.setAttribute('aria-disabled', 'true');
+    item.title = '준비 중인 페이지입니다.';
     return item;
   });
   nav.prepend(companyTitle, ...companyItems);
-  // Move existing menu nodes so their click handlers and permission state survive.
-  const nodes = Array.from(nav.children);
-  let group = null, items = null;
-  for (const node of nodes) {
-    if (node.classList.contains('sb-group-label')) {
-      group = document.createElement('details');
-      group.className = 'top-nav-group';
-      const heading = document.createElement('summary');
-      heading.className = 'sb-group-label';
-      heading.textContent = node.textContent;
-      items = document.createElement('div');
-      items.className = 'top-nav-items';
-      group.append(heading, items);
-      nav.append(group);
-      node.remove();
-      // Desktop opens the category on hover/focus; the destination needs one click.
-      const menuGroup = group;
-      const hoverMenu = window.matchMedia('(hover: hover) and (pointer: fine)');
-      menuGroup.addEventListener('pointerenter', () => {
-        if (!hoverMenu.matches) return;
-        nav.querySelectorAll('details[open]').forEach(other => { if (other !== menuGroup) other.open = false; });
-        menuGroup.open = true;
-      });
-      menuGroup.addEventListener('pointerleave', () => {
-        if (hoverMenu.matches && !menuGroup.contains(document.activeElement)) menuGroup.open = false;
-      });
-      menuGroup.addEventListener('focusin', () => { menuGroup.open = true; });
-      menuGroup.addEventListener('focusout', event => { if (!menuGroup.contains(event.relatedTarget)) menuGroup.open = false; });
-      heading.addEventListener('click', () => {
-        nav.querySelectorAll('details[open]').forEach(other => { if (other !== heading.parentElement) other.open = false; });
-      });
-    } else if (node.classList.contains('sb-item') && items) {
-      items.append(node);
-      node.addEventListener('click', () => { nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
-    } else if (node.classList.contains('sb-footer')) node.remove();
-  }
+
   const header = document.querySelector('.portal-header');
   const actions = header?.querySelector('.portal-header-actions');
-  if (header && actions) {
-    header.insertBefore(nav, actions);
-    if (!Array.from(actions.children).some(item => item.textContent.includes('내 프로필'))) {
-      const profile = document.createElement('a');
-      profile.className = 'portal-header-button';
-      profile.href = to('main/index.html#profile');
-      profile.textContent = '내 프로필';
-      actions.append(profile);
-    }
-    if (!Array.from(actions.children).some(item => item.textContent.includes('로그아웃'))) {
-      const logout = document.createElement('button');
-      logout.type = 'button';
-      logout.className = 'portal-header-button logout-button';
-      logout.textContent = '로그아웃';
-      logout.addEventListener('click', () => {
-        if (typeof doLogout === 'function') doLogout();
-        else { sessionStorage.removeItem('fb_user'); location.href = to('login/index.html'); }
-      });
-      actions.append(logout);
-    }
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'portal-header-button header-nav-toggle';
-    toggle.textContent = '메뉴';
-    toggle.setAttribute('aria-expanded','false');
-    toggle.setAttribute('aria-label','사내 운영 메뉴 열기');
-    toggle.addEventListener('click', () => {
-      nav.classList.toggle('header-nav-open');
-      toggle.setAttribute('aria-expanded', String(nav.classList.contains('header-nav-open')));
-    });
-    actions.prepend(toggle);
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { nav.classList.remove('header-nav-open'); toggle.setAttribute('aria-expanded','false'); }
+  if (!header || !actions) return;
+  const subnav = document.createElement('nav');
+  subnav.className = 'portal-subnav';
+  subnav.setAttribute('aria-label', '서브 메뉴');
+  const groups = [];
+  let current = null;
+  for (const node of Array.from(nav.children)) {
+    if (node.classList.contains('sb-group-label')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'category-button';
+      button.textContent = node.textContent;
+      const panel = document.createElement('div');
+      panel.className = 'subnav-items';
+      panel.id = 'portal-submenu-' + groups.length;
+      panel.hidden = true;
+      button.setAttribute('aria-controls', panel.id);
+      button.setAttribute('aria-expanded', 'false');
+      current = {button, panel};
+      groups.push(current);
+      nav.append(button);
+      subnav.append(panel);
+      node.remove();
+    } else if (node.classList.contains('sb-item') && current) {
+      node.classList.remove('active');
+      node.removeAttribute('aria-current');
+      if (node.tagName === 'A') {
+        const url = new URL(node.href);
+        if (url.pathname === location.pathname && (!url.hash || url.hash === location.hash)) {
+          node.classList.add('active');
+          node.setAttribute('aria-current', 'page');
+        }
+      }
+      const unavailable = node.textContent.trim() === '조직도' ||
+        (node.tagName !== 'A' && (node.tagName === 'BUTTON' || typeof node.onclick !== 'function'));
+      if (unavailable) {
+        const placeholder = document.createElement('button');
+        placeholder.type = 'button';
+        placeholder.className = 'sb-item';
+        placeholder.textContent = node.textContent;
+        placeholder.disabled = true;
+        placeholder.setAttribute('aria-disabled', 'true');
+        placeholder.title = node.title || '준비 중인 페이지입니다.';
+        node.remove();
+        current.panel.append(placeholder);
+      } else current.panel.append(node);
+    } else node.remove();
+  }
+  const homeGroup = groups.find(group => group.panel.querySelector('.active')) ||
+    groups.find(group => group.button.textContent === '사내 운영 관리') || groups[0];
+  function showGroup(selected) {
+    groups.forEach(group => {
+      const visible = group === selected;
+      group.panel.hidden = !visible;
+      group.button.setAttribute('aria-expanded', String(visible));
+      group.button.classList.toggle('preview-category', visible);
+      group.button.classList.toggle('current-category', group === homeGroup);
     });
   }
-  document.addEventListener('click', event => { if (!nav.contains(event.target)) nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') nav.querySelectorAll('details').forEach(detail => { detail.open = false; }); });
+  const restore = () => showGroup(homeGroup);
+  const hover = window.matchMedia('(hover: hover) and (pointer: fine)');
+  groups.forEach(group => {
+    group.button.addEventListener('pointerenter', () => { if (hover.matches) showGroup(group); });
+    group.button.addEventListener('focus', () => showGroup(group));
+    group.button.addEventListener('click', () => showGroup(group));
+  });
+  header.insertBefore(nav, actions);
+  header.append(subnav);
+  header.addEventListener('pointerleave', restore);
+  header.addEventListener('focusout', event => { if (!header.contains(event.relatedTarget)) restore(); });
+  document.addEventListener('click', event => { if (!header.contains(event.target)) restore(); });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') restore(); });
+  if (!Array.from(actions.children).some(item => item.textContent.includes('내 프로필'))) {
+    const profile = document.createElement('a');
+    profile.className = 'portal-header-button';
+    profile.href = to('main/index.html#profile');
+    profile.textContent = '내 프로필';
+    actions.append(profile);
+  }
+  if (!Array.from(actions.children).some(item => item.textContent.includes('로그아웃'))) {
+    const logout = document.createElement('button');
+    logout.type = 'button';
+    logout.className = 'portal-header-button logout-button';
+    logout.textContent = '로그아웃';
+    logout.addEventListener('click', () => {
+      if (typeof doLogout === 'function') doLogout();
+      else { sessionStorage.removeItem('fb_user'); location.href = to('login/index.html'); }
+    });
+    actions.append(logout);
+  }
+  restore();
 })();
