@@ -139,6 +139,34 @@ function saveSchedule(list){localStorage.setItem(KEY,JSON.stringify(list));}
 const TYPE_MAP={t:'출장',l:'연차',h:'반차',p:'공휴일'};
 const TYPE_CLS={t:'type-t',l:'type-l',h:'type-h',p:'type-p'};
 let currentFilter='all';
+let mineOnly=false;
+function schedulePeople(value){return String(value||'').split(/[·,、/\\n]/).map(name=>name.trim()).filter(Boolean);}
+function isMySchedule(entry,user){
+  if(Array.isArray(entry.userIds)) return entry.userIds.includes(user.id);
+  const people=schedulePeople(entry.w);
+  return people.includes(user.id)||Boolean(user.name&&people.includes(user.name));
+}
+function participantIds(names){
+  let accounts=[];
+  try{accounts=JSON.parse(localStorage.getItem('fb_accounts')||'[]');}catch{}
+  const people=schedulePeople(names);
+  return [...new Set([...accounts,me].filter(user=>user&&user.id&&(people.includes(user.id)||(user.name&&people.includes(user.name)))).map(user=>user.id))];
+}
+function filterSchedules(all,{today,from='',to='',mine=false,user,type='all',query=''}){
+  const lower=from||(!to?today:'');
+  return all.filter(entry=>(!lower||(entry.e||entry.s)>=lower)&&(!to||entry.s<=to)&&(!mine||isMySchedule(entry,user))&&(type==='all'||entry.t===type)&&(!query||(entry.w+' '+entry.l).toLowerCase().includes(query)));
+}
+function toggleMySchedule(){
+  mineOnly=!mineOnly;
+  const button=document.getElementById('myScheduleBtn');
+  button.setAttribute('aria-pressed',String(mineOnly));
+  renderList();
+}
+function clearSchedulePeriod(){
+  document.getElementById('scheduleFrom').value='';
+  document.getElementById('scheduleTo').value='';
+  renderList();
+}
 function setFilter(btn,f){
   currentFilter=f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
@@ -146,11 +174,19 @@ function setFilter(btn,f){
   renderList();
 }
 function renderList(){
-  const all=getSchedule(),today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),month=today.slice(0,7),q=document.getElementById('scheduleSearch').value.trim().toLowerCase(),selectedMonth=document.getElementById('scheduleMonth').value;
+  const all=getSchedule(),today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),month=today.slice(0,7),q=document.getElementById('scheduleSearch').value.trim().toLowerCase(),from=document.getElementById('scheduleFrom').value,to=document.getElementById('scheduleTo').value;
   const counts=[all.filter(e=>e.s<=today&&(e.e||e.s)>=today).length,all.filter(e=>e.s.slice(0,7)<=month&&(e.e||e.s).slice(0,7)>=month).length,all.filter(e=>e.t==='t'&&e.s<=today&&(e.e||e.s)>=today).length,all.filter(e=>e.s>today).length];
   ['summaryToday','summaryMonth','summaryTrip','summaryUpcoming'].forEach((id,i)=>document.getElementById(id).innerHTML=counts[i]+'<span>건</span>');
-  const data=all.filter(e=>(currentFilter==='all'||e.t===currentFilter)&&(!q||(e.w+' '+e.l).toLowerCase().includes(q))&&(!selectedMonth||(e.s.slice(0,7)<=selectedMonth&&(e.e||e.s).slice(0,7)>=selectedMonth)));
-  data.sort((a,b)=>b.s.localeCompare(a.s));
+  const note=document.getElementById('scheduleFilterNote');
+  if(from&&to&&from>to){
+    note.textContent='조회 종료일은 시작일보다 빠를 수 없습니다.';
+    document.getElementById('scheduleList').innerHTML='<div class="empty-row">조회 기간을 확인해주세요.</div>';
+    document.getElementById('countBar').textContent='총 0건';
+    return;
+  }
+  note.textContent=(mineOnly?'내 일정':'전체 직원')+' · '+(from||to?(from||'전체 기간')+' ~ '+(to||'이후 전체'):'오늘부터 이후 일정')+(mineOnly?' · 내 일정 버튼을 다시 누르면 전체 직원으로 돌아갑니다.':'');
+  const data=filterSchedules(all,{today,from,to,mine:mineOnly,user:me,type:currentFilter,query:q});
+  data.sort((a,b)=>a.s.localeCompare(b.s));
   const el=document.getElementById('scheduleList');
   document.getElementById('countBar').textContent='총 '+data.length+'건';
   if(!data.length){el.innerHTML='<div class="empty-row">조건에 맞는 일정이 없습니다. 검색 조건을 바꾸거나 새 일정을 등록하세요.</div>';return;}
@@ -227,9 +263,9 @@ function saveEntry(){
   const list=getSchedule();
   if(editId){
     const idx=list.findIndex(x=>x.id===editId);
-    if(idx>=0)list[idx]={id:editId,s,e,t,l,w};
+    if(idx>=0)list[idx]={...list[idx],s,e,t,l,w,userIds:participantIds(w)};
   }else{
-    list.push({id:'u'+Date.now(),s,e,t,l,w});
+    list.push({id:'u'+Date.now(),s,e,t,l,w,userIds:participantIds(w)});
   }
   saveSchedule(list);
   closeModal();
@@ -444,5 +480,4 @@ function doLogout() {
 renderList();
 renderTripNow();
 
-function resetScheduleFilters(){document.getElementById('scheduleSearch').value='';document.getElementById('scheduleMonth').value='';setFilter(document.querySelector('.filter-btn'),'all');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('modal').style.display==='flex')closeModal();});
