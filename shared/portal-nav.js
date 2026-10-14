@@ -151,6 +151,9 @@
   const homeGroup = groups.find(group => group.panel.querySelector('.active')) ||
     groups.find(group => group.button.textContent === '사내 운영 관리') || groups[0];
   function showGroup(selected) {
+    const previewing = selected !== homeGroup;
+    subnav.classList.toggle('is-preview', previewing);
+    subnav.setAttribute('aria-label', previewing ? selected.button.textContent + ' 서브 메뉴 미리 보기' : '현재 페이지 서브 메뉴');
     groups.forEach(group => {
       const visible = group === selected;
       group.panel.hidden = !visible;
