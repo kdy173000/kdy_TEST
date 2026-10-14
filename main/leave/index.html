@@ -7,9 +7,9 @@
 
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 
-<link rel="stylesheet" href="style.css?v=direct-logo31">
+<link rel="stylesheet" href="style.css?v=schedule37">
 
-<script defer src="script.js?v=ux28"></script>
+<script defer src="script.js?v=schedule37"></script>
 <link rel="stylesheet" href="../../shared/portal-nav.css?v=home-calendar35">
 <script defer src="../../shared/portal-nav.js?v=notices36"></script>
 </head>
@@ -21,9 +21,9 @@
 </button>
 
 <main class="schedule-page">
-<div class="schedule-heading"><div><p class="eyebrow">사내 운영 · 일정</p><h1>내부 일정 관리</h1><p class="page-desc">직원 일정을 한곳에서 확인하고 등록하세요.</p></div><button class="add-btn" onclick="openModal()">＋ 일정 등록</button></div>
+<div class="schedule-heading"><div><p class="eyebrow">사내 운영 · 일정</p><h1>내부 일정 관리</h1><p class="page-desc">직원 일정을 한곳에서 확인하고 등록하세요.</p></div><button type="button" class="add-btn" onclick="openModal()">＋ 일정 추가</button></div>
 <div class="schedule-summary"><article><span>오늘 진행 중</span><strong id="summaryToday">0<span>건</span></strong></article><article><span>이번 달 일정</span><strong id="summaryMonth">0<span>건</span></strong></article><article><span>현재 출장</span><strong id="summaryTrip">0<span>건</span></strong></article><article><span>앞으로의 일정</span><strong id="summaryUpcoming">0<span>건</span></strong></article></div>
-<div class="schedule-workspace"><section class="schedule-panel"><div class="panel-heading"><div><h2>일정 목록</h2><p>연차·반차·출장·공휴일을 조회합니다.</p></div><span class="count-bar" id="countBar"></span></div>
+<div class="schedule-workspace"><section class="schedule-panel"><div class="panel-heading"><div><h2>일정 목록</h2><p>연차·반차·출장·공휴일을 조회합니다.</p></div><div class="schedule-list-actions"><span class="count-bar" id="countBar"></span><button type="button" class="add-btn" onclick="openModal()">＋ 일정 추가</button></div></div>
 <div class="schedule-search"><label><span class="sr-only">담당자 또는 내용 검색</span><input id="scheduleSearch" placeholder="담당자 · 내용 · 장소 검색" oninput="renderList()"></label><label class="month-field"><span>조회 월</span><input id="scheduleMonth" type="month" onchange="renderList()"></label><button class="reset-btn" onclick="resetScheduleFilters()">초기화</button></div>
 <div class="filter-row" id="filterRow"><button class="filter-btn on" onclick="setFilter(this,'all')">전체</button><button class="filter-btn" onclick="setFilter(this,'t')">출장</button><button class="filter-btn" onclick="setFilter(this,'l')">연차</button><button class="filter-btn" onclick="setFilter(this,'h')">반차</button><button class="filter-btn" onclick="setFilter(this,'p')">공휴일</button></div>
 <div class="tbl-wrap"><div class="tbl-head"><div>#</div><div>담당자</div><div>구분</div><div>내용 · 장소</div><div>시작일</div><div>종료일</div><div>관리</div></div><div id="scheduleList"></div></div>
@@ -74,7 +74,7 @@
   </div>
 </div>
 
-<div class="nr-overlay" id="newRoomModal" onclick="if(event.target===this)closeNewRoomModal()">
+<div class="nr-overlay" id="newRoomModal" hidden onclick="if(event.target===this)closeNewRoomModal()">
   <div class="nr-box">
     <input type="hidden" id="nrType">
     <div class="nr-title" id="nrTitle">채팅방 만들기</div>
@@ -93,7 +93,7 @@
   </div>
 </div>
 
-<div class="pf-overlay" role="dialog" aria-modal="true" aria-labelledby="profileTitle" id="profileModal" onclick="if(event.target===this)closeProfile()">
+<div class="pf-overlay" role="dialog" aria-modal="true" aria-labelledby="profileTitle" id="profileModal" hidden onclick="if(event.target===this)closeProfile()">
   <div class="pf-box">
     <div class="popup-title-row"><h2 id="profileTitle">내 프로필</h2><div class="profile-tools"><button id="pfThemeBtn" onclick="toggleTheme()" aria-label="테마 전환"><span id="pf-t-ico">☀️</span></button><button class="popup-close" onclick="closeProfile()" aria-label="프로필 창 닫기">✕</button></div></div>
     <div class="pf-header">

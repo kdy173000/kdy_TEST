@@ -371,6 +371,7 @@ function openNewRoomModal(type) {
   document.getElementById('nrTitle').textContent = type === 'dm' ? '1:1 채팅 시작' : '단체 채팅방 만들기';
   document.getElementById('nrNameField').style.display = type === 'group' ? '' : 'none';
   document.getElementById('nrRoomName').value = '';
+  document.getElementById('newRoomModal').hidden = false;
   document.getElementById('newRoomModal').style.display = 'flex';
   const users = getAllUsers().filter(u => u.id !== _cu.id);
   document.getElementById('nrUsers').innerHTML = users.length
@@ -384,7 +385,7 @@ function openNewRoomModal(type) {
     });
   }
 }
-function closeNewRoomModal() { document.getElementById('newRoomModal').style.display = 'none'; }
+function closeNewRoomModal() { const modal = document.getElementById('newRoomModal'); modal.hidden = true; modal.style.display = 'none'; }
 function createRoom() {
   const type = document.getElementById('nrType').value;
   const checked = [...document.querySelectorAll('#nrUsers input:checked')];
@@ -413,9 +414,10 @@ function openProfile() {
   document.getElementById('pfRoleLabel').textContent = u.role === 'manager' ? '관리부' : '직원';
   ['pfPwOld', 'pfPwNew', 'pfPwConfirm'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pfPwMsg').textContent = '';
+  document.getElementById('profileModal').hidden = false;
   document.getElementById('profileModal').style.display = 'flex';
 }
-function closeProfile() { document.getElementById('profileModal').style.display = 'none'; }
+function closeProfile() { const modal = document.getElementById('profileModal'); modal.hidden = true; modal.style.display = 'none'; }
 function changePw() {
   const u = JSON.parse(sessionStorage.getItem('fb_user') || '{}');
   const oldPw = document.getElementById('pfPwOld').value;
