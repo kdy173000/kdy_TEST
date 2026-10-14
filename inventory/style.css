@@ -7,3 +7,7 @@
 .archive-toggle{display:flex;gap:7px;align-items:center;margin-top:14px;font-size:13px;color:#46505e}
 .archive-toggle input{width:16px}
 @media(max-width:700px){.workspace>aside{display:block}.workspace>aside #products{height:auto;max-height:none}}
+
+.heading{align-items:flex-start;gap:24px}
+.heading>.workflow-guide{width:390px;max-width:100%;margin:0;flex-shrink:0}
+@media(max-width:700px){.heading>.workflow-guide{width:100%;margin-top:16px}}

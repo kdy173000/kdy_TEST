@@ -42,3 +42,7 @@
 #closeReceiptSummary,#transactionReceiptSummary{padding:12px 14px;border-radius:8px;background:#f6f7f9;color:#303640}
 @media(max-width:700px){.workspace>aside{display:block}.purchase-list{display:flex;gap:8px;height:auto;max-height:none;overflow-x:auto}.purchase-list .product{flex:0 0 190px}.action-group{gap:6px}.order-card{padding:14px;gap:12px;flex-direction:column}.order-actions{align-items:flex-end}.order-quantities{gap:6px;padding:10px}.order-quantities strong{font-size:19px}}
 @media(max-width:600px){.receipt-quantities{grid-template-columns:1fr;gap:14px}.receipt-fields{grid-template-columns:1fr;gap:14px}.receipt-dialog .stats{padding:14px}.receipt-dialog .stats div{padding-left:10px}.receipt-dialog .stats strong{font-size:22px}}
+
+.heading{align-items:flex-start;gap:24px}
+.heading>.workflow-guide{width:390px;max-width:100%;margin:0;flex-shrink:0}
+@media(max-width:700px){.heading>.workflow-guide{width:100%;margin-top:16px}}
