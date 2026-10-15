@@ -26,7 +26,7 @@ function doLogin() {
   const account = getAllAccounts().find(a => a.id === id && a.pw === pw);
   if (account) {
     const isAdmin = account.role === 'admin' || (account.perms && account.perms.includes('관리자'));
-    sessionStorage.setItem('fb_user', JSON.stringify({ id: account.id, role: account.role || (isAdmin?'admin':'user'), name: account.name || account.id, perms: account.perms || [] }));
+    window.FBSession.start({ id: account.id, role: account.role || (isAdmin?'admin':'user'), name: account.name || account.id, perms: account.perms || [] });
     window.location.href = isAdmin
       ? (account.redirect || '../admin/main/index.html')
       : '../main/index.html';
