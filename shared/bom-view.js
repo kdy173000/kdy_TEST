@@ -59,6 +59,9 @@ window.BOMView=(()=>{
     const p=product(),b=current();if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
     $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
     $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family&&(!x.archived||x.id===pid)).map(x=>[x.id,x.name]),p.id);
+    const selectorsLocked=!editable&&$('productionDialog').classList.contains('bom-settings-mode');
+    $('familySelect').disabled=selectorsLocked;
+    $('finishedProductSelect').disabled=selectorsLocked;
     $('bomState').textContent=b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성';
     $('copyBom').hidden=!editable||!b.locked;
     $('bomHelp').textContent=p.sample?'샘플 구성입니다. 재고관리팀이 수정 버튼으로 구성을 변경할 수 있습니다.':editable?(b.locked?'생산에 사용된 구성입니다. 수정 가능한 구성을 만든 뒤 변경하세요.':'부자재명 또는 코드를 검색해 선택하세요. 변경 내용은 즉시 저장됩니다.'):'완제품에 연결된 BOM입니다. 재고관리팀은 위의 수정 버튼으로 구성을 변경할 수 있습니다.';
@@ -77,8 +80,8 @@ window.BOMView=(()=>{
     if($('finishedSummary'))$('finishedSummary').textContent='완제품 재고 '+fmt(product().finished)+'개';
   }
   function bind(edit=false){editable=edit&&FB.canAdmin();
-    $('familySelect').onchange=e=>{pid=FB.data.products.find(p=>p.family===Number(e.target.value)&&!p.archived).id;index=product().boms.length-1;render();};
-    $('finishedProductSelect').onchange=e=>{pid=e.target.value;index=product().boms.length-1;render();};
+    $('familySelect').onchange=e=>{if(e.target.disabled)return;pid=FB.data.products.find(p=>p.family===Number(e.target.value)&&!p.archived).id;index=product().boms.length-1;render();};
+    $('finishedProductSelect').onchange=e=>{if(e.target.disabled)return;pid=e.target.value;index=product().boms.length-1;render();};
 $('productionQty').oninput=update;
     $('copyBom').onclick=()=>{try{index=FB.copyBom(pid,index);render();UI.toast('새 BOM을 만들었습니다.');}catch(e){$('bomError').textContent=e.message;}};
     $('bomLines').onchange=e=>{if(!editable||!e.target.dataset.key)return;if(e.target.dataset.key==='mid'&&e.target.dataset.picked!=='true')return;const i=Number(e.target.dataset.row),r={...current().rows[i]},key=e.target.dataset.key;try{if(key==='mid'){const picked=resolveMaterial(e.target.value,FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.slot===mat(r.mid).slot&&(!m.scope||m.scope===pid)&&m.versions.some(v=>v.state==='사용')));if(!picked)throw Error('검색 목록에서 연결할 부자재를 선택해주세요.');r.mid=picked.id;r.vid=picked.versions.find(v=>v.state==='사용').id;}else r[key]=key==='each'?Number(e.target.value):e.target.value;FB.updateBom(pid,index,i,r);$('bomError').textContent='';render();UI.toast('BOM 구성을 저장했습니다.');}catch(err){$('bomError').textContent=err.message;render();}};
