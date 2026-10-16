@@ -27,9 +27,26 @@
   $('addProductVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('재고관리자 권한으로 버전을 추가할 수 있습니다.');return;}const p=selected();if(!p||p.archived){UI.toast('사용 중인 완제품을 선택하세요.');return;}versionTarget=p.id;$('productVersionName').textContent=p.name;$('newProductVersion').value='';$('productVersionError').textContent='';$('productVersionDialog').showModal();};
   $('closeProductVersion').onclick=()=>$('productVersionDialog').close();$('productVersionForm').onsubmit=e=>{e.preventDefault();try{FB.addProductVersion(versionTarget,$('newProductVersion').value);$('productVersionDialog').close();UI.toast('완제품 버전을 추가했습니다.');}catch(err){$('productVersionError').textContent=err.message;}};
   CatalogEditor.bind({kind:'product',selected,saved:id=>{$('search').value='';$('categoryFilter').value='';$('inventoryArchived').checked=!!FB.data.products.find(p=>p.id===id)?.archived;selectedId=id;render();}});
-  function bomMode(edit,viewOnly=false){$('productionDialog').classList.toggle('bom-readonly-mode',viewOnly);$('productionDialog').classList.toggle('bom-settings-mode',edit);$('productionTitle').textContent=viewOnly?'BOM 보기 · '+selected().name:edit?'BOM 설정 · '+selected().name:'생산 등록';$('productionInput').hidden=edit||viewOnly;$('bomEditControls').hidden=!edit;$('bomManageHeading').hidden=!edit;document.querySelectorAll('.production-histories').forEach(el=>el.hidden=edit||viewOnly);document.querySelector('[form="productionForm"]').hidden=edit||viewOnly;BOMView.bind(edit);}
+  let bomEditing=false;
+  function bomMode(edit,viewOnly=false){
+    const editing=edit&&FB.canAdmin(),isBom=edit||viewOnly;
+    bomEditing=editing;
+    $('productionDialog').classList.toggle('bom-readonly-mode',isBom);
+    $('productionDialog').classList.toggle('bom-settings-mode',isBom);
+    $('productionTitle').textContent=isBom?'BOM':'생산 등록';
+    $('productionInput').hidden=isBom;
+    $('bomEditControls').hidden=!editing;
+    $('bomManageHeading').hidden=false;
+    $('bomManageHeading').style.visibility=editing?'visible':'hidden';
+    $('toggleBomEdit').hidden=!isBom||!FB.canAdmin();
+    $('toggleBomEdit').textContent=editing?'수정 완료':'수정';
+    $('toggleBomEdit').setAttribute('aria-pressed',String(editing));
+    document.querySelectorAll('.production-histories').forEach(el=>el.hidden=isBom);
+    document.querySelector('[form="productionForm"]').hidden=isBom;
+    BOMView.bind(editing);
+  }
   $('viewBom').onclick=()=>{bomMode(false,true);BOMView.select(selectedId);$('productionDialog').showModal();};
-  $('editBom').onclick=()=>{if(!UI.allowWrite())return;bomMode(true);BOMView.select(selectedId);$('productionDialog').showModal();};
+  $('toggleBomEdit').onclick=()=>{if(!UI.allowWrite())return;bomMode(!bomEditing,true);};
   UI.bindVersionManagement('productVersions','product');
   BOMView.bind(false);
   function history(){

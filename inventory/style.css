@@ -24,3 +24,8 @@
 .inventory-overview .stats strong{font-size:27px;margin-top:6px;white-space:nowrap}
 @media(max-width:700px){.inventory-overview{grid-template-columns:80px minmax(0,1fr);gap:10px}.inventory-overview .item-photo>img,.inventory-overview .item-photo-empty{width:80px;height:80px}.inventory-overview .stats{padding:14px 10px}.inventory-overview .stats>div{padding-left:8px}.inventory-overview .stats span{font-size:11px}.inventory-overview .stats strong{font-size:20px}}
 @media(max-width:420px){.inventory-overview{grid-template-columns:64px minmax(0,1fr);gap:8px}.inventory-overview .item-photo>img,.inventory-overview .item-photo-empty{width:64px;height:64px}.inventory-overview .stats{padding:12px 8px}.inventory-overview .stats>div{padding-left:5px}.inventory-overview .stats span{font-size:10px}.inventory-overview .stats strong{font-size:17px}}
+
+.bom-header-actions{display:flex;align-items:center;gap:8px}
+.bom-header-actions #toggleBomEdit{border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:600}
+.bom-header-actions #toggleBomEdit[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:#fff}
+.bom-row-actions{width:72px;min-width:72px}
