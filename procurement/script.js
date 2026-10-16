@@ -8,7 +8,7 @@
     const items=filtered();
     if(!items.some(m=>m.id===selected))selected=items[0]?.id||'';
     $('stockCount').textContent=items.length+'종';
-    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" aria-pressed="${m.id===selected}" data-select="${esc(m.id)}"><strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" aria-pressed="${m.id===selected}" data-select="${esc(m.id)}">${Photos.markup('material',m.id,m.name,'list')}<strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
     if(selected)detail(selected);
     const orders=FB.data.orders.filter(o=>o.mid===selected&&!o.closed&&o.received<o.qty);
@@ -37,6 +37,7 @@
   }
   function detail(id){const m=material(id),usable=!m.archived&&m.versions.some(v=>v.state==='사용');
     const pending=vid=>FB.data.orders.filter(o=>o.mid===id&&(!vid||o.vid===vid)).reduce((n,o)=>n+UI.remaining(o),0);
+    $('materialPhoto').innerHTML=Photos.markup('material',m.id,m.name);Photos.refresh();
     $('stockTitle').textContent=m.name;$('stockKind').textContent=m.slot;$('stockCode').textContent=m.id+(m.archived?' · 단종':'');
     $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
     $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;
@@ -104,4 +105,5 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 
   UI.bindVersionAddition(()=>material(selected));
   window.addEventListener('fb-data',render);render();
 })();
+
 

@@ -2,7 +2,7 @@ const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
 if (!me || me.role !== 'admin') { window.location.href = '../../login/index.html'; }
 
 const KEY_USERS = 'fb_accounts';
-const PERMS = ['관리자','재고조회','재고관리자','제품 신고 관리','원료관리'];
+const PERMS = ['관리자','재고조회','재고관리자','제품 신고 관리','원료관리','디자이너','발주팀'];
 const PERM_STYLE = {
   '관리자':        { color:'#d95f5f', bg:'rgba(220,80,80,.15)',   border:'rgba(220,80,80,.35)' },
   '재고조회':      { color:'#52a874', bg:'rgba(82,168,116,.15)',  border:'rgba(82,168,116,.35)' },
@@ -135,3 +135,4 @@ function doLogout() { sessionStorage.removeItem('fb_user'); window.location.href
 
 renderPermBtns('newPerms');
 renderList();
+
