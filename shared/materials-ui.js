@@ -21,7 +21,7 @@ UI.bindVersionAddition=function(selected){
 
 // Shared permission and closing behavior across material workflows.
 UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 재고관리자 권한을 부여받으세요.');return false;};
-UI.applyAccess=function(){const writable=FB.canAdmin();const note=this.$('accessNote');if(note)note.textContent=writable?'재고관리자 · 등록과 수정이 가능합니다.':'조회 모드 · 등록과 수정은 재고관리자 권한이 필요합니다.';
+UI.applyAccess=function(){const writable=FB.canAdmin();const note=this.$('accessNote');if(note){const perms=FB.user()?.perms||[];note.textContent=writable?(perms.includes('발주팀')?'발주팀 · 발주 등록과 재고 관리가 가능합니다.':'재고관리자 · 등록과 수정이 가능합니다.'):perms.includes('디자이너')?'디자이너 · 사진 편집과 재고 조회가 가능합니다.':'조회 모드 · 등록과 수정은 재고관리자 또는 발주팀 권한이 필요합니다.';}
  document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'재고관리자 권한이 필요합니다.';});};
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
 document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});

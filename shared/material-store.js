@@ -23,7 +23,7 @@ function normalizeProducts(d){if(!Array.isArray(d.productCategories))d.productCa
 function read(){try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d.schema!==3||!Array.isArray(d.materials)||!Array.isArray(d.orders))throw Error('저장 데이터 형식이 다릅니다.');const p=d.products.find(p=>p.id==='DEMO-5');if(p&&p.name==='케미컬 4L 샘플'){p.name='케미컬 4L';p.sample=false;}return normalizeProducts(d);}return normalizeProducts(seed());}catch(e){throw Error('이 브라우저의 저장 데이터를 읽을 수 없습니다. '+e.message);}}
 let state=read();
 function user(){try{const session=JSON.parse(sessionStorage.getItem('fb_user')||'null');if(!session)return null;const accounts=JSON.parse(localStorage.getItem('fb_accounts')||'[]');return accounts.find(a=>a.id===session.id)||session;}catch{return null;}}
-const canAdmin=()=>{const u=user();return !!u&&(u.role==='admin'||(u.perms||[]).some(p=>['재고관리자','입출고관리','입출고 관리자'].includes(p)));};
+const canAdmin=()=>{const u=user();return !!u&&(u.role==='admin'||(u.perms||[]).some(p=>['재고관리자','입출고관리','입출고 관리자','발주팀'].includes(p)));};
 function admin(){if(!canAdmin())throw Error('재고관리자 권한이 필요합니다.');}
 function integer(n,min=1){if(!Number.isSafeInteger(n)||n<min)throw Error(`${min} 이상의 정수 수량을 입력하세요.`);return n;}
 function required(s,label){const v=String(s||'').trim();if(!v)throw Error(label+'을 입력하세요.');return v;}
