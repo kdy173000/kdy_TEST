@@ -20,11 +20,15 @@ UI.bindVersionAddition=function(selected){
 };
 
 // Shared permission and closing behavior across material workflows.
-UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 재고관리자 권한을 부여받으세요.');return false;};
-UI.applyAccess=function(){const writable=FB.canAdmin();const note=this.$('accessNote');if(note){const perms=FB.user()?.perms||[];note.textContent=writable?(perms.includes('발주팀')?'발주팀 · 발주 등록과 재고 관리가 가능합니다.':'재고관리자 · 등록과 수정이 가능합니다.'):perms.includes('디자이너')?'디자이너 · 사진 편집과 재고 조회가 가능합니다.':'조회 모드 · 등록과 수정은 재고관리자 또는 발주팀 권한이 필요합니다.';}
- document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'재고관리자 권한이 필요합니다.';});};
+UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 재고관리팀 권한을 부여받으세요.');return false;};
+UI.applyAccess=function(){const writable=FB.canAdmin(),shipping=FB.canShip(),photo=FB.canPhoto();const note=this.$('accessNote');
+ if(note)note.textContent=writable?'재고관리팀 · 발주·재고·BOM 관리가 가능합니다.':shipping?(photo?'출고·사진 편집 권한 · 재고와 BOM은 조회만 가능합니다.':'출고 권한 · 출고 등록과 재고 조회가 가능합니다.'):photo?'디자인팀 · 사진만 편집할 수 있으며 재고와 BOM은 조회만 가능합니다.':'조회 모드 · 부여받은 권한에 따라 관리 기능을 사용할 수 있습니다.';
+ document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'재고관리팀 권한이 필요합니다.';});
+ document.querySelectorAll('[data-shipping-action]').forEach(button=>{button.disabled=!shipping;button.title=shipping?'':'출고 또는 재고관리팀 권한이 필요합니다.';});};
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
 document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});
 
 UI.versionActions=function(kind,id,vid){return FB.canAdmin()?`<div class="action-group"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}">버전명 수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}">삭제</button></div>`:'';};
 UI.bindVersionManagement=function(container,kind){this.$(container).addEventListener('click',e=>{const b=e.target.closest('[data-version-edit],[data-version-delete]');if(!b||!this.allowWrite())return;const remove=b.dataset.versionDelete!==undefined,vid=remove?b.dataset.versionDelete:b.dataset.versionEdit;let name;if(remove){if(!confirm(vid+' 버전을 목록에서 삭제할까요? 재고가 0개일 때만 가능하며 과거 기록은 보존됩니다.'))return;}else{name=prompt('새 버전명을 입력하세요.',vid);if(name===null)return;}try{FB.manageVersion({kind,id:b.dataset.entity,vid,remove,name});this.toast(remove?'버전을 목록에서 삭제했습니다.':'버전명과 연결 정보를 수정했습니다.');}catch(err){this.toast(err.message);}});};
+
+UI.allowShipping=function(){if(FB.canShip())return true;UI.toast('출고 또는 재고관리팀 권한이 필요합니다.');return false;};

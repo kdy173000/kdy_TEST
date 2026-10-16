@@ -6,8 +6,7 @@ window.ItemPhotos = (() => {
   const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('fb-item-photos') : null;
   function canEdit() {
     if (window.FBSession && !window.FBSession.check()) return false;
-    const user = FB.user();
-    return !!user && (user.perms || []).some(permission => ['디자이너', '발주팀'].includes(permission));
+    return FB.canPhoto();
   }
   function key(kind, id) {
     if (!['product', 'material'].includes(kind) || typeof id !== 'string' || !id) throw Error('품목을 확인해주세요.');
@@ -18,7 +17,7 @@ window.ItemPhotos = (() => {
     if (!item) throw Error('품목을 찾을 수 없습니다.');
     return item;
   }
-  function permission() { if (!canEdit()) throw Error('사진 편집은 디자이너·발주팀 권한이 필요합니다.'); }
+  function permission() { if (!canEdit()) throw Error('사진 편집은 디자인팀 또는 재고관리팀 권한이 필요합니다.'); }
   function open() {
     if (!database) database = new Promise((resolve, reject) => {
       const request = indexedDB.open('fireball-item-photos', 1);
