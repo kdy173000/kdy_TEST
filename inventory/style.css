@@ -35,5 +35,14 @@
 .product-info-edit:hover{background:var(--hover);color:var(--text)}
 
 .bom-material-search{min-width:180px;width:100%}
-.bom-add input[type="search"]{width:100%;margin-top:8px}
+.bom-add #bomAddPicker{margin-top:8px}
+.bom-picker{min-width:180px;width:100%;text-align:left}
+.bom-picker-field{display:flex;align-items:stretch}
+.bom-picker-field .bom-material-search{min-width:0;flex:1;border-radius:6px 0 0 6px}
+.bom-picker-toggle{flex:0 0 34px;padding:0;border:1px solid var(--border2);border-left:0;border-radius:0 6px 6px 0;background:var(--bg2);color:var(--text2)}
+.bom-picker-list{max-height:180px;overflow-y:auto;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);margin-top:4px;padding:4px}
+.bom-picker-list[hidden]{display:none}
+.bom-picker-list .bom-picker-option{display:block;width:100%;padding:9px 10px;border:0;border-radius:4px;background:transparent;text-align:left;white-space:normal;color:var(--text);font-size:13px}
+.bom-picker-list .bom-picker-option:hover,.bom-picker-list .bom-picker-option.is-active{background:#fff0f3}
+.bom-picker-empty{display:block;padding:10px;color:var(--text2);font-size:13px}
 .bom-revision:has(>button[hidden]){display:none}
