@@ -1,6 +1,7 @@
 @import url('../shared/portal.css?v=direct-logo31');
 @import url('../shared/inventory.css');
 @import url('../shared/materials.css');
+@import url('../shared/item-overview.css?v=photo-align61');
 
 .workspace{margin-bottom:24px}
 .workspace>aside{display:flex;flex-direction:column;min-height:0}

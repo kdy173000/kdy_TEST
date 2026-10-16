@@ -37,7 +37,7 @@
   }
   function detail(id){const m=material(id),usable=!m.archived&&m.versions.some(v=>v.state==='사용');
     const pending=vid=>FB.data.orders.filter(o=>o.mid===id&&(!vid||o.vid===vid)).reduce((n,o)=>n+UI.remaining(o),0);
-    $('materialPhoto').innerHTML=Photos.markup('material',m.id,m.name);Photos.refresh();
+    $('materialPhoto').innerHTML=Photos.markup('material',m.id,m.name,'summary');Photos.refresh();
     $('stockTitle').textContent=m.name;$('stockKind').textContent=m.slot;$('stockCode').textContent=m.id+(m.archived?' · 단종':'');
     $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
     $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;

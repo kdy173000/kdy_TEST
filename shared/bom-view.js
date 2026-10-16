@@ -56,7 +56,7 @@ window.BOMView=(()=>{
   document.addEventListener('scroll',closeFloatingPickers,true);
   window.addEventListener('resize',closeFloatingPickers);
   function render(){
-    const p=product(),b=current();$('bomProductPhoto').innerHTML=Photos.markup('product',p.id,p.name,'detail',true);if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
+    const p=product(),b=current();if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
     $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
     $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family&&(!x.archived||x.id===pid)).map(x=>[x.id,x.name]),p.id);
     $('bomState').textContent=b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성';
@@ -68,7 +68,7 @@ window.BOMView=(()=>{
     }).join('');
     document.querySelectorAll('#bomLines .bom-material-search').forEach(input=>{const r=b.rows[Number(input.dataset.row)],m=mat(r.mid);const candidates=FB.data.materials.filter(x=>!x.deleted&&!x.archived&&x.slot===m.slot&&(!x.scope||x.scope===p.id)&&x.versions.some(v=>v.state==='사용'));setupPicker(input,candidates,()=>{input.dataset.picked='true';input.dispatchEvent(new Event('change',{bubbles:true}));});});
     if(editable){$('bomAddPicker').innerHTML=picker('bomAddMaterial','','추가할 부자재 검색',b.locked);setupPicker($('bomAddMaterial'),addCandidates(),()=>{});$('bomAddRow').disabled=b.locked;}
-    Photos.refresh();update();
+    update();
   }
   function update(){const q=Number($('productionQty').value),b=current();let short=0,valid=true;try{short=FB.requirements(pid,index,q).filter(r=>{const m=mat(r.mid),v=ver(r);return m.archived||v.state!=='사용'||v.qty<r.qty;}).length;}catch{valid=false;}
     document.querySelectorAll('[data-need]').forEach(el=>{const r=b.rows[Number(el.dataset.need)],v=ver(r);el.textContent=valid?fmt(r.each*q)+'개':'—';el.classList.toggle('shortage',valid&&(v.qty<r.each*q||mat(r.mid).archived||v.state!=='사용'));});
