@@ -4,8 +4,8 @@ window.Photos = (() => {
   const urls = new Map();
   const esc = value => UI.esc(String(value));
   const icon = '<svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="5" y="7" width="22" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="13" r="2" fill="currentColor"/><path d="m7 23 7-7 4 4 3-3 5 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
-  function markup(kind, id, label, mode = 'detail') {
-    return `<div class="item-photo item-photo-${mode}" data-photo-kind="${esc(kind)}" data-photo-id="${esc(id)}" data-photo-label="${esc(label)}" data-photo-mode="${esc(mode)}"></div>`;
+  function markup(kind, id, label, mode = 'detail', readOnly = false) {
+    return `<div class="item-photo item-photo-${mode}" data-photo-kind="${esc(kind)}" data-photo-id="${esc(id)}" data-photo-label="${esc(label)}" data-photo-mode="${esc(mode)}" data-photo-readonly="${readOnly}"></div>`;
   }
   async function fill(slot) {
     const {photoKind: kind, photoId: id, photoLabel: label, photoMode: mode} = slot.dataset;
@@ -28,7 +28,7 @@ window.Photos = (() => {
     if (mode === 'detail') {
       const note = document.createElement('span'); note.className = 'item-photo-note'; note.textContent = failed ? '사진을 불러올 수 없습니다.' : record ? '품목 사진 · BOM과 함께 사용' : '사진 없이도 품목을 관리할 수 있어요.'; slot.append(note);
     }
-    if (mode !== 'list' && ItemPhotos.canEdit()) {
+    if (mode !== 'list' && slot.dataset.photoReadonly !== 'true' && ItemPhotos.canEdit()) {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'item-photo-trigger';
       button.setAttribute('aria-label', label + (record ? ' 사진 수정' : ' 사진 등록'));
