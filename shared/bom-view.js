@@ -20,7 +20,9 @@ window.BOMView=(()=>{
       list.hidden=false;input.setAttribute('aria-expanded','true');
     }
     input.onfocus=()=>{input.select();show(true);};input.oninput=()=>show();
-    toggle.onclick=()=>{if(list.hidden){input.focus();show(true);}else close();};
+    // Keep pointer focus on the search field; opening must not turn into a close after focus events.
+    toggle.onpointerdown=e=>e.preventDefault();
+    toggle.onclick=e=>{e.preventDefault();if(input.disabled)return;input.focus({preventScroll:true});show(true);};
     input.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(list.hidden)show(true);active=matches.length?(active+(e.key==='ArrowDown'?1:-1)+matches.length)%matches.length:-1;[...list.querySelectorAll('button')].forEach((el,i)=>{el.classList.toggle('is-active',i===active);el.setAttribute('aria-selected',String(i===active));if(i===active){input.setAttribute('aria-activedescendant',el.id);el.scrollIntoView({block:'nearest'});}});}else if(e.key==='Enter'&&!list.hidden){e.preventDefault();if(active>=0)choose(matches[active]);else if(matches.length===1)choose(matches[0]);}};
     box.onfocusout=()=>queueMicrotask(()=>{if(!box.contains(document.activeElement))close();});
   }
