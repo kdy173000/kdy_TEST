@@ -29,8 +29,12 @@ window.Photos = (() => {
       const note = document.createElement('span'); note.className = 'item-photo-note'; note.textContent = failed ? '사진을 불러올 수 없습니다.' : record ? '품목 사진 · BOM과 함께 사용' : '사진 없이도 품목을 관리할 수 있어요.'; slot.append(note);
     }
     if (mode !== 'list' && ItemPhotos.canEdit()) {
-      const button = document.createElement('button'); button.type = 'button'; button.className = 'item-photo-edit'; button.textContent = record ? '사진 수정' : '사진 등록'; button.setAttribute('aria-label', label + ' ' + button.textContent);
-      button.onclick = () => open(kind, id, label); slot.append(button);
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'item-photo-trigger';
+      button.setAttribute('aria-label', label + (record ? ' 사진 수정' : ' 사진 등록'));
+      button.title = record ? '사진 수정' : '사진 등록';
+      button.append(slot.firstChild); button.onclick = () => open(kind, id, label);
+      slot.prepend(button);
     }
   }
   function refresh() { document.querySelectorAll('[data-photo-kind]').forEach(slot => { void fill(slot); }); }

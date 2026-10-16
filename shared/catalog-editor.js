@@ -13,7 +13,7 @@ window.CatalogEditor=(()=>{
   }
   $('catalogDialog').showModal();
  }
- function bind(options){config=options;document.querySelectorAll('[data-catalog-action]').forEach(b=>b.hidden=!FB.canAdmin());$('newCatalogItem').onclick=()=>open();$('editCatalogItem').onclick=()=>open(config.selected()?.id);
+ function bind(options){config=options;document.querySelectorAll('[data-catalog-action]').forEach(b=>b.hidden=!FB.canAdmin());$('newCatalogItem').onclick=()=>open();if($('editCatalogItem'))$('editCatalogItem').onclick=()=>open(config.selected()?.id);
   if(config.kind==='product'){
    $('productForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveProduct({id:itemId||undefined,name:$('adminProductName').value,family:$('adminProductFamily').value,category:$('adminProductCategory').value,sample:$('adminProductSample').value==='true'});config.saved(id);$('catalogDialog').close();UI.toast('완제품 정보를 저장했습니다.');}catch(err){$('productError').textContent=err.message;}};
    $('archiveProduct').onclick=()=>{try{FB.toggleProduct(itemId);config.saved(itemId);$('catalogDialog').close();UI.toast('완제품 사용 상태를 변경했습니다.');}catch(err){$('productError').textContent=err.message;}};
@@ -25,5 +25,5 @@ window.CatalogEditor=(()=>{
    $('catalogVersionList').onclick=e=>{const b=e.target.closest('[data-catalog-version]');if(!b)return;try{FB.toggleVersion(itemId,b.dataset.catalogVersion);versions();UI.toast('버전 사용 상태를 변경했습니다.');}catch(err){$('materialError').textContent=err.message;}};
   }
  }
- return {bind};
+ return {bind,open};
 })();
