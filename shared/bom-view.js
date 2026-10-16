@@ -9,15 +9,26 @@ window.BOMView=(()=>{
   function resolveMaterial(value,candidates){const text=value.trim();const exact=candidates.find(m=>materialLabel(m)===text||m.id===text);if(exact)return exact;const names=candidates.filter(m=>m.name===text);return names.length===1?names[0]:null;}
 
   const searchKey=v=>v.normalize('NFKC').toLowerCase().replace(/\s+/g,'');
-  function picker(id,value,label,disabled=false,attrs=''){return `<div class="bom-picker"><div class="bom-picker-field"><input id="${id}" type="search" class="bom-material-search" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="${id}-results" aria-label="${esc(label)}" autocomplete="off" placeholder="부자재명 · 코드 검색" value="${esc(value)}" ${disabled?'disabled':''} ${attrs}><button type="button" class="bom-picker-toggle" aria-label="부자재 목록 열기" ${disabled?'disabled':''}>▾</button></div><div id="${id}-results" class="bom-picker-list" role="listbox" hidden></div></div>`;}
+  function picker(id,value,label,disabled=false,attrs=''){return `<div class="bom-picker"><div class="bom-picker-field"><input id="${id}" type="search" class="bom-material-search" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="${id}-results" aria-label="${esc(label)}" autocomplete="off" placeholder="부자재명 · 코드 검색" value="${esc(value)}" ${disabled?'disabled':''} ${attrs}><button type="button" class="bom-picker-toggle" aria-label="부자재 목록 열기" ${disabled?'disabled':''}>▾</button></div><div id="${id}-results" class="bom-picker-list" role="listbox" popover="manual" hidden></div></div>`;}
   function setupPicker(input,candidates,onPick){
     const box=input.closest('.bom-picker'),list=box.querySelector('.bom-picker-list'),toggle=box.querySelector('.bom-picker-toggle');let matches=[],active=-1;
-    const close=()=>{list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');};
+    const close=()=>{if(list.matches(':popover-open'))list.hidePopover();list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');};
+    list._closePicker=close;
     const choose=m=>{input.value=materialLabel(m);close();onPick(m);};
     function show(all=false){if(input.disabled)return;matches=candidates.filter(m=>all||searchKey(materialLabel(m)).includes(searchKey(input.value)));active=-1;list.replaceChildren();
       if(!matches.length){const el=document.createElement('span');el.className='bom-picker-empty';el.textContent='검색 결과가 없습니다.';list.append(el);}
       matches.forEach((m,i)=>{const el=document.createElement('button');el.type='button';el.className='bom-picker-option';el.setAttribute('role','option');el.id=list.id+'-'+i;el.textContent=materialLabel(m);el.onpointerdown=e=>e.preventDefault();el.onclick=()=>choose(m);list.append(el);});
-      list.hidden=false;input.setAttribute('aria-expanded','true');
+      document.querySelectorAll('.bom-picker-list:not([hidden])').forEach(other=>{if(other!==list)other._closePicker?.();});
+      list.hidden=false;
+      const rect=box.querySelector('.bom-picker-field').getBoundingClientRect(),gap=6;
+      const below=window.innerHeight-rect.bottom-gap-12,above=rect.top-gap-12;
+      const upwards=below<160&&above>below,available=Math.max(60,upwards?above:below);
+      const width=Math.min(rect.width,window.innerWidth-24);
+      list.style.width=width+'px';list.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-width-12))+'px';
+      list.style.maxHeight=Math.min(240,available)+'px';list.style.top='0px';
+      if(list.showPopover&&!list.matches(':popover-open'))list.showPopover();
+      list.style.top=(upwards?Math.max(12,rect.top-gap-list.getBoundingClientRect().height):rect.bottom+gap)+'px';
+      input.setAttribute('aria-expanded','true');
     }
     input.onfocus=()=>{input.select();show(true);};input.oninput=()=>show();
     // Keep pointer focus on the search field; opening must not turn into a close after focus events.
@@ -26,6 +37,12 @@ window.BOMView=(()=>{
     input.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(list.hidden)show(true);active=matches.length?(active+(e.key==='ArrowDown'?1:-1)+matches.length)%matches.length:-1;[...list.querySelectorAll('button')].forEach((el,i)=>{el.classList.toggle('is-active',i===active);el.setAttribute('aria-selected',String(i===active));if(i===active){input.setAttribute('aria-activedescendant',el.id);el.scrollIntoView({block:'nearest'});}});}else if(e.key==='Enter'&&!list.hidden){e.preventDefault();if(active>=0)choose(matches[active]);else if(matches.length===1)choose(matches[0]);}};
     box.onfocusout=()=>queueMicrotask(()=>{if(!box.contains(document.activeElement))close();});
   }
+  function closeFloatingPickers(event){
+    if(event?.type==='scroll'&&event.target?.closest?.('.bom-picker-list'))return;
+    document.querySelectorAll('.bom-picker-list:not([hidden])').forEach(list=>list._closePicker?.());
+  }
+  document.addEventListener('scroll',closeFloatingPickers,true);
+  window.addEventListener('resize',closeFloatingPickers);
   function render(){
     const p=product(),b=current();$('bomProductPhoto').innerHTML=Photos.markup('product',p.id,p.name,'detail',true);if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
     $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
