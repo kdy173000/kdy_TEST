@@ -1,6 +1,7 @@
 'use strict';
 window.FB = (() => {
 const KEY='fireball_materials_demo_v3';
+const DEFAULT_DELIVERY_ADDRESS='부산광역시 기장군 장안읍 오리산단8로 53';
 const day=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date());
 function seed(){
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
@@ -20,6 +21,8 @@ return {schema:3,revision:0,materials,products,transactions,productions,orders};
 }
 const defaultCategories=['파이어볼','바인더','코알라티','현대','OEM','ODM'];
 function normalizeProducts(d){
+if(!Array.isArray(d.deliveryAddresses))d.deliveryAddresses=[];
+if(!d.deliveryAddresses.some(a=>a.id==='fireball'))d.deliveryAddresses.unshift({id:'fireball',label:'파이어볼',address:DEFAULT_DELIVERY_ADDRESS});
 if(!Array.isArray(d.suppliers))d.suppliers=[];
 for(const order of d.orders){if(!order.supplierId){const name=String(order.supplier||'미등록 업체').trim()||'미등록 업체';let supplier=d.suppliers.find(s=>s.name===name);if(!supplier){supplier={id:'SUP-'+String(d.suppliers.length+1).padStart(4,'0'),name,contact:'',phone:'',memo:'',archived:false};d.suppliers.push(supplier);}order.supplierId=supplier.id;}}
 if(!Array.isArray(d.productCategories))d.productCategories=[...defaultCategories];for(const p of d.products){if(!p.category)p.category='파이어볼';}for(const p of d.products){if(!Array.isArray(p.versions))p.versions=[{id:'V01',qty:p.finished,state:'사용'}];}return d;}
@@ -48,6 +51,13 @@ function toggleMaterial(id){admin();return mutate(d=>{const m=mid(d,id);m.archiv
 function addVersion(id,name){admin();return mutate(d=>{const m=mid(d,id),vid=required(name,'버전명');if(m.archived||vid.length>20||m.versions.some(v=>v.id.toLowerCase()===vid.toLowerCase()))throw Error('사용 상태 또는 중복 버전명을 확인하세요.');m.versions.push({id:vid,qty:0,state:'사용'});});}
 function toggleVersion(id,vid){admin();return mutate(d=>{const v=version(mid(d,id),vid);if(v.deleted)throw Error('삭제된 버전은 사용 상태를 변경할 수 없습니다.');v.state=v.state==='사용'?'중단':'사용';});}
 function stockMovement(input){return mutate(d=>{const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);const qty=integer(Number(input.qty)),person=required(input.person,'담당자'),date=required(input.date,'날짜'),note=required(input.note,'차감 사유');if(!['출고','재고 조정'].includes(input.type))throw Error('차감 유형을 확인하세요.');if(v.qty<qty)throw Error('차감 가능한 재고가 부족합니다.');v.qty-=qty;transaction(d,{mid:m.id,vid:v.id,qty,type:input.type,date,person,note});});}
+function saveDeliveryAddress(input){return mutate(d=>{
+ const label=required(input.label,'납품처 이름'),address=required(input.address,'납품주소');if(label.length>40||address.length>200)throw Error('납품처 이름은 40자, 주소는 200자 이내로 입력하세요.');
+ const existing=d.deliveryAddresses.find(a=>a.address===address||a.label===label);
+ if(existing){if(existing.id==='fireball')throw Error('파이어볼 주소는 기본 납품처로 등록되어 있습니다.');if(existing.address!==address)throw Error('같은 이름의 납품처가 있습니다. 다른 이름으로 저장하세요.');return existing.id;}
+ const id='ADDR-'+Date.now().toString(36)+'-'+d.deliveryAddresses.length;d.deliveryAddresses.push({id,label,address});return id;
+});}
+function removeDeliveryAddress(id){return mutate(d=>{if(id==='fireball')throw Error('기본 파이어볼 납품처는 삭제할 수 없습니다.');const index=d.deliveryAddresses.findIndex(a=>a.id===id);if(index<0)throw Error('납품처를 찾을 수 없습니다.');d.deliveryAddresses.splice(index,1);});}
 function saveSupplier(input){return mutate(d=>{
 const name=required(input.name,'업체명');if(name.length>80)throw Error('업체명은 80자 이내로 입력하세요.');
 if(d.suppliers.some(s=>s.id!==input.id&&s.name.toLowerCase()===name.toLowerCase()))throw Error('이미 등록된 업체명입니다.');
@@ -160,5 +170,5 @@ d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity
 const slots=['캡','용기','스웨이드','어플리케이터','전면 라벨','후면 라벨','속지','케이스'];
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
 window.addEventListener('storage',e=>{if(e.key===KEY){state=read();window.dispatchEvent(new Event('fb-data'));}});
-return {get data(){return state;},slots,families,day,user,canAdmin,canShip,canPhoto,saveSupplier,toggleSupplier,createOrders,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
+return {get data(){return state;},slots,families,day,user,canAdmin,canShip,canPhoto,defaultDeliveryAddress:DEFAULT_DELIVERY_ADDRESS,saveDeliveryAddress,removeDeliveryAddress,saveSupplier,toggleSupplier,createOrders,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
 })();
