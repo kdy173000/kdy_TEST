@@ -31,13 +31,13 @@ document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pat
 UI.versionActions=function(kind,id,vid){return FB.canAdmin()?`<div class="action-group"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}">수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}">삭제</button></div>`:'';};
 UI.bindVersionManagement=function(container,kind){
  const dialog=document.createElement('dialog');dialog.className='out-dialog';dialog.setAttribute('aria-label','버전 수정');
- dialog.innerHTML='<div class="modalhead"><h2>버전 수정</h2><button type="button" data-dismiss aria-label="버전 수정 닫기">✕</button></div><form><label class="field"><span>버전명</span><input name="versionName" maxlength="20" required></label><label class="field"><span>사용 상태</span><select name="versionState"><option value="사용">사용</option><option value="중단">미사용</option></select></label><p class="page-note">미사용 버전은 재고와 과거 기록을 보존하며, 새 생산·출고·발주 대상에서 제외됩니다.</p><p data-error role="alert"></p><div class="modalfoot"><button type="button" data-dismiss>취소</button><button type="submit" class="primary">저장</button></div></form>';
+ dialog.innerHTML='<div class="modalhead"><h2>버전 수정</h2><button type="button" data-dismiss aria-label="버전 수정 닫기">✕</button></div><form><div class="row"><label class="field"><span>버전명</span><input name="versionName" maxlength="20" required></label><label class="field"><span>사용 구분</span><select name="versionMarket"><option>공용 사용</option><option>국내 전용</option><option>해외 전용</option></select></label></div><label class="field"><span>사용 상태</span><select name="versionState"><option value="사용">사용</option><option value="중단">중단</option></select></label><p class="page-note">중단된 버전은 재고와 과거 기록을 보존하며, 새 생산·출고·발주 대상에서 제외됩니다.</p><p data-error role="alert"></p><div class="modalfoot"><button type="button" data-dismiss>취소</button><button type="submit" class="primary">저장</button></div></form>';
  document.body.append(dialog);
  const form=dialog.querySelector('form'),error=dialog.querySelector('[data-error]');let target=null;
  dialog.querySelectorAll('[data-dismiss]').forEach(button=>button.onclick=()=>dialog.close());
  form.onsubmit=e=>{e.preventDefault();if(!this.allowWrite()){dialog.close();return;}try{
-   FB.manageVersion({...target,name:form.elements.versionName.value,state:form.elements.versionState.value});
-   dialog.close();this.toast('버전명과 사용 상태를 수정했습니다.');
+   FB.manageVersion({...target,name:form.elements.versionName.value,state:form.elements.versionState.value,market:form.elements.versionMarket.value});
+   dialog.close();this.toast('버전명·사용 구분·상태를 수정했습니다.');
  }catch(err){error.textContent=err.message;}};
  this.$(container).addEventListener('click',e=>{
    const b=e.target.closest('[data-version-edit],[data-version-delete]');if(!b||!this.allowWrite())return;
@@ -45,7 +45,7 @@ UI.bindVersionManagement=function(container,kind){
    if(remove){if(!confirm(vid+' 버전을 목록에서 삭제할까요? 재고가 0개일 때만 가능하며 과거 기록은 보존됩니다.'))return;try{FB.manageVersion({kind,id,vid,remove:true});this.toast('버전을 목록에서 삭제했습니다.');}catch(err){this.toast(err.message);}return;}
    const entity=(kind==='product'?FB.data.products:FB.data.materials).find(x=>x.id===id),version=entity?.versions.find(v=>v.id===vid&&!v.deleted);
    if(!version){this.toast('버전을 찾을 수 없습니다.');return;}
-   target={kind,id,vid};form.elements.versionName.value=vid;form.elements.versionState.value=version.state==='사용'?'사용':'중단';error.textContent='';dialog.showModal();
+   target={kind,id,vid};form.elements.versionName.value=vid;form.elements.versionState.value=version.state==='사용'?'사용':'중단';form.elements.versionMarket.value=version.market||'공용 사용';error.textContent='';dialog.showModal();
  });
 };
 
