@@ -42,6 +42,16 @@ for(const id of ['orderSearch','supplierFilter','statusFilter','fromDate','toDat
 $('resetFilters').onclick=()=>{for(const id of ['orderSearch','supplierFilter','statusFilter','fromDate','toDate'])$(id).value='';render();};
 $('selectAll').onchange=e=>{visible.forEach(o=>e.target.checked?selected.add(o.id):selected.delete(o.id));render();};
 $('orderRows').onchange=e=>{if(!e.target.dataset.select)return;e.target.checked?selected.add(e.target.dataset.select):selected.delete(e.target.dataset.select);render();};
+$('previewDraft').onclick=()=>{
+ try{if(!draft.length)throw Error('발주할 품목을 추가하세요.');
+ const rows=draft.map(r=>{
+ const m=FB.data.materials.find(m=>m.id===r.mid&&!m.deleted&&!m.archived),supplier=FB.data.suppliers.find(s=>s.id===r.supplierId&&!s.archived);
+ if(!m||!supplier||!r.date||!Number.isSafeInteger(Number(r.qty))||Number(r.qty)<1||!m.versions.some(v=>v.id===r.vid&&v.state==='사용'&&!v.deleted))throw Error('날짜·제품·버전·수량·업체를 모두 입력하세요.');
+ return {...r,qty:Number(r.qty),name:m.name,supplier:supplier.name,person:$('orderPerson').value,id:'미저장'};
+ });OrderDocument.open(rows);
+ }catch(e){$('orderError').textContent=e.message;}
+};
+$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}OrderDocument.open(rows);};
 $('downloadOrders').onclick=()=>{
  const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length)return;
  const cell=value=>{let text=String(value??'');if(/^[=+@\t\r-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
