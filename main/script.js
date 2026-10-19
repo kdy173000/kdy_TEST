@@ -4,7 +4,6 @@
   try {
     var u = JSON.parse(raw);
     if (!u || !u.id) { window.location.replace('../login/index.html'); return; }
-    if (u.role === 'admin') { window.location.replace('../admin/main/index.html'); return; }
   } catch(e) { window.location.replace('../login/index.html'); }
 })();
 
@@ -40,173 +39,32 @@ const ALL_TZ = [
   {v:'Pacific/Auckland',l:'뉴질랜드 / 오클랜드'},
 ];
 
-const KEY_PW='admin_pw', KEY_DEFAULT='admin_tz_default', KEY_ENABLED='admin_tz_enabled';
-const KEY_SESSION='admin_session', KEY_TZ='tz';
-const DEFAULT_PW='kdy17300', DEFAULT_TZ='Asia/Kolkata';
-
-function getAdminPw()    { return localStorage.getItem(KEY_PW) || DEFAULT_PW; }
-function getDefaultTz()  { return localStorage.getItem(KEY_DEFAULT) || DEFAULT_TZ; }
-function getEnabledList(){ const s=localStorage.getItem(KEY_ENABLED); return s?JSON.parse(s):ALL_TZ.map(t=>t.v); }
-
+const KEY_TZ='tz',DEFAULT_TZ='Asia/Kolkata';
 function buildTzDropdown(){
-  const sel=document.getElementById('tzSel');
-  const enabled=getEnabledList();
-  const current=sel.value||localStorage.getItem(KEY_TZ)||getDefaultTz();
-  sel.innerHTML='';
-  ALL_TZ.filter(t=>enabled.includes(t.v)).forEach(t=>{
-    const opt=document.createElement('option');
-    opt.value=t.v; opt.textContent=t.l; sel.appendChild(opt);
-  });
-  if([...sel.options].some(o=>o.value===current)) sel.value=current;
-  else sel.value=sel.options[0]?.value||'';
-  const lbl=document.getElementById('tzLabelDisplay');
-  if(lbl){ const found=ALL_TZ.find(t=>t.v===sel.value); lbl.textContent=found?found.l:sel.value; }
+ const sel=document.getElementById('tzSel');let current=DEFAULT_TZ;
+ try{current=localStorage.getItem(KEY_TZ)||localStorage.getItem('admin_tz_default')||DEFAULT_TZ;}catch{}
+ sel.replaceChildren();
+ ALL_TZ.forEach(t=>{const option=document.createElement('option');option.value=t.v;option.textContent=t.l;sel.append(option);});
+ sel.value=ALL_TZ.some(t=>t.v===current)?current:DEFAULT_TZ;
 }
-
 function toggleTheme(){
   const h=document.documentElement,dark=h.dataset.theme==='dark';
   h.dataset.theme=dark?'light':'dark';
   document.getElementById('pf-t-ico').textContent=dark?'🌙':'☀️';
-  if(window._applyTickColors) window._applyTickColors();
 }
 function go(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
 
-function openAdmin(){
-  document.getElementById('adminOverlay').style.display='flex';
-  document.getElementById('adminPwInput').value='';
-  document.getElementById('adminErr').textContent='';
-  if(sessionStorage.getItem(KEY_SESSION)==='1') showSettings();
-  else{
-    document.getElementById('adminLoginView').style.display='';
-    document.getElementById('adminSettingsView').style.display='none';
-    setTimeout(()=>document.getElementById('adminPwInput').focus(),100);
-  }
-}
-function closeAdmin(){ document.getElementById('adminOverlay').style.display='none'; }
-function overlayClick(e){ if(e.target===document.getElementById('adminOverlay')) closeAdmin(); }
-function adminLogin(){
-  const pw=document.getElementById('adminPwInput').value;
-  if(pw===getAdminPw()){ sessionStorage.setItem(KEY_SESSION,'1'); showSettings(); }
-  else document.getElementById('adminErr').textContent='비밀번호가 일치하지 않습니다.';
-}
-function adminLogout(){
-  sessionStorage.removeItem(KEY_SESSION);
-  document.getElementById('adminLoginView').style.display='';
-  document.getElementById('adminSettingsView').style.display='none';
-  document.getElementById('adminPwInput').value='';
-  document.getElementById('adminErr').textContent='';
-}
-function showSettings(){
-  document.getElementById('adminLoginView').style.display='none';
-  document.getElementById('adminSettingsView').style.display='';
-  document.getElementById('saveSuccess').style.display='none';
-  document.getElementById('pwErr').textContent='';
-  document.getElementById('newPw1').value='';
-  document.getElementById('newPw2').value='';
-  const defSel=document.getElementById('adminDefaultTzSel');
-  defSel.innerHTML='';
-  ALL_TZ.forEach(t=>{ const opt=document.createElement('option'); opt.value=t.v; opt.textContent=t.l; defSel.appendChild(opt); });
-  defSel.value=getDefaultTz();
-  const enabled=getEnabledList();
-  const list=document.getElementById('adminTzList');
-  list.innerHTML='';
-  ALL_TZ.forEach(t=>{
-    const item=document.createElement('div'); item.className='admin-tz-item';
-    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=t.v; cb.checked=enabled.includes(t.v);
-    const lbl=document.createElement('span'); lbl.textContent=t.l;
-    if(cb.checked) lbl.className='checked';
-    cb.addEventListener('change',()=>{ lbl.className=cb.checked?'checked':''; });
-    item.appendChild(cb); item.appendChild(lbl);
-    item.addEventListener('click',e=>{ if(e.target!==cb){ cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); } });
-    list.appendChild(item);
-  });
-}
-function saveAdminSettings(){
-  const p1=document.getElementById('newPw1').value;
-  const p2=document.getElementById('newPw2').value;
-  if(p1||p2){
-    if(p1.length<6){ document.getElementById('pwErr').textContent='비밀번호는 6자 이상이어야 합니다.'; return; }
-    if(p1!==p2){ document.getElementById('pwErr').textContent='비밀번호가 일치하지 않습니다.'; return; }
-    localStorage.setItem(KEY_PW,p1);
-    document.getElementById('pwErr').textContent='';
-  }
-  const def=document.getElementById('adminDefaultTzSel').value;
-  localStorage.setItem(KEY_DEFAULT,def);
-  const checked=[...document.querySelectorAll('#adminTzList input[type=checkbox]')].filter(cb=>cb.checked).map(cb=>cb.value);
-  if(checked.length===0){ alert('타임존을 하나 이상 선택해주세요.'); return; }
-  localStorage.setItem(KEY_ENABLED,JSON.stringify(checked));
-  buildTzDropdown();
-  const sel=document.getElementById('tzSel');
-  if(![...sel.options].some(o=>o.value===sel.value)) sel.value=def;
-  localStorage.setItem(KEY_TZ,sel.value);
-  const suc=document.getElementById('saveSuccess');
-  suc.style.display='flex';
-  setTimeout(()=>suc.style.display='none',3000);
-}
-
-document.addEventListener('DOMContentLoaded',function(){
-  buildTzDropdown();
-  const face=document.getElementById('clockFace');
-  const tzSel=document.getElementById('tzSel');
-  const timeStr=document.getElementById('timeStr');
-  const dateStr=document.getElementById('dateStr');
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;';
-  face.appendChild(svg);
-  function applyTickColors(){
-    const styles=getComputedStyle(document.documentElement);
-    const major=styles.getPropertyValue('--tick-major').trim();
-    const minor=styles.getPropertyValue('--tick-minor').trim();
-    [...svg.querySelectorAll('line')].forEach((line,i)=>{ line.setAttribute('stroke',i%3===0?major:minor); });
-  }
-  window._applyTickColors=applyTickColors;
-  function drawTicks(){
-    const SIZE=face.clientWidth,CX=SIZE/2,CY=SIZE/2;
-    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE); svg.innerHTML='';
-    for(let i=0;i<12;i++){
-      const rad=(i*30-90)*Math.PI/180;
-      const outerR=CX-(SIZE*0.033);
-      const len=i%3===0?SIZE*0.047:SIZE*0.03;
-      const innerR=outerR-len;
-      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',CX+outerR*Math.cos(rad));
-      line.setAttribute('y1',CY+outerR*Math.sin(rad));
-      line.setAttribute('x2',CX+innerR*Math.cos(rad));
-      line.setAttribute('y2',CY+innerR*Math.sin(rad));
-      line.setAttribute('stroke-width',i%3===0?'2':'1.5');
-      line.setAttribute('stroke-linecap','round');
-      svg.appendChild(line);
-    }
-    applyTickColors();
-  }
-  ['hour','minute','second'].forEach(cls=>{
-    const d=document.createElement('div'); d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
-  });
-  face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
-  function getTimeParts(tz){
-    const now=new Date();
-    const fmt=new Intl.DateTimeFormat('ko-KR',{
-      timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',
-      weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'
-    });
-    const map={};
-    fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
-    return { month:Number(map.month),day:Number(map.day),weekday:map.weekday,
-      hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds() };
-  }
-  function tick(){
-    const t=getTimeParts(tzSel.value||getDefaultTz());
-    const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
-    face._hour.style.transform=`rotate(${hh*30}deg)`;
-    face._minute.style.transform=`rotate(${mm*6}deg)`;
-    face._second.style.transform=`rotate(${ss*6}deg)`;
-    timeStr.textContent=[t.hour,t.minute,t.second].map(x=>String(x).padStart(2,'0')).join(':');
-    dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
-    requestAnimationFrame(tick);
-  }
-  tzSel.addEventListener('change',()=>{ localStorage.setItem(KEY_TZ,tzSel.value); });
-  window.addEventListener('resize',drawTicks);
-  drawTicks(); tick();
+document.addEventListener('DOMContentLoaded',()=>{
+ buildTzDropdown();
+ const select=document.getElementById('tzSel'),time=document.getElementById('timeStr'),date=document.getElementById('dateStr');
+ function tick(){
+  const now=new Date(),zone=select.value||DEFAULT_TZ;
+  time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(now);
+  date.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:zone,month:'long',day:'numeric',weekday:'short'}).format(now);
+ }
+ select.addEventListener('change',()=>{try{localStorage.setItem(KEY_TZ,select.value);}catch{}tick();});
+ tick();setInterval(tick,1000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
 });
 
 let cY,cM2;
@@ -312,7 +170,6 @@ function goToday(){const n=new Date();cY=n.getFullYear();cM2=n.getMonth()+1;rend
 (function(){
   const fbUser = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
   if (!fbUser) { window.location.href = '../login/index.html'; return; }
-  if (fbUser.role === 'admin') { window.location.href = '../admin/main/index.html'; return; }
 
   // 사용자 이름 표시
   const footer = document.querySelector('.sb-footer');
