@@ -58,5 +58,5 @@ UI.versionCards=function(kind,item,{hideStopped=false,pending}={}){
 
 UI.productVersionActions=function(item,v){
  const stopped=FB.versionStatus(v)==='중단',blocked=!!item.archived,attrs=blocked?' disabled title="단종된 제품은 등록할 수 없습니다."':'';
- return '<div class="version-workflow-actions"><button type="button" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button>'+(FB.canAdmin()?'<button type="button" class="management-button" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+attrs+' title="'+(stopped?'생산 화면에서 버전 사용 상태를 확인하세요.':'이 버전으로 생산 등록')+'">생산 등록</button>':'')+(FB.canShip()?'<button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+(blocked||stopped?' disabled':'')+'>출고 등록</button>':'')+'</div>';
+ return '<div class="version-workflow-actions"><button type="button" class="primary" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button>'+(FB.canAdmin()?'<button type="button" class="management-button" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+attrs+' title="'+(stopped?'생산 화면에서 버전 사용 상태를 확인하세요.':'이 버전으로 생산 등록')+'">생산 등록</button>':'')+(FB.canShip()?'<button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+(blocked||stopped?' disabled':'')+'>출고 등록</button>':'')+'</div>';
 };
