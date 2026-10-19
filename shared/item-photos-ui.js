@@ -28,11 +28,12 @@ window.Photos = (() => {
     if (mode === 'detail') {
       const note = document.createElement('span'); note.className = 'item-photo-note'; note.textContent = failed ? '사진을 불러올 수 없습니다.' : record ? '품목 사진 · BOM과 함께 사용' : '사진 없이도 품목을 관리할 수 있어요.'; slot.append(note);
     }
-    if (mode !== 'list' && slot.dataset.photoReadonly !== 'true' && ItemPhotos.canEdit()) {
+    if (mode !== 'list' && slot.dataset.photoReadonly !== 'true') {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'item-photo-trigger';
       button.setAttribute('aria-label', label + (record ? ' 사진 수정' : ' 사진 등록'));
-      button.title = record ? '사진 수정' : '사진 등록';
+      button.disabled = !ItemPhotos.canEdit();
+      button.title = ItemPhotos.canEdit() ? (record ? '사진 수정' : '사진 등록') : '디자인팀 또는 발주팀 권한이 필요합니다.';
       button.append(slot.firstChild); button.onclick = () => open(kind, id, label);
       slot.prepend(button);
     }
