@@ -13,7 +13,7 @@
     try { links = JSON.parse(localStorage.getItem('fb_perm_links') || '{}'); } catch {}
     const groups = [
       ['사내 운영 관리', [['공지사항','main/notices/index.html'],['조직도','main/index.html#org'],['내부 일정 관리','main/leave/index.html']]],
-      ['제품 관리', [['자재','inventory/index.html','재고조회'],['부자재','procurement/index.html','재고관리자'],['원료',null,'원료관리'],['제품 신고',null,'제품 신고 관리']]],
+      ['제품 관리', [['자재','inventory/index.html','재고조회'],['부자재','procurement/index.html','재고관리자'],['발주 관리','orders/index.html'],['업체 관리','suppliers/index.html'],['원료',null,'원료관리'],['제품 신고',null,'제품 신고 관리']]],
       ['디자인팀', [['디자인 업무분배',null],['회의록',null]]],
       ['개인 업무관리', [['김다영',null],['최혜선',null],['송나겸',null]]]
     ];
@@ -74,6 +74,13 @@
       link.setAttribute('aria-current', 'page');
     }
     item.replaceWith(link);
+  }
+  // Existing dashboard sidebars also receive the shared purchasing destinations.
+  let orderAnchor=Array.from(nav.querySelectorAll('.sb-item')).find(item=>item.textContent.trim()==='부자재');
+  for(const [label,path] of [['발주 관리','orders/index.html'],['업체 관리','suppliers/index.html']]){
+    if(Array.from(nav.querySelectorAll('.sb-item')).some(item=>item.textContent.trim()===label))continue;
+    const link=document.createElement('a');link.className='sb-item';link.textContent=label;link.href=to(path);
+    if(orderAnchor){orderAnchor.after(link);orderAnchor=link;}
   }
   const content = document.querySelector('body > .layout, body > main, body > .container');
   if (content) {

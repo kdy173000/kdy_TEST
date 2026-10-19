@@ -1,7 +1,7 @@
 /* procurement.js */
 'use strict';
 (()=>{
-  const {$,esc,fmt}=UI;let category='',mode='',target='',selected='cap';
+  const {$,esc,fmt}=UI;let category='',mode='',target='',selected=new URLSearchParams(location.search).get('material')||'cap';
   const material=id=>FB.data.materials.find(m=>m.id===id);
   function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>!m.deleted&&(!m.archived||$('purchaseArchived').checked)&&(!category||(category==='라벨'?['전면 라벨','후면 라벨'].includes(m.slot):m.slot===category))&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
   function render(){
@@ -21,18 +21,16 @@
   }
   const field=(label,html)=>`<label class="field"><span>${label}</span>${html}</label>`;
   function open(kind,id){if(!UI.allowWrite())return;mode=kind;target=id;const order=kind==='due'?FB.data.orders.find(o=>o.id===id):null,m=material(order?order.mid:id);
-    $('purchaseHint').textContent=kind==='order'?'발주할 버전과 수량을 입력하세요. 실제 입고 전까지 현재 재고는 그대로입니다.':kind==='due'?'입고 예정일은 일정이 바뀔 때마다 수정할 수 있습니다.':'선택한 버전의 재고에서 입력한 수량을 차감합니다. 사유를 함께 기록하세요.';$('purchaseDialog').classList.toggle('task-dialog',kind!=='due');$('purchaseTitle').textContent=kind==='order'?'부자재 발주 등록':'수기 재고 차감';$('purchaseTarget').textContent=m.name+(order?' · '+order.id+' · 입고 대기 '+fmt(UI.remaining(order))+'개':'');
+    $('purchaseHint').textContent=kind==='due'?'입고 예정일은 일정이 바뀔 때마다 수정할 수 있습니다.':'선택한 버전의 재고에서 입력한 수량을 차감합니다. 사유를 함께 기록하세요.';$('purchaseDialog').classList.toggle('task-dialog',kind!=='due');$('purchaseTitle').textContent='수기 재고 차감';$('purchaseTarget').textContent=m.name+(order?' · '+order.id+' · 입고 대기 '+fmt(UI.remaining(order))+'개':'');
     if(kind==='due'){$('purchaseTitle').textContent='입고 예정일 수정';$('purchaseFields').innerHTML=field('입고 예정일',`<input name="due" type="date" value="${esc(order.due)}">`)+ '<p class="page-note">일정이 바뀌면 다시 수정할 수 있습니다. 날짜를 비우면 미정으로 저장됩니다.</p>';$('purchaseSave').textContent='예정일 저장';$('purchaseError').textContent='';$('purchaseDialog').showModal();return;}
     let fields='';
-    if(!order)fields+=field(kind==='order'?'발주 버전':'차감 버전',`<select name="vid">${UI.options(m.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),'')}</select>`);
-    fields+=field(kind==='order'?'발주 수량':'차감 수량',`<input name="qty" type="number" min="1" step="1" ${order?'value="'+UI.remaining(order)+'"':''} required>`);
-    if(kind==='order')fields+=field('거래처','<input name="supplier" maxlength="80" required>');
-    fields+=field(kind==='order'?'발주 날짜':'차감 날짜',`<input name="date" type="date" value="${FB.day()}" required>`);
-    if(kind==='order')fields+=field('입고 예정일','<input name="due" type="date">');
+    if(!order)fields+=field('차감 버전',`<select name="vid">${UI.options(m.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),'')}</select>`);
+    fields+=field('차감 수량',`<input name="qty" type="number" min="1" step="1" ${order?'value="'+UI.remaining(order)+'"':''} required>`);
+    fields+=field('차감 날짜',`<input name="date" type="date" value="${FB.day()}" required>`);
     fields+=field('담당자',`<input name="person" maxlength="30" value="${esc(FB.user()?.name||'')}" required>`);
     if(kind==='adjust')fields+=field('차감 사유','<select name="reason"><option>불량</option><option>파손</option><option>분실</option><option>샘플 사용</option><option>실사 차이</option><option>기타</option></select>');
     fields+=field(kind==='adjust'?'상세 사유':'비고 (선택)',`<textarea name="note" maxlength="200" ${kind==='adjust'?'required':''}></textarea>`);
-    $('purchaseSave').textContent=kind==='order'?'발주 등록':'차감 등록';
+    $('purchaseSave').textContent='차감 등록';
     $('purchaseFields').innerHTML=fields;$('purchaseFields').lastElementChild.classList.add('wide');$('purchaseError').textContent='';$('purchaseDialog').showModal();
   }
   function detail(id){const m=material(id),usable=!m.archived&&m.versions.some(v=>v.state==='사용');
@@ -50,7 +48,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
   $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
-  $('orderMaterial').onclick=()=>open('order',selected);$('adjustMaterial').onclick=()=>open('adjust',selected);
+  $('orderMaterial').onclick=()=>{if(!UI.allowWrite())return;location.href='../orders/index.html?material='+encodeURIComponent(selected);};$('adjustMaterial').onclick=()=>open('adjust',selected);
 
   let closingId='';
   function previewReceipt(){const o=FB.data.orders.find(o=>o.id===closingId);if(!o)return;const q=Number($('closeActual').value),bad=Number($('closeDefective').value),good=q-bad,remaining=Math.max(0,o.qty-o.received-Math.max(0,good)),missing=Math.max(0,o.qty-(o.delivered??o.received)-Math.max(0,q)),extra=Math.max(0,o.received+good-o.qty);$('closeRemaining').value=missing;$('closeReceiptSummary').textContent=bad>q?'불량 수량은 입고 수량 이하로 입력하세요.':'이번 정상 입고 '+fmt(Math.max(0,good))+'개 · 정상 수량 기준 추가 입고 필요 '+fmt(remaining)+'개'+(extra?' · 정상 수량 초과 '+fmt(extra)+'개':'');}
@@ -59,7 +57,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${t.order?`발주 
   $('closeActual').oninput=previewReceipt;$('closeDefective').oninput=previewReceipt;
   $('closeReceiptForm').onsubmit=e=>{e.preventDefault();try{const o=FB.data.orders.find(o=>o.id===closingId);selected=o.mid;FB.receiveOrder({id:closingId,vid:$('closeReceiptVersion').value,qty:Number($('closeActual').value),defective:Number($('closeDefective').value),finish:false,date:$('closeReceiptDate').value,person:$('closeReceiptPerson').value,note:$('closeReceiptNote').value});$('closeOrderDialog').close();UI.toast('실제 입고 수량과 비고를 저장했습니다.');}catch(err){$('closeOrderError').textContent=err.message;}};
   $('closePurchase').onclick=()=>$('purchaseDialog').close();
-  $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='due')FB.updateOrderDue({...input,id:target});else if(mode==='order')FB.createOrder({...input,mid:target});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='due'?'입고 예정일을 수정했습니다.':mode==='order'?'발주를 등록했습니다. 입고 전에는 재고가 늘지 않습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
+  $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{if(mode==='due')FB.updateOrderDue({...input,id:target});else FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast(mode==='due'?'입고 예정일을 수정했습니다.':'차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};
 
   let transactionIndex=-1,transactionRevision=-1;
   function previewTransactionReceipt(){

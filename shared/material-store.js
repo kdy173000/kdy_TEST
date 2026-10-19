@@ -19,7 +19,10 @@ products.find(p=>p.family===5).name='케미컬 4L';products.find(p=>p.family===5
 return {schema:3,revision:0,materials,products,transactions,productions,orders};
 }
 const defaultCategories=['파이어볼','바인더','코알라티','현대','OEM','ODM'];
-function normalizeProducts(d){if(!Array.isArray(d.productCategories))d.productCategories=[...defaultCategories];for(const p of d.products){if(!p.category)p.category='파이어볼';}for(const p of d.products){if(!Array.isArray(p.versions))p.versions=[{id:'V01',qty:p.finished,state:'사용'}];}return d;}
+function normalizeProducts(d){
+if(!Array.isArray(d.suppliers))d.suppliers=[];
+for(const order of d.orders){if(!order.supplierId){const name=String(order.supplier||'미등록 업체').trim()||'미등록 업체';let supplier=d.suppliers.find(s=>s.name===name);if(!supplier){supplier={id:'SUP-'+String(d.suppliers.length+1).padStart(4,'0'),name,contact:'',phone:'',memo:'',archived:false};d.suppliers.push(supplier);}order.supplierId=supplier.id;}}
+if(!Array.isArray(d.productCategories))d.productCategories=[...defaultCategories];for(const p of d.products){if(!p.category)p.category='파이어볼';}for(const p of d.products){if(!Array.isArray(p.versions))p.versions=[{id:'V01',qty:p.finished,state:'사용'}];}return d;}
 function read(){try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d.schema!==3||!Array.isArray(d.materials)||!Array.isArray(d.orders))throw Error('저장 데이터 형식이 다릅니다.');const p=d.products.find(p=>p.id==='DEMO-5');if(p&&p.name==='케미컬 4L 샘플'){p.name='케미컬 4L';p.sample=false;}return normalizeProducts(d);}return normalizeProducts(seed());}catch(e){throw Error('이 브라우저의 저장 데이터를 읽을 수 없습니다. '+e.message);}}
 let state=read();
 function user(){try{const session=JSON.parse(sessionStorage.getItem('fb_user')||'null');if(!session)return null;const accounts=JSON.parse(localStorage.getItem('fb_accounts')||'[]');return accounts.find(a=>a.id===session.id)||session;}catch{return null;}}
@@ -45,7 +48,29 @@ function toggleMaterial(id){admin();return mutate(d=>{const m=mid(d,id);m.archiv
 function addVersion(id,name){admin();return mutate(d=>{const m=mid(d,id),vid=required(name,'버전명');if(m.archived||vid.length>20||m.versions.some(v=>v.id.toLowerCase()===vid.toLowerCase()))throw Error('사용 상태 또는 중복 버전명을 확인하세요.');m.versions.push({id:vid,qty:0,state:'사용'});});}
 function toggleVersion(id,vid){admin();return mutate(d=>{const v=version(mid(d,id),vid);if(v.deleted)throw Error('삭제된 버전은 사용 상태를 변경할 수 없습니다.');v.state=v.state==='사용'?'중단':'사용';});}
 function stockMovement(input){return mutate(d=>{const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);const qty=integer(Number(input.qty)),person=required(input.person,'담당자'),date=required(input.date,'날짜'),note=required(input.note,'차감 사유');if(!['출고','재고 조정'].includes(input.type))throw Error('차감 유형을 확인하세요.');if(v.qty<qty)throw Error('차감 가능한 재고가 부족합니다.');v.qty-=qty;transaction(d,{mid:m.id,vid:v.id,qty,type:input.type,date,person,note});});}
-function createOrder(input){return mutate(d=>{const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);const qty=integer(Number(input.qty)),supplier=required(input.supplier,'거래처'),date=required(input.date,'발주 날짜'),person=required(input.person,'담당자');const id='PO-'+String(d.orders.length+1).padStart(4,'0');d.orders.push({id,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplier,date,due:input.due||'',person,note:input.note||'',closed:false});return id;});}
+function saveSupplier(input){return mutate(d=>{
+const name=required(input.name,'업체명');if(name.length>80)throw Error('업체명은 80자 이내로 입력하세요.');
+if(d.suppliers.some(s=>s.id!==input.id&&s.name.toLowerCase()===name.toLowerCase()))throw Error('이미 등록된 업체명입니다.');
+const fields={name,contact:String(input.contact||'').trim().slice(0,60),phone:String(input.phone||'').trim().slice(0,60),memo:String(input.memo||'').trim().slice(0,200)};
+if(input.id){const s=d.suppliers.find(s=>s.id===input.id);if(!s)throw Error('업체를 찾을 수 없습니다.');Object.assign(s,fields);return s.id;}
+const id='SUP-'+String(d.suppliers.length+1).padStart(4,'0');d.suppliers.push({id,...fields,archived:false});return id;
+});}
+function toggleSupplier(id){return mutate(d=>{const s=d.suppliers.find(s=>s.id===id);if(!s)throw Error('업체를 찾을 수 없습니다.');s.archived=!s.archived;});}
+function createOrders(inputs){return mutate(d=>{
+if(!Array.isArray(inputs)||!inputs.length||inputs.length>100)throw Error('1~100개의 발주 품목을 입력하세요.');
+const batch='BATCH-'+String(d.orders.length+1).padStart(4,'0'),ids=[];
+for(const input of inputs){
+const m=mid(d,input.mid),v=version(m,input.vid);usable(m,v);
+if(m.deleted||v.deleted)throw Error('삭제된 부자재 또는 버전으로 발주할 수 없습니다.');
+const supplier=d.suppliers.find(s=>s.id===input.supplierId&&!s.archived);if(!supplier)throw Error('등록된 사용 중인 업체를 선택하세요.');
+const qty=integer(Number(input.qty)),date=required(input.date,'발주 날짜'),person=required(input.person,'담당자'),due=String(input.due||'');
+for(const value of [date,due].filter(Boolean)){if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||Number.isNaN(Date.parse(value))||new Date(value).toISOString().slice(0,10)!==value)throw Error('올바른 날짜를 입력하세요.');}
+const id='PO-'+String(d.orders.length+1).padStart(4,'0');
+d.orders.push({id,batch,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplierId:supplier.id,supplier:supplier.name,date,due,person,note:String(input.note||'').trim().slice(0,200),closed:false});ids.push(id);
+}
+return ids;
+});}
+function createOrder(input){return createOrders([input])[0];}
 function receiveOrder(input){return mutate(d=>{
 const order=d.orders.find(o=>o.id===input.id);
 if(!order||order.closed||order.received>=order.qty)throw Error('입고 가능한 발주가 아닙니다.');
@@ -121,5 +146,5 @@ d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity
 const slots=['캡','용기','스웨이드','어플리케이터','전면 라벨','후면 라벨','속지','케이스'];
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
 window.addEventListener('storage',e=>{if(e.key===KEY){state=read();window.dispatchEvent(new Event('fb-data'));}});
-return {get data(){return state;},slots,families,day,user,canAdmin,canShip,canPhoto,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
+return {get data(){return state;},slots,families,day,user,canAdmin,canShip,canPhoto,saveSupplier,toggleSupplier,createOrders,addProductCategory,saveProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
 })();

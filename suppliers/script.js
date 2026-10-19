@@ -1,0 +1,23 @@
+'use strict';
+(()=>{
+const {$,esc,fmt}=UI;if(!FB.user()){location.replace('../login/index.html');return;}
+let selected=new URLSearchParams(location.search).get('supplier')||'',editing='';
+const state=o=>o.closed?'잔량 마감':o.received>=o.qty?'입고 완료':o.received?'부분 입고':'입고 전';
+function render(){
+ $('newSupplier').hidden=!FB.canAdmin();
+ const q=$('supplierSearch').value.trim().toLowerCase(),items=FB.data.suppliers.filter(s=>(!s.archived||$('showArchived').checked)&&(!q||(s.name+' '+s.contact).toLowerCase().includes(q)));
+ if(!items.some(s=>s.id===selected))selected=items[0]?.id||'';
+ $('supplierList').innerHTML=items.map(s=>'<button class="supplier-button '+(s.id===selected?'active':'')+'" data-supplier="'+esc(s.id)+'">'+esc(s.name)+'<small>'+esc(s.contact||'담당자 미등록')+(s.archived?' · 거래 중단':'')+'</small></button>').join('')||'<p class="empty">등록된 업체가 없습니다.</p>';
+ const s=FB.data.suppliers.find(s=>s.id===selected);if(!s){$('supplierDetail').innerHTML='<p class="empty">업체를 등록하거나 목록에서 선택하세요.</p>';return;}
+ const orders=FB.data.orders.filter(o=>o.supplierId===s.id).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+ $('supplierDetail').innerHTML='<div class="sectionhead"><h2>'+esc(s.name)+'</h2><div class="action-group">'+(FB.canAdmin()?'<button id="editSupplier" type="button">정보 수정</button><button id="archiveSupplier" type="button">'+(s.archived?'거래 재개':'거래 중단')+'</button>':'')+'</div></div><div class="supplier-meta"><p><span>담당자</span>'+esc(s.contact||'—')+'</p><p><span>연락처</span>'+esc(s.phone||'—')+'</p><p><span>거래 상태</span>'+(s.archived?'중단':'사용')+'</p><p><span>누적 발주</span>'+orders.length+'건</p></div><p class="supplier-note">'+esc(s.memo)+'</p><div class="sectionhead"><h3>업체별 발주 이력</h3><a href="../orders/index.html">전체 발주 관리</a></div><div class="tablewrap"><table><thead><tr><th>날짜</th><th>제품명</th><th>버전</th><th class="num">수량</th><th>메모</th><th>입고 상태</th><th>재고</th></tr></thead><tbody>'+orders.map(o=>'<tr><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td>'+esc(o.note)+'</td><td>'+state(o)+'</td><td><a href="../procurement/index.html?material='+encodeURIComponent(o.mid)+'">재고·입고</a></td></tr>').join('')+(orders.length?'':'<tr><td colspan="7" class="empty">이 업체에 등록된 발주가 없습니다.</td></tr>')+'</tbody></table></div>';
+ if(FB.canAdmin()){$('editSupplier').onclick=()=>open(s);$('archiveSupplier').onclick=()=>{if(!UI.allowWrite())return;if(!confirm(s.name+' 업체의 거래를 '+(s.archived?'재개':'중단')+'할까요? 기존 발주 이력은 유지됩니다.'))return;try{FB.toggleSupplier(s.id);UI.toast('거래 상태를 변경했습니다.');}catch(e){UI.toast(e.message);}};}
+}
+function open(s){if(!UI.allowWrite())return;editing=s?.id||'';$('supplierTitle').textContent=s?'업체 정보 수정':'업체 등록';for(const [field,key] of [['supplierName','name'],['supplierContact','contact'],['supplierPhone','phone'],['supplierMemo','memo']])$(field).value=s?.[key]||'';$('supplierError').textContent='';$('supplierDialog').showModal();}
+$('newSupplier').onclick=()=>open();$('closeSupplier').onclick=$('cancelSupplier').onclick=()=>$('supplierDialog').close();
+$('supplierForm').onsubmit=e=>{e.preventDefault();if(!UI.allowWrite())return;try{selected=FB.saveSupplier({id:editing||undefined,name:$('supplierName').value,contact:$('supplierContact').value,phone:$('supplierPhone').value,memo:$('supplierMemo').value});$('supplierSearch').value='';$('supplierDialog').close();render();UI.toast('업체 정보를 저장했습니다.');}catch(err){$('supplierError').textContent=err.message;}};
+$('supplierSearch').oninput=render;$('showArchived').onchange=render;
+$('supplierList').onclick=e=>{const button=e.target.closest('[data-supplier]');if(button){selected=button.dataset.supplier;render();}};
+const initial=FB.data.suppliers.find(s=>s.id===selected);if(initial?.archived)$('showArchived').checked=true;
+window.addEventListener('fb-data',render);render();
+})();
