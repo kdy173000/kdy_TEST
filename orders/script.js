@@ -10,7 +10,7 @@ const status=o=>o.closed?'closed':o.received>=o.qty?'done':o.received?'partial':
 const statusLabel=o=>({closed:'잔량 마감',done:'입고 완료',partial:'부분 입고',pending:'입고 전'})[status(o)];
 const remaining=o=>o.closed?0:Math.max(0,o.qty-o.received);
 function renderDraft(){
- $('draftRows').innerHTML=draft.map((r,i)=>'<tr data-row="'+i+'"><td><input data-field="date" type="date" required value="'+esc(r.date)+'"></td><td>'+SearchPicker.markup(materials().find(m=>m.id===r.mid)?materials().find(m=>m.id===r.mid).name+' · '+r.mid:'','제품명')+'</td><td><select data-field="vid" aria-label="버전" required>'+UI.options((FB.data.materials.find(m=>m.id===r.mid)?.versions||[]).filter(v=>!v.deleted&&v.state==='사용').map(v=>[v.id,v.id+' · '+(v.market||'공용 사용')]),r.vid)+'</select></td><td><input data-field="qty" aria-label="발주 수량" type="number" min="1" step="1" required value="'+esc(r.qty)+'"></td><td>'+SearchPicker.markup(suppliers().find(s=>s.id===r.supplierId)?.name||'','업체')+'</td><td><input data-field="note" aria-label="메모" maxlength="200" value="'+esc(r.note)+'"></td><td><input data-field="due" aria-label="입고 예정일" type="date" value="'+esc(r.due)+'"></td><td><button type="button" data-remove="'+i+'">삭제</button></td></tr>').join('');
+ $('draftRows').innerHTML=draft.map((r,i)=>'<tr data-row="'+i+'"><td><input data-field="date" type="date" required value="'+esc(r.date)+'"></td><td>'+SearchPicker.markup(materials().find(m=>m.id===r.mid)?materials().find(m=>m.id===r.mid).name+' · '+r.mid:'','제품명')+'</td><td><select data-field="vid" aria-label="버전" required>'+UI.options((FB.data.materials.find(m=>m.id===r.mid)?.versions||[]).filter(v=>!v.deleted&&v.state==='사용').map(v=>[v.id,v.id+' · '+(v.market||'공용 사용')]),r.vid)+'</select></td><td><input data-field="spec" aria-label="규격" maxlength="80" placeholder="예: 44.5 × 49.5 mm" required value="'+esc(r.spec)+'"></td><td><input data-field="qty" aria-label="발주 수량" type="number" min="1" step="1" required value="'+esc(r.qty)+'"></td><td><input data-field="unitPrice" aria-label="단가 원 부가세 별도" type="number" min="0" step="1" required value="'+esc(r.unitPrice)+'"></td><td>'+SearchPicker.markup(suppliers().find(s=>s.id===r.supplierId)?.name||'','업체')+'</td><td><input data-field="note" aria-label="메모" maxlength="200" value="'+esc(r.note)+'"></td><td><input data-field="due" aria-label="입고 예정일" type="date" value="'+esc(r.due)+'"></td><td><button type="button" data-remove="'+i+'">삭제</button></td></tr>').join('');
  document.querySelectorAll('#draftRows tr').forEach(row=>{
  const r=draft[Number(row.dataset.row)],pickers=row.querySelectorAll('.search-picker');
  SearchPicker.bind(pickers[0],materials().map(m=>({id:m.id,label:m.name+' · '+m.id})),id=>{r.mid=id;r.vid=materials().find(m=>m.id===id)?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'';renderDraft();});
@@ -20,7 +20,7 @@ function renderDraft(){
 }
 function addRow(mid=''){
  const m=materials().find(m=>m.id===mid),last=draft[draft.length-1];
- draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',qty:'',supplierId:last?.supplierId||'',note:'',due:last?.due||''});renderDraft();
+ draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',spec:'',unitPrice:'',qty:'',supplierId:last?.supplierId||'',note:'',due:last?.due||''});renderDraft();
 }
 function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('deliveryAddress').value='';$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
@@ -51,8 +51,9 @@ $('previewDraft').onclick=()=>{
  try{if(!$('deliveryAddress').value.trim())throw Error('이번 발주의 납품주소를 입력하세요.');if(!draft.length)throw Error('발주할 품목을 추가하세요.');
  const rows=draft.map(r=>{
  const m=FB.data.materials.find(m=>m.id===r.mid&&!m.deleted&&!m.archived),supplier=FB.data.suppliers.find(s=>s.id===r.supplierId&&!s.archived);
+ if(!r.spec?.trim()||String(r.unitPrice).trim()===''||!Number.isSafeInteger(Number(r.unitPrice))||Number(r.unitPrice)<0)throw Error('규격과 0원 이상의 정수 단가를 입력하세요.');
  if(!m||!supplier||!r.date||!Number.isSafeInteger(Number(r.qty))||Number(r.qty)<1||!m.versions.some(v=>v.id===r.vid&&v.state==='사용'&&!v.deleted))throw Error('날짜·제품·버전·수량·업체를 모두 입력하세요.');
- return {...r,qty:Number(r.qty),name:m.name,supplier:supplier.name,person:$('orderPerson').value,deliveryAddress:$('deliveryAddress').value.trim(),id:'미저장'};
+ return {...r,qty:Number(r.qty),spec:r.spec.trim(),unitPrice:Number(r.unitPrice),supplyAmount:Number(r.qty)*Number(r.unitPrice),taxAmount:Math.round(Number(r.qty)*Number(r.unitPrice)*0.1),taxRate:0.1,name:m.name,supplier:supplier.name,person:$('orderPerson').value,deliveryAddress:$('deliveryAddress').value.trim(),id:'미저장'};
  });OrderDocument.open(rows);
  }catch(e){$('orderError').textContent=e.message;}
 };
@@ -60,7 +61,7 @@ $('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.h
 $('downloadOrders').onclick=()=>{
  const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length)return;
  const cell=value=>{let text=String(value??'');if(/^[=+@\t\r-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
- const data=[['날짜','제품명','버전','수량','업체','메모','입고 예정일','발주번호','입고 상태','납품주소'],...rows.map(o=>[o.date,o.name,o.vid,o.qty,supplierName(o),o.note,o.due,o.id,statusLabel(o),o.deliveryAddress||''])];
+ const data=[['날짜','제품명','버전','수량','업체','메모','입고 예정일','발주번호','입고 상태','납품주소','규격','단가','공급가액','세액'],...rows.map(o=>[o.date,o.name,o.vid,o.qty,supplierName(o),o.note,o.due,o.id,statusLabel(o),o.deliveryAddress||'',o.spec||'',o.unitPrice??'',o.supplyAmount??'',o.taxAmount??''])];
  const blob=new Blob(['\uFEFF'+data.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='발주내역_'+FB.day()+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 window.addEventListener('fb-data',render);render();
