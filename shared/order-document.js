@@ -1,24 +1,25 @@
 'use strict';
 window.OrderDocument=(()=>{
  const $=id=>document.getElementById(id),esc=UI.esc;
- const total=(rows,key)=>rows.some(r=>r[key]===null||r[key]===undefined)?null:rows.reduce((n,r)=>n+Number(r[key]),0);
+ const sumAmounts=(rows,key)=>rows.some(r=>r[key]===null||r[key]===undefined)?null:rows.reduce((n,r)=>n+Number(r[key]),0);
  const grand=rows=>rows.some(r=>r.supplyAmount==null||r.taxAmount==null)?null:rows.reduce((n,r)=>n+r.supplyAmount+r.taxAmount,0);
  const money=value=>value===undefined||value===null?'':Number(value).toLocaleString('ko-KR');
  const BUYER={name:'(주) 파이어볼',businessNumber:'603-81-26282',representative:'장진혁 외 1인',address:'부산광역시 기장군 장안읍 오리산단8로 53',businessType:'제조업',businessItem:'광학용코팅제, 대리석, 목재, 요트, 코팅제',phone:'051-728-6667'};
  let pages=[],current=0;
  function makePages(rows){
   const groups=new Map();
-  for(const row of rows){const key=JSON.stringify([row.supplierId,row.date,row.deliveryAddress||'']);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(structuredClone(row));}
+  for(const row of rows){const key=JSON.stringify([row.supplierId||String(row.supplier||'').trim(),row.date]);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(structuredClone(row));}
   const result=[];
-  for(const rows of groups.values()){const supplier=structuredClone(FB.data.suppliers.find(s=>s.id===rows[0].supplierId)||{name:rows[0].supplier});for(let i=0;i<rows.length;i+=15)result.push({supplier,date:rows[0].date,rows:rows.slice(i,i+15)});}
+  for(const rows of groups.values()){const supplier=structuredClone(FB.data.suppliers.find(s=>s.id===rows[0].supplierId)||{name:rows[0].supplier});for(let i=0;i<rows.length;i+=15)result.push({supplier,date:rows[0].date,numberStart:i+1,rows:rows.slice(i,i+15)});}
   return result;
  }
  function sheet(page,index,pageCount){
   const s=page.supplier,rows=page.rows;
-  const body=rows.map((r,i)=>'<tr><td>'+String(i+1)+'</td><td>'+esc(r.name)+'<br><small>'+esc(r.vid)+'</small></td><td>'+esc(r.spec||'')+'</td><td class="num">'+esc(r.qty)+'</td><td class="num">'+money(r.unitPrice)+'</td><td class="num">'+money(r.supplyAmount)+'</td><td class="num">'+money(r.taxAmount)+'</td><td>'+esc(r.note)+'</td></tr>').join('')+Array.from({length:Math.max(0,15-rows.length)},()=>'<tr>'+Array.from({length:8},()=>'<td>&nbsp;</td>').join('')+'</tr>').join('');
+  const addresses=[...new Set(rows.map(r=>String(r.deliveryAddress||'').trim()).filter(Boolean))];
+  const body=rows.map((r,i)=>'<tr><td>'+String((page.numberStart||1)+i)+'</td><td>'+esc(r.name)+'<br><small>'+esc(r.vid)+'</small></td><td>'+esc(r.spec||'')+'</td><td class="num">'+esc(r.qty)+'</td><td class="num">'+money(r.unitPrice)+'</td><td class="num">'+money(r.supplyAmount)+'</td><td class="num">'+money(r.taxAmount)+'</td><td>'+esc([r.note,addresses.length>1?'납품: '+(r.deliveryAddress||'미입력'):''].filter(Boolean).join(' · '))+'</td></tr>').join('')+Array.from({length:Math.max(0,15-rows.length)},()=>'<tr>'+Array.from({length:8},()=>'<td>&nbsp;</td>').join('')+'</tr>').join('');
 
   const due=[...new Set(rows.map(r=>r.due).filter(Boolean))].join(', ')||'미정',person=[...new Set(rows.map(r=>r.person).filter(Boolean))].join(', ');
-  return '<article class="invoice-sheet"><h1>발 주 서</h1><div class="invoice-info"><div><strong>공급자 · '+esc(s.name||'')+'</strong><br>발행일자: '+esc(page.date)+'<br>사업자등록번호: '+esc(s.businessNumber||'')+'<br>대표자: '+esc(s.representative||'')+'<br>사업장: '+esc(s.address||'')+'<br>업태 / 종목: '+esc(s.businessType||'')+' / '+esc(s.businessItem||'')+'<br>연락처: '+esc(s.phone||'')+'</div><div><strong>공급받는 자 · '+esc(BUYER.name)+'</strong><br>등록번호: '+esc(BUYER.businessNumber)+'<br>성명: '+esc(BUYER.representative)+'<br>사업장: '+esc(BUYER.address)+'<br>업태: '+esc(BUYER.businessType)+'<br>종목: '+esc(BUYER.businessItem)+'<br>전화번호: '+esc(BUYER.phone)+'<br><br>아래와 같이 제품 발주드립니다.</div></div><table><thead><tr><th>번호</th><th>품명 · 버전</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>'+body+'</tbody></table><div class="invoice-total">합계 수량: '+rows.reduce((n,r)=>n+Number(r.qty),0).toLocaleString('ko-KR')+'개 &nbsp; 공급가액: '+money(total(rows,'supplyAmount'))+'원 &nbsp; 세액: '+money(total(rows,'taxAmount'))+'원<br>총금액: '+money(grand(rows))+'원</div><div class="invoice-footer">납기일자: '+esc(due)+'<br>납품장소: '+esc(rows[0].deliveryAddress||'미입력')+'<br>담당자: '+esc(person)+'</div><div class="invoice-page-number">'+(index+1)+' / '+pageCount+'</div></article>';
+  return '<article class="invoice-sheet"><h1>발 주 서</h1><div class="invoice-info"><div><strong>공급자 · '+esc(s.name||'')+'</strong><br>발행일자: '+esc(page.date)+'<br>사업자등록번호: '+esc(s.businessNumber||'')+'<br>대표자: '+esc(s.representative||'')+'<br>사업장: '+esc(s.address||'')+'<br>업태 / 종목: '+esc(s.businessType||'')+' / '+esc(s.businessItem||'')+'<br>연락처: '+esc(s.phone||'')+'</div><div><strong>공급받는 자 · '+esc(BUYER.name)+'</strong><br>등록번호: '+esc(BUYER.businessNumber)+'<br>성명: '+esc(BUYER.representative)+'<br>사업장: '+esc(BUYER.address)+'<br>업태: '+esc(BUYER.businessType)+'<br>종목: '+esc(BUYER.businessItem)+'<br>전화번호: '+esc(BUYER.phone)+'<br><br>아래와 같이 제품 발주드립니다.</div></div><table><thead><tr><th>번호</th><th>품명 · 버전</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>'+body+'</tbody></table><div class="invoice-total">합계 수량: '+rows.reduce((n,r)=>n+Number(r.qty),0).toLocaleString('ko-KR')+'개 &nbsp; 공급가액: '+money(sumAmounts(rows,'supplyAmount'))+'원 &nbsp; 세액: '+money(sumAmounts(rows,'taxAmount'))+'원<br>총금액: '+money(grand(rows))+'원</div><div class="invoice-footer">납기일자: '+esc(due)+'<br>납품장소: '+esc(addresses.length?addresses.join(' / '):'미입력')+'<br>담당자: '+esc(person)+'</div><div class="invoice-page-number">'+(index+1)+' / '+pageCount+'</div></article>';
  }
  function render(){if(!pages.length)return;$('previewPaper').innerHTML=sheet(pages[current],current,pages.length);$('pageNumber').textContent=(current+1)+' / '+pages.length;$('previousPage').disabled=current===0;$('nextPage').disabled=current===pages.length-1;}
  function selectedPages(){const range=$('previewRange').value;if(range==='current')return [pages[current]];if(range==='all')return pages;const from=Number($('pageFrom').value),to=Number($('pageTo').value);if(!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to>pages.length)throw Error('1~'+pages.length+' 범위의 페이지를 입력하세요.');return pages.slice(from-1,to);}
@@ -52,21 +53,28 @@ window.OrderDocument=(()=>{
    'xl/_rels/workbook.xml.rels':'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+selected.map((_,i)=>'<Relationship Id="rId'+(i+1)+'" Type="'+rels+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')+'</Relationships>'
   };
   selected.forEach((p,i)=>{
-   const s=p.supplier,rows=[['발주서'],['발행일자',p.date],['공급자',s.name],['사업자등록번호',s.businessNumber||''],['대표자',s.representative||''],['사업장 소재지',s.address||''],['업태',s.businessType||'','종목',s.businessItem||''],['공급받는 자',BUYER.name],['등록번호',BUYER.businessNumber],['대표자',BUYER.representative],['사업장 소재지',BUYER.address],['업태',BUYER.businessType],['종목',BUYER.businessItem],['전화번호',BUYER.phone],[],['번호','품명','버전','규격','수량','단가','공급가액','세액','비고'],...p.rows.map((r,j)=>[j+1,r.name,r.vid,r.spec||'',Number(r.qty),r.unitPrice??'',r.supplyAmount??'',r.taxAmount??'',r.note]),['합계 수량','','',p.rows.reduce((n,r)=>n+Number(r.qty),0)],['합계 공급가액',total(p.rows,'supplyAmount')],['합계 세액',total(p.rows,'taxAmount')],['총금액',grand(p.rows)],['납품주소',p.rows[0].deliveryAddress||'미입력'],['담당자',[...new Set(p.rows.map(r=>r.person).filter(Boolean))].join(', ')]];
+   const s=p.supplier,rows=[['발주서'],['발행일자',p.date],['공급자',s.name],['사업자등록번호',s.businessNumber||''],['대표자',s.representative||''],['사업장 소재지',s.address||''],['업태',s.businessType||'','종목',s.businessItem||''],['공급받는 자',BUYER.name],['등록번호',BUYER.businessNumber],['대표자',BUYER.representative],['사업장 소재지',BUYER.address],['업태',BUYER.businessType],['종목',BUYER.businessItem],['전화번호',BUYER.phone],[],['번호','품명','버전','규격','수량','단가','공급가액','세액','비고'],...p.rows.map((r,j)=>[(p.numberStart||1)+j,r.name,r.vid,r.spec||'',Number(r.qty),r.unitPrice??'',r.supplyAmount??'',r.taxAmount??'',[r.note,r.deliveryAddress?'납품: '+r.deliveryAddress:''].filter(Boolean).join(' · ')]),['합계 수량','','',p.rows.reduce((n,r)=>n+Number(r.qty),0)],['합계 공급가액',sumAmounts(p.rows,'supplyAmount')],['합계 세액',sumAmounts(p.rows,'taxAmount')],['총금액',grand(p.rows)],['납품주소',[...new Set(p.rows.map(r=>r.deliveryAddress).filter(Boolean))].join(' / ')||'미입력'],['담당자',[...new Set(p.rows.map(r=>r.person).filter(Boolean))].join(', ')]];
    const data=rows.map((row,r)=>'<row r="'+(r+1)+'">'+row.map((v,c)=>{const address=String.fromCharCode(65+c)+(r+1);return typeof v==='number'?'<c r="'+address+'"><v>'+v+'</v></c>':'<c r="'+address+'" t="inlineStr"><is><t xml:space="preserve">'+xml(v)+'</t></is></c>';}).join('')+'</row>').join('');
    files['xl/worksheets/sheet'+(i+1)+'.xml']='<worksheet xmlns="'+ns+'"><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="44" customWidth="1"/><col min="3" max="6" width="15" customWidth="1"/><col min="7" max="7" width="35" customWidth="1"/></cols><sheetData>'+data+'</sheetData><pageSetup paperSize="9" orientation="portrait" fitToWidth="1"/></worksheet>';
   });
   return zip(files);
  }
  function download(blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='발주서_'+FB.day()+'.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ function errorMessage(error){
+  const message=String(error?.message||'');if(/[가-힣]/.test(message))return message;
+  console.error('발주서 출력 오류',error);
+  if(/not a function|undefined|null|ReferenceError|TypeError/i.test(message))return '발주서 미리보기를 생성하지 못했습니다. 화면을 새로고침한 뒤 다시 시도해주세요.';
+  return '발주서 저장·인쇄 중 오류가 발생했습니다. 입력 내용을 확인한 뒤 다시 시도해주세요.';
+ }
  function open(rows){
-  if(!rows.length)throw Error('미리 볼 발주가 없습니다.');pages=makePages(rows);current=0;$('previewSavePanel').hidden=true;$('previewSaveError').textContent='';$('previewRange').value='all';$('previewRangeFields').hidden=true;$('pageFrom').value=1;$('pageTo').value=pages.length;$('pageFrom').max=$('pageTo').max=pages.length;render();$('orderPreview').showModal();
+  try{
+  if(!rows.length)throw Error('미리 볼 발주가 없습니다.');pages=makePages(rows);current=0;$('previewSavePanel').hidden=true;$('previewSaveError').textContent='';$('previewRange').value='all';$('previewRangeFields').hidden=true;$('pageFrom').value=1;$('pageTo').value=pages.length;$('pageFrom').max=$('pageTo').max=pages.length;render();$('orderPreview').showModal();}catch(error){throw Error(errorMessage(error));}
  }
  document.addEventListener('DOMContentLoaded',()=>{
   $('closePreview').onclick=()=>$('orderPreview').close();$('previousPage').onclick=()=>{if(current>0){current--;render();}};$('nextPage').onclick=()=>{if(current<pages.length-1){current++;render();}};
-  $('previewPrint').onclick=()=>print(pages);$('previewSave').onclick=()=>{$('previewSavePanel').hidden=!$('previewSavePanel').hidden;};
+  $('previewPrint').onclick=()=>{try{print(pages);}catch(e){UI.toast(errorMessage(e));}};$('previewSave').onclick=()=>{$('previewSavePanel').hidden=!$('previewSavePanel').hidden;};
   $('cancelPreviewSave').onclick=()=>$('previewSavePanel').hidden=true;$('previewRange').onchange=()=>$('previewRangeFields').hidden=$('previewRange').value!=='range';
-  $('confirmPreviewSave').onclick=()=>{try{const selected=selectedPages();if($('previewFormat').value==='xlsx')download(workbook(selected));else print(selected);$('previewSaveError').textContent='';$('previewSavePanel').hidden=true;}catch(e){$('previewSaveError').textContent=e.message;}};
+  $('confirmPreviewSave').onclick=()=>{try{const selected=selectedPages();if($('previewFormat').value==='xlsx')download(workbook(selected));else print(selected);$('previewSaveError').textContent='';$('previewSavePanel').hidden=true;}catch(e){$('previewSaveError').textContent=errorMessage(e);}};
  });
- return {open};
+ return {open,errorMessage};
 })();

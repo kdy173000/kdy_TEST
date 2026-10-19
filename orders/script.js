@@ -93,9 +93,9 @@ $('previewDraft').onclick=()=>{
  if(!m||!supplier||!r.date||!Number.isSafeInteger(Number(r.qty))||Number(r.qty)<1||!m.versions.some(v=>v.id===r.vid&&v.state==='사용'&&!v.deleted))throw Error('날짜·제품·버전·수량·업체를 모두 입력하세요.');
  return {...r,qty:Number(r.qty),spec:r.spec.trim(),unitPrice:Number(r.unitPrice),supplyAmount:Number(r.qty)*Number(r.unitPrice),taxAmount:Math.round(Number(r.qty)*Number(r.unitPrice)*0.1),taxRate:0.1,name:m.name,supplier:supplier.name,person:$('orderPerson').value,deliveryAddress:$('deliveryAddress').value.trim(),id:'미저장'};
  });OrderDocument.open(rows);
- }catch(e){$('orderError').textContent=e.message;}
+ }catch(e){$('orderError').textContent=OrderDocument.errorMessage(e);}
 };
-$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast('미리보기를 열지 못했습니다. '+e.message);}};
+$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast(OrderDocument.errorMessage(e));}};
 window.addEventListener('fb-data',render);render();
 const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial);
 })();
