@@ -88,9 +88,10 @@ for(const value of [date,due].filter(Boolean)){if(!/^\d{4}-\d{2}-\d{2}$/.test(va
 const spec=String(input.spec||'').trim();if(spec.length>80)throw Error('규격은 80자 이내로 입력하세요.');
 let unitPrice=null,supplyAmount=null,taxAmount=null;
 if(input.unitPrice!==undefined&&input.unitPrice!==null){if(String(input.unitPrice).trim()==='')throw Error('단가를 입력하세요.');unitPrice=integer(Number(input.unitPrice),0);supplyAmount=integer(unitPrice*qty,0);taxAmount=integer(Math.round(supplyAmount*0.1),0);if(!Number.isSafeInteger(supplyAmount+taxAmount))throw Error('금액이 너무 큽니다.');}
+const personPhone=String(input.personPhone||'').trim();if(personPhone.length>40)throw Error('담당자 전화번호는 40자 이내로 입력하세요.');
 const deliveryAddress=String(input.deliveryAddress||'').trim();if(deliveryAddress.length>200)throw Error('납품주소는 200자 이내로 입력하세요.');
 const id='PO-'+String(d.orders.length+1).padStart(4,'0');
-d.orders.push({id,batch,deliveryAddress,spec,unitPrice,supplyAmount,taxAmount,taxRate:0.1,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplierId:supplier.id,supplier:supplier.name,date,due,person,note:String(input.note||'').trim().slice(0,200),closed:false});ids.push(id);
+d.orders.push({id,batch,deliveryAddress,spec,unitPrice,supplyAmount,taxAmount,taxRate:0.1,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplierId:supplier.id,supplier:supplier.name,date,due,person,personPhone,note:String(input.note||'').trim().slice(0,200),closed:false});ids.push(id);
 }
 return ids;
 });}
@@ -153,8 +154,9 @@ function updateOrder(input){return mutate(d=>{
  let unitPrice=null,supplyAmount=null,taxAmount=null;
  if(input.unitPrice!==null&&input.unitPrice!==undefined&&String(input.unitPrice).trim()!==''){unitPrice=integer(Number(input.unitPrice),0);supplyAmount=integer(qty*unitPrice,0);taxAmount=integer(Math.round(supplyAmount*0.1),0);if(!Number.isSafeInteger(supplyAmount+taxAmount))throw Error('금액이 너무 큽니다.');}
  else if(o.unitPrice!==null&&o.unitPrice!==undefined)throw Error('단가를 입력하세요.');
+ const personPhone=String(input.personPhone===undefined?(o.personPhone||''):input.personPhone).trim();if(personPhone.length>40)throw Error('담당자 전화번호는 40자 이내로 입력하세요.');
  const before=structuredClone(o);
- Object.assign(o,{mid:m.id,vid:v.id,name:m.name,qty,supplierId:supplier.id,supplier:supplier.name,date,due,spec,note,deliveryAddress,person,unitPrice,supplyAmount,taxAmount,taxRate:0.1});
+ Object.assign(o,{mid:m.id,vid:v.id,name:m.name,qty,supplierId:supplier.id,supplier:supplier.name,date,due,spec,note,deliveryAddress,person,personPhone,unitPrice,supplyAmount,taxAmount,taxRate:0.1});
  d.orderEdits=d.orderEdits||[];d.orderEdits.push({id:o.id,date:day(),person:user()?.name||'',before,after:structuredClone(o)});
 });}
 function updateOrderDue(input){return mutate(d=>{const o=d.orders.find(o=>o.id===input.id);if(!o||o.closed||o.received>=o.qty)throw Error('입고 대기 발주만 예정일을 수정할 수 있습니다.');const due=String(input.due||'');if(due&&(!/^\d{4}-\d{2}-\d{2}$/.test(due)||Number.isNaN(Date.parse(due))||new Date(due).toISOString().slice(0,10)!==due))throw Error('올바른 입고 예정일을 입력하세요.');o.due=due;});}
