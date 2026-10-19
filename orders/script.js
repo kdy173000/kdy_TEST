@@ -9,16 +9,20 @@ const supplierName=o=>FB.data.suppliers.find(s=>s.id===o.supplierId)?.name||o.su
 const status=o=>o.closed?'closed':o.received>=o.qty?'done':o.received?'partial':'pending';
 const statusLabel=o=>({closed:'잔량 마감',done:'입고 완료',partial:'부분 입고',pending:'입고 전'})[status(o)];
 const remaining=o=>o.closed?0:Math.max(0,o.qty-o.received);
-function materialOptions(value,q=''){const query=q.trim().toLowerCase();return '<option value="">제품 선택</option>'+UI.options(materials().filter(m=>m.id===value||!query||(m.name+' '+m.id).toLowerCase().includes(query)).map(m=>[m.id,m.name+' · '+m.id]),value);}
 function renderDraft(){
- $('draftRows').innerHTML=draft.map((r,i)=>'<tr data-row="'+i+'"><td><input data-field="date" type="date" required value="'+esc(r.date)+'"></td><td><select data-field="mid" aria-label="제품명" required>'+materialOptions(r.mid,$('draftSearch').value)+'</select></td><td><select data-field="vid" aria-label="버전" required>'+UI.options((FB.data.materials.find(m=>m.id===r.mid)?.versions||[]).filter(v=>!v.deleted&&v.state==='사용').map(v=>[v.id,v.id+' · '+(v.market||'공용 사용')]),r.vid)+'</select></td><td><input data-field="qty" aria-label="발주 수량" type="number" min="1" step="1" required value="'+esc(r.qty)+'"></td><td><select data-field="supplierId" aria-label="업체" required><option value="">업체 선택</option>'+UI.options(suppliers().map(s=>[s.id,s.name]),r.supplierId)+'</select></td><td><input data-field="note" aria-label="메모" maxlength="200" value="'+esc(r.note)+'"></td><td><input data-field="due" aria-label="입고 예정일" type="date" value="'+esc(r.due)+'"></td><td><button type="button" data-remove="'+i+'">삭제</button></td></tr>').join('');
+ $('draftRows').innerHTML=draft.map((r,i)=>'<tr data-row="'+i+'"><td><input data-field="date" type="date" required value="'+esc(r.date)+'"></td><td>'+SearchPicker.markup(materials().find(m=>m.id===r.mid)?materials().find(m=>m.id===r.mid).name+' · '+r.mid:'','제품명')+'</td><td><select data-field="vid" aria-label="버전" required>'+UI.options((FB.data.materials.find(m=>m.id===r.mid)?.versions||[]).filter(v=>!v.deleted&&v.state==='사용').map(v=>[v.id,v.id+' · '+(v.market||'공용 사용')]),r.vid)+'</select></td><td><input data-field="qty" aria-label="발주 수량" type="number" min="1" step="1" required value="'+esc(r.qty)+'"></td><td>'+SearchPicker.markup(suppliers().find(s=>s.id===r.supplierId)?.name||'','업체')+'</td><td><input data-field="note" aria-label="메모" maxlength="200" value="'+esc(r.note)+'"></td><td><input data-field="due" aria-label="입고 예정일" type="date" value="'+esc(r.due)+'"></td><td><button type="button" data-remove="'+i+'">삭제</button></td></tr>').join('');
+ document.querySelectorAll('#draftRows tr').forEach(row=>{
+ const r=draft[Number(row.dataset.row)],pickers=row.querySelectorAll('.search-picker');
+ SearchPicker.bind(pickers[0],materials().map(m=>({id:m.id,label:m.name+' · '+m.id})),id=>{r.mid=id;r.vid=materials().find(m=>m.id===id)?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'';renderDraft();});
+ SearchPicker.bind(pickers[1],suppliers().map(s=>({id:s.id,label:s.name})),id=>{r.supplierId=id;});
+ });
  $('orderError').textContent=suppliers().length?'':'먼저 업체 관리에서 업체를 등록하세요.';
 }
 function addRow(mid=''){
  const m=materials().find(m=>m.id===mid),last=draft[draft.length-1];
  draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',qty:'',supplierId:last?.supplierId||'',note:'',due:last?.due||''});renderDraft();
 }
-function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('draftSearch').value='';$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
+function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
  $('startOrder').hidden=!FB.canAdmin();
  const chosen=$('supplierFilter').value;$('supplierFilter').innerHTML='<option value="">전체 업체</option>'+UI.options(FB.data.suppliers.map(s=>[s.id,s.name+(s.archived?' · 거래 중단':'')]),chosen);
@@ -28,9 +32,6 @@ function render(){
  $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td><a href="../procurement/index.html?material='+encodeURIComponent(o.mid)+'">재고·입고</a></td></tr>').join('')||'<tr><td colspan="10" class="empty">발주 내역이 없습니다.</td></tr>';
  const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('downloadOrders').disabled=!selected.size;
 }
-$('draftSearch').oninput=()=>{
- document.querySelectorAll('#draftRows tr').forEach(row=>{const r=draft[Number(row.dataset.row)];row.querySelector('[data-field="mid"]').innerHTML=materialOptions(r.mid,$('draftSearch').value);});
-};
 $('startOrder').onclick=()=>start();
 $('addRow').onclick=()=>{if(UI.allowWrite())addRow();};
 $('cancelOrder').onclick=()=>{if(draft.some(r=>r.mid||r.qty||r.note)&&!confirm('작성 중인 발주를 닫을까요? 저장되지 않은 내용은 사라집니다.'))return;draft=[];$('orderEditor').hidden=true;};

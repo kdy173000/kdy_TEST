@@ -4,8 +4,9 @@
   const to = path => new URL(path, root).href;
   document.body.classList.add('portal-with-nav');
   let nav = document.querySelector('.app-side-nav');
-  if (!nav) {
-    nav = document.createElement('nav');
+  if (!nav) { nav = document.createElement('nav'); nav.id='portalSidebar'; }
+  {
+    nav.replaceChildren();
     nav.className = 'app-side-nav';
     nav.setAttribute('aria-label', '사내 운영 메뉴');
     let user = {}, links = {};
@@ -74,13 +75,6 @@
       link.setAttribute('aria-current', 'page');
     }
     item.replaceWith(link);
-  }
-  // Existing dashboard sidebars also receive the shared purchasing destinations.
-  let orderAnchor=Array.from(nav.querySelectorAll('.sb-item')).find(item=>item.textContent.trim()==='부자재');
-  for(const [label,path] of [['발주 관리','orders/index.html'],['업체 관리','suppliers/index.html']]){
-    if(Array.from(nav.querySelectorAll('.sb-item')).some(item=>item.textContent.trim()===label))continue;
-    const link=document.createElement('a');link.className='sb-item';link.textContent=label;link.href=to(path);
-    if(orderAnchor){orderAnchor.after(link);orderAnchor=link;}
   }
   const content = document.querySelector('body > .layout, body > main, body > .container');
   if (content) {
