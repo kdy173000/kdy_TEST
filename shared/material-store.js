@@ -109,11 +109,12 @@ if(!product&&d.orders.some(o=>o.mid===entity.id&&o.vid===v.id&&!o.closed&&o.rece
 if(!product&&d.products.some(p=>p.boms.some(b=>!b.locked&&b.rows.some(r=>r.mid===entity.id&&r.vid===v.id))))throw Error('현재 BOM에 연결된 버전입니다. BOM을 다른 버전으로 변경한 뒤 삭제하세요.');
 v.deleted=true;v.state='중단';return;}
 const name=required(input.name,'버전명');if(name.length>20||entity.versions.some(x=>x!==v&&x.id.toLowerCase()===name.toLowerCase()))throw Error('20자 이내의 중복되지 않는 버전명을 입력하세요.');
-const old=v.id;v.id=name;
+const nextState=input.state===undefined?v.state:input.state;if(!['사용','중단'].includes(nextState))throw Error('사용 상태를 확인하세요.');
+const old=v.id,oldState=v.state;v.id=name;v.state=nextState;
 for(const t of d.transactions)if(product?t.pid===entity.id:t.mid===entity.id){if(t.vid===old)t.vid=name;if(t.orderedVid===old)t.orderedVid=name;}
 for(const p of d.productions){if(product&&p.pid===entity.id&&p.vid===old)p.vid=name;for(const row of p.rows||[])if(!product&&row.mid===entity.id&&row.vid===old)row.vid=name;}
 if(!product){for(const p of d.products)for(const b of p.boms)for(const row of b.rows)if(row.mid===entity.id&&row.vid===old)row.vid=name;for(const o of d.orders)if(o.mid===entity.id){if(o.vid===old)o.vid=name;for(const row of o.receipts||[]){if(row.vid===old)row.vid=name;if(row.orderedVid===old)row.orderedVid=name;}}}
-d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity.id,before:old,after:name,date:day(),person:user()?.name||''});
+d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity.id,before:old,after:name,beforeState:oldState,afterState:nextState,date:day(),person:user()?.name||''});
 });}
 const slots=['캡','용기','스웨이드','어플리케이터','전면 라벨','후면 라벨','속지','케이스'];
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
