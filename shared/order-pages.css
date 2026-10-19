@@ -7,8 +7,8 @@
 .order-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:18px 0}.order-filters>input{flex:1;min-width:220px}.order-filters>select{width:160px}.order-filters label{font-size:12px}.order-filters label input{margin-top:5px;width:150px}
 .order-editor-toolbar{display:flex;gap:20px;align-items:end;justify-content:space-between;margin:22px 0 18px;padding:18px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px}
 .order-editor-toolbar label{font-size:13px;color:var(--text2);width:200px}.order-editor-toolbar .draft-search-label{width:min(480px,65%)}.order-editor-toolbar input{margin-top:8px}
-.order-entry{min-width:1530px;table-layout:fixed;margin:0}
-.order-entry th:nth-child(1){width:136px}.order-entry th:nth-child(2){width:245px}.order-entry th:nth-child(3){width:130px}.order-entry th:nth-child(4){width:170px}.order-entry th:nth-child(5){width:90px}.order-entry th:nth-child(6){width:110px}.order-entry th:nth-child(7){width:180px}.order-entry th:nth-child(8){width:180px}.order-entry th:nth-child(9){width:136px}.order-entry th:last-child{width:66px}
+.order-entry{min-width:1390px;table-layout:fixed;margin:0}
+.order-entry th:nth-child(1){width:136px}.order-entry th:nth-child(2){width:245px}.order-entry th:nth-child(3){width:130px}.order-entry th:nth-child(4){width:170px}.order-entry th:nth-child(5){width:90px}.order-entry th:nth-child(6){width:110px}.order-entry th:nth-child(7){width:180px}.order-entry th:nth-child(8){width:180px}.order-entry th:last-child{width:66px}
 .order-entry th,.order-entry td{padding:12px 8px;vertical-align:middle}.panel .order-entry td:first-child{min-width:0}
 .order-entry th{white-space:nowrap;color:var(--text2)}.order-entry input,.order-entry select{height:42px;padding:10px;font-size:13px;min-width:0;background:var(--bg2)}
 .order-entry input[type=number]{text-align:right}.panel .order-entry button{margin:0;padding:8px;font-size:12px;white-space:nowrap}
@@ -55,3 +55,5 @@
 .order-editor-toolbar{flex-wrap:wrap}.order-editor-toolbar .delivery-address-field{flex:1 0 100%;width:100%}
 
 .delivery-presets{display:flex;align-items:end;gap:10px;flex:1 0 100%;flex-wrap:wrap}.order-editor-toolbar .delivery-presets label{width:min(320px,100%)}.delivery-presets select{margin-top:8px}.delivery-presets button{height:42px;font-size:13px}
+
+.order-history .due-edit{display:block;margin:6px 0 0;padding:5px 8px;font-size:12px}#orderDueForm{margin-top:18px}#orderDueError{color:#9b1b30;font-size:13px}
