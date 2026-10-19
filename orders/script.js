@@ -2,7 +2,7 @@
 (()=>{
 const {$,esc,fmt}=UI;
 if(!FB.user()){location.replace('../login/index.html');return;}
-let draft=[],visible=[],selected=new Set();
+let draft=[],visible=[],selected=new Set(),deliveryPlaceId='fireball';
 const materials=()=>FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.versions.some(v=>!v.deleted&&v.state==='사용'));
 const suppliers=()=>FB.data.suppliers.filter(s=>!s.archived);
 const supplierName=o=>FB.data.suppliers.find(s=>s.id===o.supplierId)?.name||o.supplier;
@@ -22,19 +22,22 @@ function addRow(mid=''){
  const m=materials().find(m=>m.id===mid),last=draft[draft.length-1];
  draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',spec:'',unitPrice:'',qty:'',supplierId:last?.supplierId||'',note:'',due:''});renderDraft();
 }
-function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('deliveryAddress').value=FB.defaultDeliveryAddress;renderDeliveryPresets();$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
-function renderDeliveryPresets(){
- const current=$('deliveryAddress').value.trim(),match=FB.data.deliveryAddresses.find(a=>a.address===current);
- $('deliveryPreset').value=match?.id||'';
- $('deliveryPresetPicker').innerHTML=SearchPicker.markup(match?.label||'','납품처 이름 또는 주소');
- SearchPicker.bind($('deliveryPresetPicker').querySelector('.search-picker'),[{id:'',label:'직접 입력'},...FB.data.deliveryAddresses.map(a=>({id:a.id,label:a.label+' · '+a.address}))],id=>{const place=FB.data.deliveryAddresses.find(a=>a.id===id);$('deliveryAddress').value=place?.address||'';renderDeliveryPresets();});
- BusinessCertificates.show($('deliveryCertificate'),match);
- $('removeDeliveryPreset').disabled=!match||match.id==='fireball';
+function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;deliveryPlaceId='fireball';$('deliveryAddress').value=FB.defaultDeliveryAddress;renderDeliveryPresets();$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
+function deliveryPlaces(){
+ return [{id:'fireball',label:'파이어볼',address:FB.defaultDeliveryAddress},...FB.data.suppliers.filter(s=>!s.archived&&s.name.replace(/주식회사|\(주\)|㈜|\s/g,'')!=='파이어볼').map(s=>({id:'supplier:'+s.id,label:s.name,address:s.address||''}))];
 }
-
-$('deliveryAddress').oninput=renderDeliveryPresets;
-$('saveDeliveryPreset').onclick=()=>{if(!UI.allowWrite())return;const address=$('deliveryAddress').value.trim();if(!address){UI.toast('저장할 납품주소를 입력하세요.');return;}const label=prompt('납품처 이름을 입력하세요. 예: 2공장, 외주 포장업체');if(label===null)return;try{FB.saveDeliveryAddress({label,address});renderDeliveryPresets();UI.toast('자주 쓰는 납품처를 저장했습니다.');}catch(e){UI.toast(e.message);}};
-$('removeDeliveryPreset').onclick=()=>{if(!UI.allowWrite())return;const id=$('deliveryPreset').value;if(!id||id==='fireball')return;if(!confirm('이 납품처를 저장 목록에서 삭제할까요? 기존 발주 주소는 유지됩니다.'))return;try{FB.removeDeliveryAddress(id);renderDeliveryPresets();UI.toast('저장 목록에서 삭제했습니다.');}catch(e){UI.toast(e.message);}};
+function renderDeliveryPresets(){
+ const current=$('deliveryAddress').value.trim(),places=deliveryPlaces();
+ const match=places.find(p=>p.id===deliveryPlaceId&&p.address===current)||places.find(p=>p.address&&p.address===current);
+ deliveryPlaceId=match?.id||'';
+ $('deliveryPreset').value=deliveryPlaceId;
+ $('deliveryPresetPicker').innerHTML=SearchPicker.markup(match?.label||'','납품처 업체명');
+ SearchPicker.bind($('deliveryPresetPicker').querySelector('.search-picker'),[{id:'',label:'직접입력'},...places.map(p=>({id:p.id,label:p.label}))],id=>{
+  const place=places.find(p=>p.id===id);deliveryPlaceId=id;$('deliveryAddress').value=place?.address||'';renderDeliveryPresets();
+  if(!place||!place.address)$('deliveryAddress').focus();
+ });
+}
+$('deliveryAddress').oninput=()=>{deliveryPlaceId='';renderDeliveryPresets();};
 function render(){
  renderDeliveryPresets();
  $('startOrder').hidden=!FB.canAdmin();
