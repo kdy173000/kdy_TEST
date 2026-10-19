@@ -44,7 +44,7 @@ function render(){
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!from||o.date>=from)&&(!to||o.date<=to)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
  $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td class="order-receipt-cell">'+(o.closed||o.received>=o.qty?'<span class="receipt-control page-note">처리 완료</span>':FB.canAdmin()?'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'">입고 완료</button>':'<span class="receipt-control page-note">조회 전용</span>')+'</td><td class="order-edit-cell">'+(FB.canAdmin()?'<button type="button" data-edit-order="'+esc(o.id)+'">수정</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="12" class="empty">발주 내역이 없습니다.</td></tr>';
- const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('downloadOrders').disabled=!selected.size;
+ const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!selected.size;
 }
 let editingOrder=null,editingRevision=0,editingMid='',editingSupplier='';
 function editVersions(value){const m=FB.data.materials.find(m=>m.id===editingMid);$('editOrderVersion').innerHTML=UI.options((m?.versions||[]).filter(v=>v.id===value||(!v.deleted&&v.state==='사용')).map(v=>[v.id,v.id]),value);}
@@ -92,13 +92,7 @@ $('previewDraft').onclick=()=>{
  });OrderDocument.open(rows);
  }catch(e){$('orderError').textContent=e.message;}
 };
-$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}OrderDocument.open(rows);};
-$('downloadOrders').onclick=()=>{
- const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length)return;
- const cell=value=>{let text=String(value??'');if(/^[=+@\t\r-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
- const data=[['날짜','제품명','버전','수량','업체','메모','입고 예정일','발주번호','입고 상태','납품주소','규격','단가','공급가액','세액'],...rows.map(o=>[o.date,o.name,o.vid,o.qty,supplierName(o),o.note,o.due,o.id,statusLabel(o),o.deliveryAddress||'',o.spec||'',o.unitPrice??'',o.supplyAmount??'',o.taxAmount??''])];
- const blob=new Blob(['\uFEFF'+data.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='발주내역_'+FB.day()+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
+$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast('미리보기를 열지 못했습니다. '+e.message);}};
 window.addEventListener('fb-data',render);render();
 const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial);
 })();
