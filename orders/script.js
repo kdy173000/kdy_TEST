@@ -43,17 +43,34 @@ function render(){
  const q=$('orderSearch').value.trim().toLowerCase(),supplier=$('supplierFilter').value,state=$('statusFilter').value,from=$('fromDate').value,to=$('toDate').value;
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!from||o.date>=from)&&(!to||o.date<=to)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
- $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+(FB.canAdmin()&&!o.closed&&o.received<o.qty?'<button class="due-edit" type="button" data-edit-order-due="'+esc(o.id)+'">'+(o.due?'수정':'예정일 입력')+'</button>':'')+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td class="order-receipt-cell">'+(o.closed||o.received>=o.qty?'<span class="receipt-control page-note">처리 완료</span>':FB.canAdmin()?'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'">입고 완료</button>':'<span class="receipt-control page-note">조회 전용</span>')+'</td></tr>').join('')||'<tr><td colspan="11" class="empty">발주 내역이 없습니다.</td></tr>';
+ $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td class="order-receipt-cell">'+(o.closed||o.received>=o.qty?'<span class="receipt-control page-note">처리 완료</span>':FB.canAdmin()?'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'">입고 완료</button>':'<span class="receipt-control page-note">조회 전용</span>')+'</td><td class="order-edit-cell">'+(FB.canAdmin()?'<button type="button" data-edit-order="'+esc(o.id)+'">수정</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="12" class="empty">발주 내역이 없습니다.</td></tr>';
  const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('downloadOrders').disabled=!selected.size;
 }
-let dueOrderId='';
+let editingOrder=null,editingRevision=0,editingMid='',editingSupplier='';
+function editVersions(value){const m=FB.data.materials.find(m=>m.id===editingMid);$('editOrderVersion').innerHTML=UI.options((m?.versions||[]).filter(v=>v.id===value||(!v.deleted&&v.state==='사용')).map(v=>[v.id,v.id]),value);}
 $('orderRows').addEventListener('click',e=>{
- const button=e.target.closest('[data-edit-order-due]');if(!button||!UI.allowWrite())return;
- const order=FB.data.orders.find(o=>o.id===button.dataset.editOrderDue);if(!order)return;
- dueOrderId=order.id;$('dueOrderName').textContent=order.id+' · '+order.name;$('orderDueDate').value=order.due||'';$('orderDueError').textContent='';$('orderDueDialog').showModal();
+ const button=e.target.closest('[data-edit-order]');if(!button||!UI.allowWrite())return;
+ const o=FB.data.orders.find(o=>o.id===button.dataset.editOrder);if(!o)return;
+ editingOrder=structuredClone(o);editingRevision=FB.data.revision;editingMid=o.mid;editingSupplier=o.supplierId;
+ const received=FB.data.transactions.some(t=>t.order===o.id)||(o.receipts||[]).some(r=>!r.deleted);
+ $('editOrderName').textContent=o.id+' · '+o.name;
+ for(const [id,key] of [['editOrderDate','date'],['editOrderDue','due'],['editOrderSpec','spec'],['editOrderQty','qty'],['editOrderPrice','unitPrice'],['editOrderPerson','person'],['editOrderNote','note'],['editOrderAddress','deliveryAddress']])$(id).value=o[key]??'';
+ $('editOrderQty').min=Math.max(1,o.received);$('editOrderQty').readOnly=!!o.closed;
+ $('editOrderMaterial').innerHTML=SearchPicker.markup(o.name,'제품명');
+ const materialPicker=$('editOrderMaterial').querySelector('.search-picker');
+ if(received){materialPicker.querySelectorAll('input,button').forEach(el=>el.disabled=true);}else SearchPicker.bind(materialPicker,FB.data.materials.filter(m=>m.id===o.mid||(!m.deleted&&!m.archived)).map(m=>({id:m.id,label:m.name+' · '+m.id})),id=>{editingMid=id;editVersions('');});
+ editVersions(o.vid);$('editOrderVersion').disabled=received;
+ $('editOrderSupplier').innerHTML=SearchPicker.markup(supplierName(o),'업체');
+ SearchPicker.bind($('editOrderSupplier').querySelector('.search-picker'),FB.data.suppliers.filter(s=>!s.archived||s.id===o.supplierId).map(s=>({id:s.id,label:s.name})),id=>editingSupplier=id);
+ $('editOrderHelp').textContent=received?'입고 기록이 있어 제품·버전은 보호됩니다. 발주 수량은 정상 입고 수량보다 적게 수정할 수 없습니다.':'수정한 내용은 발주 내역·업체 이력·입고 대기에 함께 반영됩니다.';
+ $('orderEditError').textContent='';$('orderEditDialog').showModal();
 });
-$('closeOrderDue').onclick=$('cancelOrderDue').onclick=()=>$('orderDueDialog').close();
-$('orderDueForm').onsubmit=e=>{e.preventDefault();if(!UI.allowWrite())return;try{FB.updateOrderDue({id:dueOrderId,due:$('orderDueDate').value});$('orderDueDialog').close();UI.toast('입고 예정일을 저장했습니다.');}catch(err){$('orderDueError').textContent=err.message;}};
+$('closeOrderEdit').onclick=$('cancelOrderEdit').onclick=()=>$('orderEditDialog').close();
+$('orderEditForm').onsubmit=e=>{
+ e.preventDefault();if(!UI.allowWrite())return;
+ const button=$('saveOrderEdit');button.disabled=true;
+ try{FB.updateOrder({id:editingOrder.id,revision:editingRevision,mid:editingMid,vid:$('editOrderVersion').value,supplierId:editingSupplier,date:$('editOrderDate').value,due:$('editOrderDue').value,spec:$('editOrderSpec').value,qty:Number($('editOrderQty').value),unitPrice:$('editOrderPrice').value,person:$('editOrderPerson').value,note:$('editOrderNote').value,deliveryAddress:$('editOrderAddress').value});$('orderEditDialog').close();UI.toast('발주 정보를 수정했습니다.');}catch(err){$('orderEditError').textContent=err.message;}finally{button.disabled=false;}
+};
 $('startOrder').onclick=()=>start();
 $('addRow').onclick=()=>{if(UI.allowWrite())addRow();};
 $('cancelOrder').onclick=()=>{if(draft.some(r=>r.mid||r.qty||r.note)&&!confirm('작성 중인 발주를 닫을까요? 저장되지 않은 내용은 사라집니다.'))return;draft=[];$('orderEditor').hidden=true;};

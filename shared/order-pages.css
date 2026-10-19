@@ -56,4 +56,6 @@
 
 .delivery-presets{display:flex;align-items:end;gap:10px;flex:1 0 100%;flex-wrap:wrap}.order-editor-toolbar .delivery-presets label{width:min(320px,100%)}.delivery-presets select{margin-top:8px}.delivery-presets button{height:42px;font-size:13px}
 
-.order-history .due-edit{display:block;margin:6px 0 0;padding:5px 8px;font-size:12px}#orderDueForm{margin-top:18px}#orderDueError{color:#9b1b30;font-size:13px}
+
+
+.order-edit-dialog{width:820px}.order-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;margin-top:20px}.order-edit-grid .field{margin:0;min-width:0}.order-edit-grid .wide{grid-column:1/-1}.order-edit-grid .field>span{display:block;font-size:13px;margin-bottom:7px}.order-edit-cell{text-align:center}.order-history th:last-child,.order-history .order-edit-cell{width:80px;min-width:80px}#orderEditError{color:#9b1b30;font-size:13px}@media(max-width:600px){.order-edit-grid{grid-template-columns:1fr}}
