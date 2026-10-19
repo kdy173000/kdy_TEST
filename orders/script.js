@@ -26,6 +26,10 @@ function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEdito
 function render(){
  $('startOrder').hidden=!FB.canAdmin();
  const chosen=$('supplierFilter').value;$('supplierFilter').innerHTML='<option value="">전체 업체</option>'+UI.options(FB.data.suppliers.map(s=>[s.id,s.name+(s.archived?' · 거래 중단':'')]),chosen);
+ $('productFilterPicker').innerHTML=SearchPicker.markup(FB.data.materials.find(m=>m.id===$('orderSearch').value)?.name||'','제품명');
+ SearchPicker.bind($('productFilterPicker').querySelector('.search-picker'),[{id:'',label:'전체 제품'},...FB.data.materials.filter(m=>!m.deleted).map(m=>({id:m.id,label:m.name+' · '+m.id}))],id=>{$('orderSearch').value=id;render();});
+ $('supplierFilterPicker').innerHTML=SearchPicker.markup(FB.data.suppliers.find(s=>s.id===$('supplierFilter').value)?.name||'','업체');
+ SearchPicker.bind($('supplierFilterPicker').querySelector('.search-picker'),[{id:'',label:'전체 업체'},...FB.data.suppliers.map(s=>({id:s.id,label:s.name+(s.archived?' · 거래 중단':'')}))],id=>{$('supplierFilter').value=id;render();});
  const q=$('orderSearch').value.trim().toLowerCase(),supplier=$('supplierFilter').value,state=$('statusFilter').value,from=$('fromDate').value,to=$('toDate').value;
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!from||o.date>=from)&&(!to||o.date<=to)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
