@@ -73,9 +73,9 @@ window.BOMView=(()=>{
     if(editable){$('bomAddPicker').innerHTML=picker('bomAddMaterial','','추가할 부자재 검색',b.locked);setupPicker($('bomAddMaterial'),addCandidates(),()=>{});$('bomAddRow').disabled=b.locked;}
     update();
   }
-  function update(){const q=Number($('productionQty').value),b=current();let short=0,valid=true;try{short=FB.requirements(pid,index,q).filter(r=>{const m=mat(r.mid),v=ver(r);return m.archived||v.state!=='사용'||v.qty<r.qty;}).length;}catch{valid=false;}
+  function update(){const q=Number($('productionQty').value),b=current(),selectedVersion=product().versions.find(v=>v.id===vid),stopped=!selectedVersion||FB.versionStatus(selectedVersion)==='중단',submit=document.querySelector('[form="productionForm"]');if(submit){submit.disabled=!FB.canAdmin()||product().archived||stopped;submit.title=stopped?'중단된 버전입니다. 버전 수정에서 사용 상태를 변경하세요.':'';}let short=0,valid=true;try{short=FB.requirements(pid,index,q).filter(r=>{const m=mat(r.mid),v=ver(r);return m.archived||v.state!=='사용'||v.qty<r.qty;}).length;}catch{valid=false;}
     document.querySelectorAll('[data-need]').forEach(el=>{const r=b.rows[Number(el.dataset.need)],v=ver(r);el.textContent=valid?fmt(r.each*q)+'개':'—';el.classList.toggle('shortage',valid&&(v.qty<r.each*q||mat(r.mid).archived||v.state!=='사용'));});
-    $('productionSummary').textContent=!valid?'1 이상의 생산 수량을 입력하세요.':short?`부자재 ${short}종 재고 부족 또는 사용 중단 · 생산 등록 불가`:`${fmt(q)}개 생산 · 부자재 ${b.rows.length}종 사용`;
+    $('productionSummary').textContent=stopped?'중단된 버전입니다. 버전 수정에서 사용 상태를 변경한 뒤 생산을 등록하세요.':!valid?'1 이상의 생산 수량을 입력하세요.':short?`부자재 ${short}종 재고 부족 또는 사용 중단 · 생산 등록 불가`:`${fmt(q)}개 생산 · 부자재 ${b.rows.length}종 사용`;
     $('productionSummary').classList.toggle('shortage',short>0);
     if($('finishedSummary'))$('finishedSummary').textContent='완제품 재고 '+fmt(product().finished)+'개';
   }
