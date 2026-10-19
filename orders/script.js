@@ -25,10 +25,13 @@ function addRow(mid=''){
 function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('deliveryAddress').value=FB.defaultDeliveryAddress;renderDeliveryPresets();$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function renderDeliveryPresets(){
  const current=$('deliveryAddress').value.trim(),match=FB.data.deliveryAddresses.find(a=>a.address===current);
- $('deliveryPreset').innerHTML='<option value="">직접 입력</option>'+UI.options(FB.data.deliveryAddresses.map(a=>[a.id,a.label]),match?.id||'');
+ $('deliveryPreset').value=match?.id||'';
+ $('deliveryPresetPicker').innerHTML=SearchPicker.markup(match?.label||'','납품처 이름 또는 주소');
+ SearchPicker.bind($('deliveryPresetPicker').querySelector('.search-picker'),[{id:'',label:'직접 입력'},...FB.data.deliveryAddresses.map(a=>({id:a.id,label:a.label+' · '+a.address}))],id=>{const place=FB.data.deliveryAddresses.find(a=>a.id===id);$('deliveryAddress').value=place?.address||'';renderDeliveryPresets();});
+ BusinessCertificates.show($('deliveryCertificate'),match);
  $('removeDeliveryPreset').disabled=!match||match.id==='fireball';
 }
-$('deliveryPreset').onchange=()=>{const place=FB.data.deliveryAddresses.find(a=>a.id===$('deliveryPreset').value);$('deliveryAddress').value=place?.address||'';renderDeliveryPresets();$('deliveryAddress').focus();};
+
 $('deliveryAddress').oninput=renderDeliveryPresets;
 $('saveDeliveryPreset').onclick=()=>{if(!UI.allowWrite())return;const address=$('deliveryAddress').value.trim();if(!address){UI.toast('저장할 납품주소를 입력하세요.');return;}const label=prompt('납품처 이름을 입력하세요. 예: 2공장, 외주 포장업체');if(label===null)return;try{FB.saveDeliveryAddress({label,address});renderDeliveryPresets();UI.toast('자주 쓰는 납품처를 저장했습니다.');}catch(e){UI.toast(e.message);}};
 $('removeDeliveryPreset').onclick=()=>{if(!UI.allowWrite())return;const id=$('deliveryPreset').value;if(!id||id==='fireball')return;if(!confirm('이 납품처를 저장 목록에서 삭제할까요? 기존 발주 주소는 유지됩니다.'))return;try{FB.removeDeliveryAddress(id);renderDeliveryPresets();UI.toast('저장 목록에서 삭제했습니다.');}catch(e){UI.toast(e.message);}};
