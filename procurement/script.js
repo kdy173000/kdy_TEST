@@ -14,13 +14,13 @@
     const orders=FB.data.orders.filter(o=>o.mid===selected&&!o.closed&&o.received<o.qty);
     $('pendingOrderCount').textContent=orders.length+'건';
     $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<article class="order-card"><div class="order-card-main"><div class="order-card-heading"><strong>${esc(o.supplier)}</strong><span class="badge">${o.received?'부분 입고':'입고 전'}</span></div><p class="order-meta">${esc(o.id)} · 발주 버전 <strong>${esc(o.vid)}</strong></p><div class="order-quantities"><div><span>발주 수량</span><strong>${fmt(o.qty)}<small>개</small></strong></div><div><span>정상 입고</span><strong>${fmt(o.received)}<small>개</small></strong></div><div><span>추가 입고 필요</span><strong>${fmt(UI.remaining(o))}<small>개</small></strong></div></div><p class="order-dates">발주 ${esc(o.date)} · 입고 예정 <strong>${esc(o.due)||'미정'}</strong></p>${o.note?`<p class="order-note">${esc(o.note)}</p>`:''}</div></article>`).join('')||'<p class="empty">입고 대기 중인 발주가 없습니다.<br>발주 등록과 입고 처리는 발주 관리에서 진행하세요.</p>';
-    UI.applyAccess();if(selected){const m=material(selected),usable=!m.archived&&m.versions.some(v=>v.state==='사용');$('orderMaterial').disabled=!FB.canAdmin()||!usable;$('adjustMaterial').disabled=!FB.canAdmin()||!usable;$('addMaterialVersion').disabled=!FB.canAdmin()||m.archived;}
+    UI.applyAccess();if(selected){const m=material(selected),blocked=!FB.canAdmin()||!!m.archived;$('orderMaterial').disabled=blocked;$('adjustMaterial').disabled=blocked;$('addMaterialVersion').disabled=blocked;}
 
 
 
   }
   const field=(label,html)=>`<label class="field"><span>${label}</span>${html}</label>`;
-  function openAdjustment(id){if(!UI.allowWrite())return;target=id;const m=material(id);
+  function openAdjustment(id){if(!UI.allowWrite())return;target=id;const m=material(id);if(!m||m.archived)return;if(!m.versions.some(v=>!v.deleted&&v.state==='사용')){UI.toast('사용 가능한 버전이 없습니다. 버전 수정에서 공용 사용·국내 전용·해외 전용 중 하나를 선택하세요.');return;}
     $('purchaseHint').textContent='선택한 버전의 재고에서 입력한 수량을 차감합니다. 사유를 함께 기록하세요.';$('purchaseDialog').classList.add('task-dialog');$('purchaseTitle').textContent='수기 재고 차감';$('purchaseTarget').textContent=m.name;
     let fields='';
     fields+=field('차감 버전',`<select name="vid">${UI.options(m.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),'')}</select>`);
@@ -32,12 +32,11 @@
     $('purchaseSave').textContent='차감 등록';
     $('purchaseFields').innerHTML=fields;$('purchaseFields').lastElementChild.classList.add('wide');$('purchaseError').textContent='';$('purchaseDialog').showModal();
   }
-  function detail(id){const m=material(id),usable=!m.archived&&m.versions.some(v=>v.state==='사용');
+  function detail(id){const m=material(id);
     const pending=vid=>FB.data.orders.filter(o=>o.mid===id&&(!vid||o.vid===vid)).reduce((n,o)=>n+UI.remaining(o),0);
     $('materialPhoto').innerHTML=Photos.markup('material',m.id,m.name,'summary');Photos.refresh();
     $('stockTitle').textContent=m.name;$('stockKind').textContent=m.slot;$('stockCode').textContent=m.id+(m.archived?' · 단종':'');
     $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
-    $('orderMaterial').disabled=!usable;$('adjustMaterial').disabled=!usable;
     $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
     $('stockVersions').innerHTML=UI.versionCards('material',m,{hideStopped:$('hideStoppedVersions').checked,pending});
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>{const t=r.t,type=$('historyType').value,q=$('historySearch').value.trim().toLowerCase();return t.mid===id&&(!type||(type==='입고'?['입고','불량 입고'].includes(t.type):type==='생산'?!!t.production:UI.minus(t.type)&&!t.production))&&[t.vid,t.person,t.note,t.date].join(' ').toLowerCase().includes(q);}).reverse().map(({t,index})=>{

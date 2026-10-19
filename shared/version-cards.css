@@ -5,7 +5,6 @@
 .version-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .version-card-header h4{margin:0;min-width:0;font-size:16px;overflow-wrap:anywhere}
 .version-card-badges{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-shrink:0}
-.version-market{display:inline-block;border-radius:4px;padding:4px 7px;font-size:12px;font-weight:500;line-height:1.4;background:var(--bg3,#f0f2f5);color:var(--text2)}
 .version-card-body{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .version-card-stock>strong{font-size:25px;line-height:1.2}
 .version-card-stock>strong small{font-size:12px;font-weight:400;color:var(--text2)}
@@ -13,4 +12,4 @@
 .version .version-management-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .version .version-management-actions button{display:inline-flex;align-items:center;justify-content:center;margin:0;padding:6px 9px;font-size:12px;line-height:1.4}
 .versions>.empty{grid-column:1/-1;margin:0;padding:24px}
-@media(max-width:600px){.version-section-actions{gap:8px}.version-hide-stopped{font-size:12px}.versions .compact-version{padding:14px}.version-card-header{gap:8px;flex-wrap:wrap}.version-card-badges{margin-left:auto}.version-market,.version-card-badges .state{font-size:11px}.version-card-stock>strong{font-size:23px}}
+@media(max-width:600px){.version-section-actions{gap:8px}.version-hide-stopped{font-size:12px}.versions .compact-version{padding:14px}.version-card-header{gap:8px;flex-wrap:wrap}.version-card-badges{margin-left:auto}.version-card-badges .state{font-size:11px}.version-card-stock>strong{font-size:23px}}
