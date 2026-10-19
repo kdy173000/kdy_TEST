@@ -52,6 +52,16 @@ function saveSupplier(input){return mutate(d=>{
 const name=required(input.name,'업체명');if(name.length>80)throw Error('업체명은 80자 이내로 입력하세요.');
 if(d.suppliers.some(s=>s.id!==input.id&&s.name.toLowerCase()===name.toLowerCase()))throw Error('이미 등록된 업체명입니다.');
 const fields={name,contact:String(input.contact||'').trim().slice(0,60),phone:String(input.phone||'').trim().slice(0,60),memo:String(input.memo||'').trim().slice(0,200)};
+const previous=d.suppliers.find(s=>s.id===input.id);
+for(const [key,limit] of [['businessNumber',12],['representative',60],['openedOn',10],['corporateNumber',14],['address',200],['headOfficeAddress',200],['businessType',100],['businessItem',100]]){fields[key]=String(input[key]===undefined?(previous?.[key]||''):input[key]).trim();if(fields[key].length>limit)throw Error('사업자 정보의 입력 길이를 확인하세요.');}
+for(const [key,length,label] of [['businessNumber',10,'사업자등록번호'],['corporateNumber',13,'법인등록번호']]){
+ if(!fields[key])continue;
+ if(!/^[0-9-]+$/.test(fields[key])||fields[key].replaceAll('-','').length!==length)throw Error(label+' 자릿수를 확인하세요.');
+ const number=fields[key].replaceAll('-','');fields[key]=key==='businessNumber'?number.slice(0,3)+'-'+number.slice(3,5)+'-'+number.slice(5):number.slice(0,6)+'-'+number.slice(6);
+}
+if(fields.businessNumber&&d.suppliers.some(s=>s.id!==input.id&&String(s.businessNumber||'').replaceAll('-','')===fields.businessNumber.replaceAll('-','')))throw Error('동일한 사업자등록번호의 업체가 있습니다.');
+if(fields.openedOn&&(!/^\d{4}-\d{2}-\d{2}$/.test(fields.openedOn)||Number.isNaN(Date.parse(fields.openedOn))||new Date(fields.openedOn).toISOString().slice(0,10)!==fields.openedOn))throw Error('개업연월일을 확인하세요.');
+
 if(input.id){const s=d.suppliers.find(s=>s.id===input.id);if(!s)throw Error('업체를 찾을 수 없습니다.');Object.assign(s,fields);return s.id;}
 const id='SUP-'+String(d.suppliers.length+1).padStart(4,'0');d.suppliers.push({id,...fields,archived:false});return id;
 });}
