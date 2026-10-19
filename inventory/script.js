@@ -5,7 +5,7 @@
   const selected=()=>FB.data.products.find(p=>p.id===selectedId);
   function categories(){const value=$('categoryFilter').value;$('categoryFilter').innerHTML=UI.options([['','전체 포장 유형'],...FB.data.productCategories.map(f=>[f,f])],value);}
   function render(){UI.applyAccess();categories();const q=$('search').value.toLowerCase(),family=$('categoryFilter').value;
-    const list=FB.data.products.filter(p=>(!p.archived||$('inventoryArchived').checked)&&(family===''||p.category===family)&&(p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)));
+    const list=FB.data.products.filter(p=>!p.deleted&&(!p.archived||$('inventoryArchived').checked)&&(family===''||p.category===family)&&(p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)));
     if(!list.some(p=>p.id===selectedId))selectedId=list[0]?.id||'';const p=selected();
     $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<div class="product-list-row"><button class="product ${p.id===selectedId?'active':''}" aria-pressed="${p.id===selectedId}" data-material="${esc(p.id)}">${Photos.markup('product',p.id,p.name,'list')}<strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(p.category)}${p.archived?' · 단종':''}</span></button>${FB.canAdmin()?`<button type="button" class="product-info-edit" data-edit-product="${esc(p.id)}" aria-label="${esc(p.name)} 정보 수정">정보 수정</button>`:''}</div>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('inventoryContent').hidden=!p;$('inventoryEmpty').hidden=!!p;if(!p)return;
