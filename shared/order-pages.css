@@ -49,3 +49,5 @@
 
 @media(max-width:600px){.receipt-quantities{grid-template-columns:1fr;gap:14px}.receipt-fields{grid-template-columns:1fr;gap:14px}.receipt-dialog .stats{padding:14px}.receipt-dialog .stats div{padding-left:10px}.receipt-dialog .stats strong{font-size:22px}}
 .order-filters .order-product-filter{flex:1;min-width:240px;font-size:12px}.order-product-filter>span{display:block;margin-bottom:6px}.order-supplier-filter{width:240px;font-size:12px}.order-supplier-filter>span{display:block;margin-bottom:6px}.order-supplier-filter select[hidden]{display:none}
+
+.order-history th:last-child,.order-history .order-receipt-cell{width:120px;min-width:120px;text-align:center;vertical-align:middle}.order-history .order-receipt-cell .receipt-control{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:88px;min-height:32px;margin:0;padding:7px 10px;white-space:nowrap;font-size:12px;line-height:1.4}
