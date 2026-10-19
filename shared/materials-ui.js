@@ -28,7 +28,7 @@ UI.applyAccess=function(){const writable=FB.canAdmin(),shipping=FB.canShip(),pho
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
 document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});
 
-UI.versionActions=function(kind,id,vid){return FB.canAdmin()?`<div class="action-group version-management-actions"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}">수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}">삭제</button></div>`:'';};
+UI.versionActions=function(kind,id,vid){const attrs=FB.canAdmin()?'':' disabled title="발주팀 권한이 필요합니다."';return `<div class="action-group version-management-actions"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}"${attrs}>수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}"${attrs}>삭제</button></div>`;};
 UI.bindVersionManagement=function(container,kind){
  const dialog=document.createElement('dialog');dialog.className='out-dialog';dialog.setAttribute('aria-label','버전 수정');
  dialog.innerHTML='<div class="modalhead"><h2>버전 수정</h2><button type="button" data-dismiss aria-label="버전 수정 닫기">✕</button></div><form><div class="row"><label class="field"><span>버전명</span><input name="versionName" maxlength="20" required></label><label class="field"><span>사용 상태</span><select name="versionState"><option>공용 사용</option><option>국내 전용</option><option>해외 전용</option><option>중단</option></select></label></div><p class="page-note">중단된 버전은 재고와 과거 기록을 보존하며, 새 생산·출고·발주 대상에서 제외됩니다.</p><p data-error role="alert"></p><div class="modalfoot"><button type="button" data-dismiss>취소</button><button type="submit" class="primary">저장</button></div></form>';
@@ -57,6 +57,8 @@ UI.versionCards=function(kind,item,{hideStopped=false,pending}={}){
 };
 
 UI.productVersionActions=function(item,v){
- const stopped=FB.versionStatus(v)==='중단',blocked=!!item.archived,attrs=blocked?' disabled title="단종된 제품은 등록할 수 없습니다."':'';
- return '<div class="version-workflow-actions"><button type="button" class="primary" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button>'+(FB.canAdmin()?'<button type="button" class="management-button" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+attrs+' title="'+(stopped?'생산 화면에서 버전 사용 상태를 확인하세요.':'이 버전으로 생산 등록')+'">생산 등록</button>':'')+(FB.canShip()?'<button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+(blocked||stopped?' disabled':'')+'>출고 등록</button>':'')+'</div>';
+ const stopped=FB.versionStatus(v)==='중단',blocked=!!item.archived;
+ const productionReason=!FB.canAdmin()?'발주팀 권한이 필요합니다.':blocked?'단종된 제품입니다.':stopped?'생산 화면에서 버전 사용 상태를 확인하세요.':'이 버전으로 생산 등록';
+ const shippingReason=!FB.canShip()?'출고팀 권한이 필요합니다.':blocked?'단종된 제품입니다.':stopped?'중단된 버전입니다.':'이 버전으로 출고 등록';
+ return '<div class="version-workflow-actions"><button type="button" class="primary" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button><button type="button" class="management-button" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+(!FB.canAdmin()||blocked?' disabled':'')+' title="'+productionReason+'">생산 등록</button><button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+(!FB.canShip()||blocked||stopped?' disabled':'')+' title="'+shippingReason+'">출고 등록</button></div>';
 };

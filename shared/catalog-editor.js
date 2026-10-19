@@ -13,7 +13,7 @@ window.CatalogEditor=(()=>{
   }
   $('catalogDialog').showModal();
  }
- function bind(options){config=options;document.querySelectorAll('[data-catalog-action]').forEach(b=>b.hidden=!FB.canAdmin());$('newCatalogItem').onclick=()=>open();if($('editCatalogItem'))$('editCatalogItem').onclick=()=>open(config.selected()?.id);
+ function bind(options){config=options;document.querySelectorAll('[data-catalog-action]').forEach(b=>{b.hidden=false;b.disabled=!FB.canAdmin();b.title=FB.canAdmin()?'':'발주팀 권한이 필요합니다.';});$('newCatalogItem').onclick=()=>open();if($('editCatalogItem'))$('editCatalogItem').onclick=()=>open(config.selected()?.id);
   if(config.kind==='product'){
    $('deleteProduct').onclick=()=>{if(!UI.allowWrite())return;const p=config.selected();if(!p)return;if(!confirm(p.name+'을 목록에서 삭제할까요? 재고나 연결 기록이 있으면 삭제할 수 없습니다.'))return;try{FB.deleteProduct(p.id);config.saved('');$('catalogDialog').close();UI.toast('자재를 목록에서 삭제했습니다.');}catch(err){UI.toast(err.message);}};
    $('productForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveProduct({id:itemId||undefined,name:$('adminProductName').value,family:$('adminProductFamily').value,category:$('adminProductCategory').value,sample:$('adminProductSample').value==='true'});config.saved(id);$('catalogDialog').close();UI.toast('완제품 정보를 저장했습니다.');}catch(err){$('productError').textContent=err.message;}};

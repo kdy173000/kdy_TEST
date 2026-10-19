@@ -7,7 +7,7 @@
   function render(){UI.applyAccess();categories();const q=$('search').value.toLowerCase(),family=$('categoryFilter').value;
     const list=FB.data.products.filter(p=>!p.deleted&&(!p.archived||$('inventoryArchived').checked)&&(family===''||p.category===family)&&(p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)));
     if(!list.some(p=>p.id===selectedId))selectedId=list[0]?.id||'';const p=selected();
-    $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<div class="product-list-row"><button class="product ${p.id===selectedId?'active':''}" aria-pressed="${p.id===selectedId}" data-material="${esc(p.id)}">${Photos.markup('product',p.id,p.name,'list')}<strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(p.category)}${p.archived?' · 단종':''}</span></button>${FB.canAdmin()?`<button type="button" class="product-info-edit" data-edit-product="${esc(p.id)}" aria-label="${esc(p.name)} 정보 수정">정보 수정</button>`:''}</div>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<div class="product-list-row"><button class="product ${p.id===selectedId?'active':''}" aria-pressed="${p.id===selectedId}" data-material="${esc(p.id)}">${Photos.markup('product',p.id,p.name,'list')}<strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(p.category)}${p.archived?' · 단종':''}</span></button>${`<button type="button" class="product-info-edit" data-edit-product="${esc(p.id)}" aria-label="${esc(p.name)} 정보 수정" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>정보 수정</button>`}</div>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('inventoryContent').hidden=!p;$('inventoryEmpty').hidden=!!p;if(!p)return;
     $('materialKind').textContent=p.sample?'샘플':'본품';$('productName').textContent=p.name;$('productCode').textContent=p.id+(p.archived?' · 단종':'');$('total').textContent=fmt(p.finished)+'개';$('productVersions').innerHTML=UI.versionCards('product',p,{hideStopped:$('hideStoppedVersions').checked});
     const productions=FB.data.productions.filter(x=>x.pid===p.id),shipments=FB.data.transactions.filter(t=>t.pid===p.id&&t.type==='완제품 출고');
@@ -38,7 +38,7 @@
     $('bomEditControls').hidden=!editing;
     $('bomManageHeading').hidden=false;
     $('bomManageHeading').style.visibility=editing?'visible':'hidden';
-    $('toggleBomEdit').hidden=!isBom||!FB.canAdmin();
+    $('toggleBomEdit').hidden=!isBom;$('toggleBomEdit').disabled=!FB.canAdmin();$('toggleBomEdit').title=FB.canAdmin()?'':'발주팀 권한이 필요합니다.';
     $('toggleBomEdit').textContent=editing?'수정 완료':'수정';
     $('toggleBomEdit').setAttribute('aria-pressed',String(editing));
     document.querySelectorAll('.production-histories').forEach(el=>el.hidden=isBom);
