@@ -14,17 +14,17 @@ document.querySelectorAll('[data-admin-link]').forEach(a=>a.hidden=!FB.canAdmin(
 
 UI.bindVersionAddition=function(selected){
   const {$}=UI;let target='';
-  $('addMaterialVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('재고관리자 권한으로 버전을 추가할 수 있습니다.');return;}const m=selected();if(!m||m.archived){UI.toast('사용 중인 부자재를 선택하세요.');return;}target=m.id;$('versionMaterial').textContent=m.name;$('versionName').value='';$('addVersionError').textContent='';$('versionDialog').showModal();};
+  $('addMaterialVersion').onclick=()=>{if(!FB.canAdmin()){UI.toast('발주팀 권한으로 버전을 추가할 수 있습니다.');return;}const m=selected();if(!m||m.archived){UI.toast('사용 중인 부자재를 선택하세요.');return;}target=m.id;$('versionMaterial').textContent=m.name;$('versionName').value='';$('addVersionError').textContent='';$('versionDialog').showModal();};
   $('closeVersion').onclick=()=>$('versionDialog').close();
   $('addVersionForm').onsubmit=e=>{e.preventDefault();try{FB.addVersion(target,$('versionName').value);$('versionDialog').close();UI.toast('새 버전을 추가했습니다. 초기 재고는 0개입니다.');}catch(err){$('addVersionError').textContent=err.message;}};
 };
 
 // Shared permission and closing behavior across material workflows.
-UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 재고관리팀 권한을 부여받으세요.');return false;};
+UI.allowWrite=function(){if(FB.canAdmin())return true;UI.toast('조회 모드입니다. 계정 관리에서 발주팀 권한을 부여받으세요.');return false;};
 UI.applyAccess=function(){const writable=FB.canAdmin(),shipping=FB.canShip(),photo=FB.canPhoto();const note=this.$('accessNote');
- if(note)note.textContent=writable?'재고관리팀 · 발주·재고·BOM 관리가 가능합니다.':shipping?(photo?'출고·사진 편집 권한 · 재고와 BOM은 조회만 가능합니다.':'출고 권한 · 출고 등록과 재고 조회가 가능합니다.'):photo?'디자인팀 · 사진만 편집할 수 있으며 재고와 BOM은 조회만 가능합니다.':'조회 모드 · 부여받은 권한에 따라 관리 기능을 사용할 수 있습니다.';
- document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'재고관리팀 권한이 필요합니다.';});
- document.querySelectorAll('[data-shipping-action]').forEach(button=>{button.disabled=!shipping;button.title=shipping?'':'출고 또는 재고관리팀 권한이 필요합니다.';});};
+ if(note)note.textContent=writable?'발주팀 · 발주·재고·BOM 관리가 가능합니다.':shipping?(photo?'출고·사진 편집 권한 · 재고와 BOM은 조회만 가능합니다.':'출고 권한 · 출고 등록과 재고 조회가 가능합니다.'):photo?'디자인팀 · 사진만 편집할 수 있으며 재고와 BOM은 조회만 가능합니다.':'조회 모드 · 부여받은 권한에 따라 관리 기능을 사용할 수 있습니다.';
+ document.querySelectorAll('[data-write-action]').forEach(button=>{button.disabled=!writable;button.title=writable?'':'발주팀 권한이 필요합니다.';});
+ document.querySelectorAll('[data-shipping-action]').forEach(button=>{button.disabled=!shipping;button.title=shipping?'':'출고팀 권한이 필요합니다.';});};
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
 document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});
 
@@ -49,9 +49,11 @@ UI.bindVersionManagement=function(container,kind){
  });
 };
 
-UI.allowShipping=function(){if(FB.canShip())return true;UI.toast('출고 또는 재고관리팀 권한이 필요합니다.');return false;};
+UI.allowShipping=function(){if(FB.canShip())return true;UI.toast('출고팀 권한이 필요합니다.');return false;};
 
 UI.versionCards=function(kind,item,{hideStopped=false,pending}={}){
  const versions=item.versions.filter(v=>!v.deleted&&(!hideStopped||v.state==='사용'));
- return versions.map(v=>'<article class="version compact-version"><div class="version-card-header"><h4>'+this.esc(v.id)+'</h4><div class="version-card-badges"><span class="state '+(v.state==='사용'?'':'blocked')+'">'+this.esc(FB.versionStatus(v))+'</span></div></div><div class="version-card-body"><div class="version-card-stock"><strong>'+this.fmt(v.qty)+'<small> 개</small></strong>'+(pending?'<p>입고 대기 '+this.fmt(pending(v.id))+'개</p>':'')+'</div>'+this.versionActions(kind,item.id,v.id)+'</div></article>').join('')||'<p class="empty">표시할 버전이 없습니다.'+(hideStopped?' 중단 숨기기를 해제하면 중단된 버전을 볼 수 있습니다.':'')+'</p>';
+ return versions.map(v=>'<article class="version compact-version"><div class="version-card-header"><h4>'+this.esc(v.id)+'</h4><div class="version-card-badges"><span class="state '+(v.state==='사용'?'':'blocked')+'">'+this.esc(FB.versionStatus(v))+'</span></div></div><div class="version-card-body"><div class="version-card-stock"><strong>'+this.fmt(v.qty)+'<small> 개</small></strong>'+(pending?'<p>입고 대기 '+this.fmt(pending(v.id))+'개</p>':'')+'</div>'+this.versionActions(kind,item.id,v.id)+'</div>'+(kind==='product'?this.productVersionActions(item,v):'')+'</article>').join('')||'<p class="empty">표시할 버전이 없습니다.'+(hideStopped?' 중단 숨기기를 해제하면 중단된 버전을 볼 수 있습니다.':'')+'</p>';
 };
+
+UI.productVersionActions=function(item,v){const disabled=item.archived||v.state!=='사용',attrs=disabled?' disabled':'';return '<div class="version-workflow-actions"><button type="button" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button>'+(FB.canAdmin()?'<button type="button" class="primary" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+attrs+'>생산 등록</button>':'')+(FB.canShip()?'<button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+attrs+'>출고 등록</button>':'')+'</div>';};

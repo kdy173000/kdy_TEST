@@ -13,3 +13,6 @@
 .version .version-management-actions button{display:inline-flex;align-items:center;justify-content:center;margin:0;padding:6px 9px;font-size:12px;line-height:1.4}
 .versions>.empty{grid-column:1/-1;margin:0;padding:24px}
 @media(max-width:600px){.version-section-actions{gap:8px}.version-hide-stopped{font-size:12px}.versions .compact-version{padding:14px}.version-card-header{gap:8px;flex-wrap:wrap}.version-card-badges{margin-left:auto}.version-card-badges .state{font-size:11px}.version-card-stock>strong{font-size:23px}}
+
+.version-workflow-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line,#e5e7eb)}
+.version-workflow-actions button{flex:1;margin:0;padding:7px 10px;font-size:12px;white-space:nowrap}

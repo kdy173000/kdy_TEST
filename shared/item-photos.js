@@ -17,7 +17,7 @@ window.ItemPhotos = (() => {
     if (!item) throw Error('품목을 찾을 수 없습니다.');
     return item;
   }
-  function permission() { if (!canEdit()) throw Error('사진 편집은 디자인팀 또는 재고관리팀 권한이 필요합니다.'); }
+  function permission() { if (!canEdit()) throw Error('사진 편집은 디자인팀 또는 발주팀 권한이 필요합니다.'); }
   function open() {
     if (!database) database = new Promise((resolve, reject) => {
       const request = indexedDB.open('fireball-item-photos', 1);

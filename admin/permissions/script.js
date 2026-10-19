@@ -1,11 +1,11 @@
 const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
 if (!me || me.role !== 'admin') { window.location.href = '../../login/index.html'; }
 
-const PERMS = ['관리자','재고조회','재고관리팀','디자인팀','출고','제품 신고 관리','원료관리'];
+const PERMS = ['관리자','재고조회','발주팀','디자인팀','출고팀','제품 신고 관리','원료관리'];
 const PERM_STYLE = {
   '관리자':        { color:'#d95f5f', bg:'rgba(220,80,80,.15)',   border:'rgba(220,80,80,.35)' },
   '재고조회':      { color:'#52a874', bg:'rgba(82,168,116,.15)',  border:'rgba(82,168,116,.35)' },
-  '재고관리팀':    { color:'#6488e0', bg:'rgba(100,136,224,.15)', border:'rgba(100,136,224,.35)' },
+  '발주팀':    { color:'#6488e0', bg:'rgba(100,136,224,.15)', border:'rgba(100,136,224,.35)' },
   '제품 신고 관리':{ color:'#c89a3c', bg:'rgba(200,154,60,.15)',  border:'rgba(200,154,60,.35)' },
   '원료관리':      { color:'#b06ed6', bg:'rgba(176,110,214,.15)', border:'rgba(176,110,214,.35)' },
 };
@@ -13,7 +13,7 @@ const KEY_LINKS  = 'fb_perm_links';
 const KEY_CUSTOM = 'fb_custom_perms';
 const DEFAULT_STYLE = { color:'#9090a0', bg:'rgba(144,144,160,.15)', border:'rgba(144,144,160,.35)' };
 
-function getLinks()        { return JSON.parse(localStorage.getItem(KEY_LINKS)  || '{}'); }
+function getLinks() {const links=JSON.parse(localStorage.getItem(KEY_LINKS)||'{}');return {...links,'발주팀':links['발주팀']||links['재고관리팀']||links['재고관리자']||links['입출고관리']||'','출고팀':links['출고팀']||links['출고']||''};}
 function getCustomPerms()  { return JSON.parse(localStorage.getItem(KEY_CUSTOM) || '[]'); }
 function saveCustomPerms(list) { localStorage.setItem(KEY_CUSTOM, JSON.stringify(list)); }
 function getAllPerms()     { return [...PERMS, ...getCustomPerms()]; }

@@ -45,6 +45,8 @@
   }
 
   window.FBSession = Object.freeze({start, check});
+  const normalizePerms=perms=>[...new Set((perms||[]).map(p=>['재고관리팀','재고관리자','입출고관리','입출고 관리자'].includes(p)?'발주팀':p==='출고'?'출고팀':p))];
+  try{const raw=localStorage.getItem('fb_accounts');if(raw){const accounts=JSON.parse(raw);const next=accounts.map(a=>({...a,perms:normalizePerms(a.perms)}));if(JSON.stringify(accounts)!==JSON.stringify(next))localStorage.setItem('fb_accounts',JSON.stringify(next));}const rawUser=sessionStorage.getItem(USER_KEY);if(rawUser){const current=JSON.parse(rawUser);current.perms=normalizePerms(current.perms);sessionStorage.setItem(USER_KEY,JSON.stringify(current));}}catch(error){console.error('업무 권한 이름을 갱신하지 못했습니다.',error);}
   check();
   window.addEventListener('pageshow', check);
   window.addEventListener('focus', check);

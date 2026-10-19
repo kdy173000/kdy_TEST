@@ -44,7 +44,7 @@ window.Photos = (() => {
   const find = selector => dialog.querySelector(selector);
   function lock(value) { busy = value; dialog.querySelectorAll('button').forEach(button => { button.disabled = value; }); }
   async function open(kind, id, label) {
-    if (!ItemPhotos.canEdit()) { UI.toast('사진 편집은 디자인팀 또는 재고관리팀 권한이 필요합니다.'); return; }
+    if (!ItemPhotos.canEdit()) { UI.toast('사진 편집은 디자인팀 또는 발주팀 권한이 필요합니다.'); return; }
     target = {kind, id}; find('[data-photo-name]').textContent = label; find('[data-photo-error]').textContent = ''; find('[data-photo-file]').value = '';
     const preview = find('.item-photo-preview'); preview.innerHTML = markup(kind, id, label, 'list');
     find('[data-photo-remove]').hidden = true; dialog.showModal(); refresh();

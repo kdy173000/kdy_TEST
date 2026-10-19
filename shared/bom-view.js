@@ -1,7 +1,7 @@
 'use strict';
 window.BOMView=(()=>{
   const {$,esc,fmt}=UI;
-  let pid=FB.data.products[0].id,index=0,editable=false;
+  let pid=FB.data.products[0].id,index=FB.data.products[0].versions.find(v=>!v.deleted)?.bomIndex??FB.data.products[0].boms.length-1,editable=false,vid=FB.data.products[0].versions.find(v=>!v.deleted)?.id||'';
   const product=()=>FB.data.products.find(p=>p.id===pid),current=()=>product().boms[index];
   const mat=id=>FB.data.materials.find(m=>m.id===id),ver=r=>mat(r.mid).versions.find(v=>v.id===r.vid);
   const materialLabel=m=>m.name+' · '+m.id;
@@ -56,15 +56,15 @@ window.BOMView=(()=>{
   document.addEventListener('scroll',closeFloatingPickers,true);
   window.addEventListener('resize',closeFloatingPickers);
   function render(){
-    const p=product(),b=current();if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),$('productionVersion').value);}
+    const p=product(),b=current();if($('productionVersion')){$('productionVersion').innerHTML=UI.options(p.versions.filter(v=>!v.deleted&&(v.state==='사용'||v.id===vid)).map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),vid);$('productionVersion').disabled=true;}
     $('familySelect').innerHTML=UI.options(FB.families.map((f,i)=>[i,f]).filter(([i])=>FB.data.products.some(x=>x.family===i&&(!x.archived||x.id===pid))),p.family);
     $('finishedProductSelect').innerHTML=UI.options(FB.data.products.filter(x=>x.family===p.family&&(!x.archived||x.id===pid)).map(x=>[x.id,x.name]),p.id);
-    const selectorsLocked=!editable&&$('productionDialog').classList.contains('bom-settings-mode');
+    const selectorsLocked=true;
     $('familySelect').disabled=selectorsLocked;
     $('finishedProductSelect').disabled=selectorsLocked;
-    $('bomState').textContent=b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성';
+    $('bomState').textContent=vid+' · '+(b.locked?'사용된 BOM · 잠금':editable?'편집 가능':'생산용 구성');
     $('copyBom').hidden=!editable||!b.locked;
-    $('bomHelp').textContent=p.sample?'샘플 구성입니다. 재고관리팀이 수정 버튼으로 구성을 변경할 수 있습니다.':editable?(b.locked?'생산에 사용된 구성입니다. 수정 가능한 구성을 만든 뒤 변경하세요.':'부자재명 또는 코드를 검색해 선택하세요. 변경 내용은 즉시 저장됩니다.'):'완제품에 연결된 BOM입니다. 재고관리팀은 위의 수정 버튼으로 구성을 변경할 수 있습니다.';
+    $('bomHelp').textContent=p.sample?'샘플 구성입니다. 발주팀이 수정 버튼으로 구성을 변경할 수 있습니다.':editable?(b.locked?'생산에 사용된 구성입니다. 수정 가능한 구성을 만든 뒤 변경하세요.':'부자재명 또는 코드를 검색해 선택하세요. 변경 내용은 즉시 저장됩니다.'):'선택한 완제품 버전에 연결된 BOM입니다. 발주팀은 위의 수정 버튼으로 구성을 변경할 수 있습니다.';
     $('bomLines').innerHTML=b.rows.map((r,i)=>{
       const m=mat(r.mid),v=ver(r),disabled=!editable||b.locked;
       return `<tr><td>${esc(r.slot)}</td><td>${picker(`bomMaterial-${i}`,materialLabel(m),r.slot+' 부자재 검색',disabled,`data-row="${i}" data-key="mid"`)}</td><td><select aria-label="${esc(r.slot)} 버전" data-row="${i}" data-key="vid" ${disabled?'disabled':''}>${UI.options(m.versions.filter(x=>x.state==='사용'||x.id===r.vid).map(x=>[x.id,x.id+(x.state!=='사용'?' · 중단':'')]),r.vid)}</select></td><td><input aria-label="${esc(r.slot)} 개당 수량" data-row="${i}" data-key="each" type="number" min="1" step="1" value="${r.each}" ${disabled?'disabled':''}></td><td class="num">${fmt(v.qty)}개</td><td class="num" data-need="${i}"></td><td class="bom-row-actions">${editable?`<button type="button" data-remove-row="${i}" ${disabled?'disabled':''}>삭제</button>`:''}</td></tr>`;
@@ -83,10 +83,10 @@ window.BOMView=(()=>{
     $('familySelect').onchange=e=>{if(e.target.disabled)return;pid=FB.data.products.find(p=>p.family===Number(e.target.value)&&!p.archived).id;index=product().boms.length-1;render();};
     $('finishedProductSelect').onchange=e=>{if(e.target.disabled)return;pid=e.target.value;index=product().boms.length-1;render();};
 $('productionQty').oninput=update;
-    $('copyBom').onclick=()=>{try{index=FB.copyBom(pid,index);render();UI.toast('새 BOM을 만들었습니다.');}catch(e){$('bomError').textContent=e.message;}};
+    $('copyBom').onclick=()=>{try{index=FB.copyBom(pid,index,vid);render();UI.toast('새 BOM을 만들었습니다.');}catch(e){$('bomError').textContent=e.message;}};
     $('bomLines').onchange=e=>{if(!editable||!e.target.dataset.key)return;if(e.target.dataset.key==='mid'&&e.target.dataset.picked!=='true')return;const i=Number(e.target.dataset.row),r={...current().rows[i]},key=e.target.dataset.key;try{if(key==='mid'){const picked=resolveMaterial(e.target.value,FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.slot===mat(r.mid).slot&&(!m.scope||m.scope===pid)&&m.versions.some(v=>v.state==='사용')));if(!picked)throw Error('검색 목록에서 연결할 부자재를 선택해주세요.');r.mid=picked.id;r.vid=picked.versions.find(v=>v.state==='사용').id;}else r[key]=key==='each'?Number(e.target.value):e.target.value;FB.updateBom(pid,index,i,r);$('bomError').textContent='';render();UI.toast('BOM 구성을 저장했습니다.');}catch(err){$('bomError').textContent=err.message;render();}};
     if(editable){$('bomAddRow').onclick=()=>{try{const picked=resolveMaterial($('bomAddMaterial').value,addCandidates());if(!picked)throw Error('검색 목록에서 추가할 부자재를 선택해주세요.');FB.addBomRow(pid,index,picked.id);$('bomError').textContent='';render();}catch(e){$('bomError').textContent=e.message;}};$('bomLines').onclick=e=>{const b=e.target.closest('[data-remove-row]');if(!b)return;try{FB.removeBomRow(pid,index,Number(b.dataset.removeRow));render();}catch(err){$('bomError').textContent=err.message;}};}
     render();
   }
-  return {bind,render,update,get pid(){return pid;},get index(){return index;},select(id){pid=id||FB.data.products[0].id;index=product().boms.length-1;render();}};
+  return {bind,render,update,get pid(){return pid;},get index(){return index;},select(id,versionId){pid=id||FB.data.products[0].id;vid=versionId||product().versions.find(v=>!v.deleted)?.id;index=FB.productBomIndex(pid,vid);$('bomError').textContent='';render();}};
 })();

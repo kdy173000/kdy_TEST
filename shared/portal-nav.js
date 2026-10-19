@@ -22,7 +22,7 @@
       const title = document.createElement('div'); title.className = 'sb-group-label'; title.textContent = name; nav.append(title);
       for (const [label, path, perm] of items) {
         const custom = perm && (links[perm] || (perm === '재고관리자' && links['입출고관리']));
-        const permitted = !perm || (perm === '재고조회' && (user.perms || []).includes('재고관리자')) || user.role === 'manager' || user.role === 'admin' || ((user.perms || []).includes(perm) || (perm === '재고관리자' && (user.perms || []).some(p => ['입출고관리','입출고 관리자'].includes(p))));
+        const permitted = !perm || (perm === '재고조회' && (user.perms || []).some(p=>['발주팀','재고관리팀','재고관리자'].includes(p))) || user.role === 'manager' || user.role === 'admin' || ((user.perms || []).includes(perm) || (perm === '재고관리자' && (user.perms || []).some(p => ['발주팀','재고관리팀','입출고관리','입출고 관리자'].includes(p))));
         let url = path && to(path);
         if (custom) { try { const parsed = new URL(custom); if (['http:','https:'].includes(parsed.protocol)) url = parsed.href; } catch {} }
         const item = document.createElement(url && permitted ? 'a' : 'button');
