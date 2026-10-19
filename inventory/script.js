@@ -9,7 +9,7 @@
     if(!list.some(p=>p.id===selectedId))selectedId=list[0]?.id||'';const p=selected();
     $('materialCount').textContent=list.length+'종';$('products').innerHTML=list.map(p=>`<div class="product-list-row"><button class="product ${p.id===selectedId?'active':''}" aria-pressed="${p.id===selectedId}" data-material="${esc(p.id)}">${Photos.markup('product',p.id,p.name,'list')}<strong>${esc(p.name)}</strong><span>${p.sample?'샘플':'본품'} · ${esc(p.category)}${p.archived?' · 단종':''}</span></button>${FB.canAdmin()?`<button type="button" class="product-info-edit" data-edit-product="${esc(p.id)}" aria-label="${esc(p.name)} 정보 수정">정보 수정</button>`:''}</div>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('inventoryContent').hidden=!p;$('inventoryEmpty').hidden=!!p;if(!p)return;
-    $('materialKind').textContent=p.sample?'샘플':'본품';$('productName').textContent=p.name;$('productCode').textContent=p.id+(p.archived?' · 단종':'');$('total').textContent=fmt(p.finished)+'개';$('productVersions').innerHTML=p.versions.filter(v=>!v.deleted).map(v=>`<article class="version"><div class="versiontop"><h4>${esc(v.id)}</h4><span class="badge">${v.state==='사용'?'사용':'중단'}</span></div><strong>${fmt(v.qty)}<small> 개</small></strong>${UI.versionActions('product',p.id,v.id)}</article>`).join('');
+    $('materialKind').textContent=p.sample?'샘플':'본품';$('productName').textContent=p.name;$('productCode').textContent=p.id+(p.archived?' · 단종':'');$('total').textContent=fmt(p.finished)+'개';$('productVersions').innerHTML=UI.versionCards('product',p,{hideStopped:$('hideStoppedVersions').checked});
     const productions=FB.data.productions.filter(x=>x.pid===p.id),shipments=FB.data.transactions.filter(t=>t.pid===p.id&&t.type==='완제품 출고');
     $('available').textContent=fmt(productions.filter(x=>!x.cancelled).reduce((n,x)=>n+x.q,0))+'개';$('versionCount').textContent=fmt(shipments.reduce((n,x)=>n+x.qty,0))+'개';
     const rows=[...productions.map(x=>({date:x.date,type:x.cancelled?'생산 취소':'생산 완료',vid:(x.vid||'V01')+' · '+x.lot,qty:x.q,person:x.person,note:x.id+' · '+(x.note||'')})),...shipments].sort((a,b)=>a.date.localeCompare(b.date));
@@ -47,6 +47,7 @@
   }
   $('viewBom').onclick=()=>{bomMode(false,true);BOMView.select(selectedId);$('productionDialog').showModal();};
   $('toggleBomEdit').onclick=()=>{if(!UI.allowWrite())return;bomMode(!bomEditing,true);};
+  $('hideStoppedVersions').onchange=render;
   UI.bindVersionManagement('productVersions','product');
   BOMView.bind(false);
   function history(){

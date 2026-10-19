@@ -28,7 +28,7 @@ UI.applyAccess=function(){const writable=FB.canAdmin(),shipping=FB.canShip(),pho
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
 document.querySelectorAll('.materials-nav a').forEach(a=>{if(new URL(a.href).pathname===location.pathname){a.setAttribute('aria-current','page');}});
 
-UI.versionActions=function(kind,id,vid){return FB.canAdmin()?`<div class="action-group"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}">수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}">삭제</button></div>`:'';};
+UI.versionActions=function(kind,id,vid){return FB.canAdmin()?`<div class="action-group version-management-actions"><button type="button" data-version-edit="${this.esc(vid)}" data-entity="${this.esc(id)}">수정</button><button type="button" data-version-delete="${this.esc(vid)}" data-entity="${this.esc(id)}">삭제</button></div>`:'';};
 UI.bindVersionManagement=function(container,kind){
  const dialog=document.createElement('dialog');dialog.className='out-dialog';dialog.setAttribute('aria-label','버전 수정');
  dialog.innerHTML='<div class="modalhead"><h2>버전 수정</h2><button type="button" data-dismiss aria-label="버전 수정 닫기">✕</button></div><form><div class="row"><label class="field"><span>버전명</span><input name="versionName" maxlength="20" required></label><label class="field"><span>사용 구분</span><select name="versionMarket"><option>공용 사용</option><option>국내 전용</option><option>해외 전용</option></select></label></div><label class="field"><span>사용 상태</span><select name="versionState"><option value="사용">사용</option><option value="중단">중단</option></select></label><p class="page-note">중단된 버전은 재고와 과거 기록을 보존하며, 새 생산·출고·발주 대상에서 제외됩니다.</p><p data-error role="alert"></p><div class="modalfoot"><button type="button" data-dismiss>취소</button><button type="submit" class="primary">저장</button></div></form>';
@@ -50,3 +50,8 @@ UI.bindVersionManagement=function(container,kind){
 };
 
 UI.allowShipping=function(){if(FB.canShip())return true;UI.toast('출고 또는 재고관리팀 권한이 필요합니다.');return false;};
+
+UI.versionCards=function(kind,item,{hideStopped=false,pending}={}){
+ const versions=item.versions.filter(v=>!v.deleted&&(!hideStopped||v.state==='사용'));
+ return versions.map(v=>'<article class="version compact-version"><div class="version-card-header"><h4>'+this.esc(v.id)+'</h4><div class="version-card-badges"><span class="version-market">'+this.esc(v.market||'공용 사용')+'</span><span class="state '+(v.state==='사용'?'':'blocked')+'">'+(v.state==='사용'?'사용':'중단')+'</span></div></div><div class="version-card-body"><div class="version-card-stock"><strong>'+this.fmt(v.qty)+'<small> 개</small></strong>'+(pending?'<p>입고 대기 '+this.fmt(pending(v.id))+'개</p>':'')+'</div>'+this.versionActions(kind,item.id,v.id)+'</div></article>').join('')||'<p class="empty">표시할 버전이 없습니다.'+(hideStopped?' 중단 숨기기를 해제하면 중단된 버전을 볼 수 있습니다.':'')+'</p>';
+};
