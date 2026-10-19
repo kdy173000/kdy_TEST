@@ -22,7 +22,7 @@ function addRow(mid=''){
  const m=materials().find(m=>m.id===mid),last=draft[draft.length-1];
  draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',qty:'',supplierId:last?.supplierId||'',note:'',due:last?.due||''});renderDraft();
 }
-function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
+function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;$('deliveryAddress').value='';$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
  $('startOrder').hidden=!FB.canAdmin();
  const chosen=$('supplierFilter').value;$('supplierFilter').innerHTML='<option value="">전체 업체</option>'+UI.options(FB.data.suppliers.map(s=>[s.id,s.name+(s.archived?' · 거래 중단':'')]),chosen);
@@ -42,17 +42,17 @@ $('cancelOrder').onclick=()=>{if(draft.some(r=>r.mid||r.qty||r.note)&&!confirm('
 $('draftRows').oninput=e=>{const row=e.target.closest('[data-row]');if(!row)return;const r=draft[Number(row.dataset.row)];if(e.target.dataset.field)r[e.target.dataset.field]=e.target.value;};
 $('draftRows').onchange=e=>{if(!e.target.dataset.field)return;const r=draft[Number(e.target.closest('[data-row]').dataset.row)];r[e.target.dataset.field]=e.target.value;if(e.target.dataset.field==='mid'){r.vid=FB.data.materials.find(m=>m.id===r.mid)?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'';renderDraft();}};
 $('draftRows').onclick=e=>{const button=e.target.closest('[data-remove]');if(!button)return;draft.splice(Number(button.dataset.remove),1);if(!draft.length)addRow();else renderDraft();};
-$('orderForm').onsubmit=e=>{e.preventDefault();if(!UI.allowWrite())return;const button=$('saveOrders');button.disabled=true;try{const ids=FB.createOrders(draft.map(r=>({...r,person:$('orderPerson').value})));draft=[];$('orderEditor').hidden=true;ids.forEach(id=>selected.add(id));render();UI.toast(ids.length+'개 품목의 발주를 저장했습니다.');}catch(err){$('orderError').textContent=err.message;}finally{button.disabled=false;}};
+$('orderForm').onsubmit=e=>{e.preventDefault();if(!UI.allowWrite())return;const button=$('saveOrders');button.disabled=true;try{const ids=FB.createOrders(draft.map(r=>({...r,person:$('orderPerson').value,deliveryAddress:$('deliveryAddress').value})));draft=[];$('orderEditor').hidden=true;ids.forEach(id=>selected.add(id));render();UI.toast(ids.length+'개 품목의 발주를 저장했습니다.');}catch(err){$('orderError').textContent=err.message;}finally{button.disabled=false;}};
 for(const id of ['orderSearch','supplierFilter','statusFilter','fromDate','toDate'])$(id).addEventListener(id==='orderSearch'?'input':'change',render);
 $('resetFilters').onclick=()=>{for(const id of ['orderSearch','supplierFilter','statusFilter','fromDate','toDate'])$(id).value='';render();};
 $('selectAll').onchange=e=>{visible.forEach(o=>e.target.checked?selected.add(o.id):selected.delete(o.id));render();};
 $('orderRows').onchange=e=>{if(!e.target.dataset.select)return;e.target.checked?selected.add(e.target.dataset.select):selected.delete(e.target.dataset.select);render();};
 $('previewDraft').onclick=()=>{
- try{if(!draft.length)throw Error('발주할 품목을 추가하세요.');
+ try{if(!$('deliveryAddress').value.trim())throw Error('이번 발주의 납품주소를 입력하세요.');if(!draft.length)throw Error('발주할 품목을 추가하세요.');
  const rows=draft.map(r=>{
  const m=FB.data.materials.find(m=>m.id===r.mid&&!m.deleted&&!m.archived),supplier=FB.data.suppliers.find(s=>s.id===r.supplierId&&!s.archived);
  if(!m||!supplier||!r.date||!Number.isSafeInteger(Number(r.qty))||Number(r.qty)<1||!m.versions.some(v=>v.id===r.vid&&v.state==='사용'&&!v.deleted))throw Error('날짜·제품·버전·수량·업체를 모두 입력하세요.');
- return {...r,qty:Number(r.qty),name:m.name,supplier:supplier.name,person:$('orderPerson').value,id:'미저장'};
+ return {...r,qty:Number(r.qty),name:m.name,supplier:supplier.name,person:$('orderPerson').value,deliveryAddress:$('deliveryAddress').value.trim(),id:'미저장'};
  });OrderDocument.open(rows);
  }catch(e){$('orderError').textContent=e.message;}
 };
@@ -60,7 +60,7 @@ $('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.h
 $('downloadOrders').onclick=()=>{
  const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length)return;
  const cell=value=>{let text=String(value??'');if(/^[=+@\t\r-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';};
- const data=[['날짜','제품명','버전','수량','업체','메모','입고 예정일','발주번호','입고 상태'],...rows.map(o=>[o.date,o.name,o.vid,o.qty,supplierName(o),o.note,o.due,o.id,statusLabel(o)])];
+ const data=[['날짜','제품명','버전','수량','업체','메모','입고 예정일','발주번호','입고 상태','납품주소'],...rows.map(o=>[o.date,o.name,o.vid,o.qty,supplierName(o),o.note,o.due,o.id,statusLabel(o),o.deliveryAddress||''])];
  const blob=new Blob(['\uFEFF'+data.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='발주내역_'+FB.day()+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 window.addEventListener('fb-data',render);render();

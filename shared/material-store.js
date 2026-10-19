@@ -75,8 +75,9 @@ if(m.deleted||v.deleted)throw Error('삭제된 부자재 또는 버전으로 발
 const supplier=d.suppliers.find(s=>s.id===input.supplierId&&!s.archived);if(!supplier)throw Error('등록된 사용 중인 업체를 선택하세요.');
 const qty=integer(Number(input.qty)),date=required(input.date,'발주 날짜'),person=required(input.person,'담당자'),due=String(input.due||'');
 for(const value of [date,due].filter(Boolean)){if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||Number.isNaN(Date.parse(value))||new Date(value).toISOString().slice(0,10)!==value)throw Error('올바른 날짜를 입력하세요.');}
+const deliveryAddress=String(input.deliveryAddress||'').trim();if(deliveryAddress.length>200)throw Error('납품주소는 200자 이내로 입력하세요.');
 const id='PO-'+String(d.orders.length+1).padStart(4,'0');
-d.orders.push({id,batch,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplierId:supplier.id,supplier:supplier.name,date,due,person,note:String(input.note||'').trim().slice(0,200),closed:false});ids.push(id);
+d.orders.push({id,batch,deliveryAddress,mid:m.id,vid:v.id,name:m.name,qty,received:0,supplierId:supplier.id,supplier:supplier.name,date,due,person,note:String(input.note||'').trim().slice(0,200),closed:false});ids.push(id);
 }
 return ids;
 });}
