@@ -11,7 +11,7 @@ window.SearchPicker=(()=>{
  document.querySelectorAll('.search-picker-list:not([hidden])').forEach(other=>{if(other!==list)other._closePicker?.();});
  if(!matches.length){const empty=document.createElement('span');empty.textContent='검색 결과가 없습니다.';empty.className='search-picker-empty';list.append(empty);}
  matches.forEach((item,i)=>{const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.id=list.id+'-'+i;button.textContent=item.label;button.onpointerdown=e=>e.preventDefault();button.onclick=()=>choose(item);list.append(button);});
- list.hidden=false;const r=box.getBoundingClientRect(),up=window.innerHeight-r.bottom<180&&r.top>window.innerHeight-r.bottom,width=Math.min(Math.max(r.width,240),window.innerWidth-24);
+ list.hidden=false;const r=box.querySelector('.search-picker-field').getBoundingClientRect(),up=window.innerHeight-r.bottom<180&&r.top>window.innerHeight-r.bottom,width=Math.min(r.width,window.innerWidth-24);
  list.style.width=width+'px';list.style.left=Math.max(12,Math.min(r.left,window.innerWidth-width-12))+'px';list.style.maxHeight=Math.max(70,Math.min(240,(up?r.top:window.innerHeight-r.bottom)-18))+'px';
  if(!list.matches(':popover-open'))list.showPopover();list.style.top=(up?r.top-6-list.getBoundingClientRect().height:r.bottom+6)+'px';input.setAttribute('aria-expanded','true');
  }
