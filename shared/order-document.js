@@ -1,5 +1,6 @@
 'use strict';
 window.OrderDocument=(()=>{
+ function requirePrintPermission(){if(!FB.canAdmin())throw Error('발주팀 권한이 있어야 발주서를 인쇄하거나 저장할 수 있습니다.');}
  const $=id=>document.getElementById(id),esc=UI.esc;
  const sumAmounts=(rows,key)=>rows.some(r=>r[key]===null||r[key]===undefined)?null:rows.reduce((n,r)=>n+Number(r[key]),0);
  const grand=rows=>rows.some(r=>r.supplyAmount==null||r.taxAmount==null)?null:rows.reduce((n,r)=>n+r.supplyAmount+r.taxAmount,0);
@@ -23,7 +24,7 @@ window.OrderDocument=(()=>{
  }
  function render(){if(!pages.length)return;$('previewPaper').innerHTML=sheet(pages[current],current,pages.length);$('pageNumber').textContent=(current+1)+' / '+pages.length;$('previousPage').disabled=current===0;$('nextPage').disabled=current===pages.length-1;}
  function selectedPages(){const range=$('previewRange').value;if(range==='current')return [pages[current]];if(range==='all')return pages;const from=Number($('pageFrom').value),to=Number($('pageTo').value);if(!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to>pages.length)throw Error('1~'+pages.length+' 범위의 페이지를 입력하세요.');return pages.slice(from-1,to);}
- function print(selected){
+ function print(selected){requirePrintPermission();
   const frame=$('orderPrintFrame'),doc=frame.contentDocument;
   const css=[...document.styleSheets].filter(s=>{try{return s.href?.includes('order-pages.css')}catch{return false}}).flatMap(s=>{try{return [...s.cssRules].filter(r=>r.cssText.includes('invoice-')).map(r=>r.cssText)}catch{return []}}).join('\n');
   doc.open();doc.write('<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>발주서</title><style>'+css+'\n@page{size:A4 portrait;margin:10mm}body{margin:0}*{box-sizing:border-box}.invoice-sheet{width:190mm;min-height:270mm;margin:0;padding:6mm;font-family:Arial,sans-serif;break-after:page;box-shadow:none}.invoice-sheet:last-child{break-after:auto}.invoice-info{display:grid;grid-template-columns:1fr 1fr}.num{text-align:right}</style></head><body>'+selected.map((p,i)=>sheet(p,i,selected.length)).join('')+'</body></html>');doc.close();frame.contentWindow.focus();setTimeout(()=>frame.contentWindow.print(),100);
@@ -59,7 +60,7 @@ window.OrderDocument=(()=>{
   });
   return zip(files);
  }
- function download(blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='발주서_'+FB.day()+'.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ function download(blob){requirePrintPermission();const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='발주서_'+FB.day()+'.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function errorMessage(error){
   const message=String(error?.message||'');if(/[가-힣]/.test(message))return message;
   console.error('발주서 출력 오류',error);
@@ -67,14 +68,14 @@ window.OrderDocument=(()=>{
   return '발주서 저장·인쇄 중 오류가 발생했습니다. 입력 내용을 확인한 뒤 다시 시도해주세요.';
  }
  function open(rows){
-  try{
+  try{requirePrintPermission();
   if(!rows.length)throw Error('미리 볼 발주가 없습니다.');pages=makePages(rows);current=0;$('previewSavePanel').hidden=true;$('previewSaveError').textContent='';$('previewRange').value='all';$('previewRangeFields').hidden=true;$('pageFrom').value=1;$('pageTo').value=pages.length;$('pageFrom').max=$('pageTo').max=pages.length;render();$('orderPreview').showModal();}catch(error){throw Error(errorMessage(error));}
  }
  document.addEventListener('DOMContentLoaded',()=>{
   $('closePreview').onclick=()=>$('orderPreview').close();$('previousPage').onclick=()=>{if(current>0){current--;render();}};$('nextPage').onclick=()=>{if(current<pages.length-1){current++;render();}};
-  $('previewPrint').onclick=()=>{try{print(pages);}catch(e){UI.toast(errorMessage(e));}};$('previewSave').onclick=()=>{$('previewSavePanel').hidden=!$('previewSavePanel').hidden;};
+  $('previewPrint').onclick=()=>{try{print(pages);}catch(e){UI.toast(errorMessage(e));}};$('previewSave').onclick=()=>{if(!UI.allowWrite())return;$('previewSavePanel').hidden=!$('previewSavePanel').hidden;};
   $('cancelPreviewSave').onclick=()=>$('previewSavePanel').hidden=true;$('previewRange').onchange=()=>$('previewRangeFields').hidden=$('previewRange').value!=='range';
-  $('confirmPreviewSave').onclick=()=>{try{const selected=selectedPages();if($('previewFormat').value==='xlsx')download(workbook(selected));else print(selected);$('previewSaveError').textContent='';$('previewSavePanel').hidden=true;}catch(e){$('previewSaveError').textContent=errorMessage(e);}};
+  $('confirmPreviewSave').onclick=()=>{try{requirePrintPermission();const selected=selectedPages();if($('previewFormat').value==='xlsx')download(workbook(selected));else print(selected);$('previewSaveError').textContent='';$('previewSavePanel').hidden=true;}catch(e){$('previewSaveError').textContent=errorMessage(e);}};
  });
  return {open,errorMessage};
 })();

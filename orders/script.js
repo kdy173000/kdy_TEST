@@ -55,7 +55,7 @@ function render(){
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!orderDate||o.date===orderDate)&&receivedOn(o,receiptDate)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
  $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td class="order-receipt-cell">'+(o.closed||o.received>=o.qty?'<span class="receipt-control page-note">처리 완료</span>':'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>입고 완료</button>')+'</td><td class="order-edit-cell">'+('<button type="button" data-edit-order="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>수정</button>')+'</td></tr>').join('')||'<tr><td colspan="12" class="empty">발주 내역이 없습니다.</td></tr>';
- const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!selected.size;
+ const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!FB.canAdmin()||!selected.size;$('previewSelected').title=FB.canAdmin()?(selected.size?'':'인쇄할 발주를 선택하세요.'):'발주팀 권한이 필요합니다.';
 }
 let editingOrder=null,editingRevision=0,editingMid='',editingSupplier='';
 function editVersions(value){const m=FB.data.materials.find(m=>m.id===editingMid);$('editOrderVersion').innerHTML=UI.options((m?.versions||[]).filter(v=>v.id===value||(!v.deleted&&v.state==='사용')).map(v=>[v.id,v.id]),value);}
@@ -93,7 +93,7 @@ for(const id of ['orderSearch','supplierFilter','statusFilter','orderDateFilter'
 $('resetFilters').onclick=()=>{for(const id of ['orderSearch','supplierFilter','statusFilter','orderDateFilter','receiptDateFilter'])$(id).value='';render();};
 $('selectAll').onchange=e=>{visible.forEach(o=>e.target.checked?selected.add(o.id):selected.delete(o.id));render();};
 $('orderRows').onchange=e=>{if(!e.target.dataset.select)return;e.target.checked?selected.add(e.target.dataset.select):selected.delete(e.target.dataset.select);render();};
-$('previewDraft').onclick=()=>{
+$('previewDraft').onclick=()=>{if(!UI.allowWrite())return;
  try{if(!$('deliveryAddress').value.trim())throw Error('이번 발주의 납품주소를 입력하세요.');if(!draft.length)throw Error('발주할 품목을 추가하세요.');
  const rows=draft.map(r=>{
  const m=FB.data.materials.find(m=>m.id===r.mid&&!m.deleted&&!m.archived),supplier=FB.data.suppliers.find(s=>s.id===r.supplierId&&!s.archived);
@@ -103,7 +103,7 @@ $('previewDraft').onclick=()=>{
  });OrderDocument.open(rows);
  }catch(e){$('orderError').textContent=OrderDocument.errorMessage(e);}
 };
-$('previewSelected').onclick=()=>{const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast(OrderDocument.errorMessage(e));}};
+$('previewSelected').onclick=()=>{if(!UI.allowWrite())return;const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast(OrderDocument.errorMessage(e));}};
 window.addEventListener('fb-data',render);render();
 const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial);
 })();
