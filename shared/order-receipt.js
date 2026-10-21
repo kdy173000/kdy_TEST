@@ -12,8 +12,8 @@ document.addEventListener('click',e=>{
  const button=e.target.closest('[data-receive]');if(!button||!UI.allowWrite())return;
  const o=FB.data.orders.find(o=>o.id===button.dataset.receive),m=FB.data.materials.find(m=>m.id===o?.mid);
  if(!o||!m||o.closed||o.received>=o.qty){UI.toast('입고 대기 중인 발주를 선택하세요.');return;}
- orderId=o.id;$('closeOrderName').textContent=o.id+' · '+o.name;$('closeOrdered').textContent=fmt(o.qty)+'개';$('closeReceived').textContent=fmt(o.received)+'개';$('closeOrderedVersion').value=o.vid;
- $('closeReceiptVersion').innerHTML=UI.options(m.versions.filter(v=>!v.deleted&&(v.state==='사용'||v.id===o.vid)).map(v=>[v.id,v.id]),o.vid);
+ orderId=o.id;$('closeOrderName').textContent=o.id+' · '+o.name;$('closeOrdered').textContent=fmt(o.qty)+'개';$('closeReceived').textContent=fmt(o.received)+'개';
+ $('closeReceiptVersion').value=o.vid;
  $('closeActual').value='';$('closeDefective').value=0;$('closeReceiptDate').value=FB.day();$('closeReceiptPerson').value=FB.user()?.name||'';$('closeReceiptNote').value='';$('closeOrderError').textContent='';preview();$('closeOrderDialog').showModal();
 });
 for(const id of ['dismissCloseOrder','keepOrder'])$(id).onclick=()=>$('closeOrderDialog').close();

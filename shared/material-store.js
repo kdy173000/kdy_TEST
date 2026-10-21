@@ -104,7 +104,8 @@ if(!order||order.closed||order.received>=order.qty)throw Error('입고 가능한
 const delivered=integer(Number(input.qty),0),defective=integer(Number(input.defective||0),0),finish=input.finish===true;
 if(defective>delivered)throw Error('불량 수량은 이번에 받은 전체 수량보다 많을 수 없습니다.');
 if(!delivered&&!finish)throw Error('이번에 받은 수량을 입력하거나 남은 수량 취소를 선택하세요.');
-const good=delivered-defective,m=mid(d,order.mid),v=version(m,input.vid||order.vid),person=required(input.person,'담당자'),date=required(input.date,'입고 날짜'),note=String(input.note||'').trim();
+if(input.vid&&input.vid!==order.vid)throw Error('발주한 버전으로만 입고할 수 있습니다.');
+const good=delivered-defective,m=mid(d,order.mid),v=version(m,order.vid),person=required(input.person,'담당자'),date=required(input.date,'입고 날짜'),note=String(input.note||'').trim();
 if(!Number.isSafeInteger(v.qty+good)||!Number.isSafeInteger(order.received+good))throw Error('수량이 너무 큽니다.');
 if(v.deleted)throw Error('삭제된 버전으로는 입고할 수 없습니다.');
 const prior=order.received;v.qty+=good;order.received+=good;
@@ -123,7 +124,8 @@ if(t.order&&!o)throw Error('연결 발주를 찾을 수 없습니다.');
 const before=structuredClone(t),oldGood=t.qty,oldBad=t.defective||0,oldDelivered=t.delivered??(oldGood+oldBad);
 let good=0,bad=0,delivered=0,date=t.date,person=t.person,note=t.note;
 if(!remove){date=required(input.date,'날짜');person=required(input.person,'담당자');note=String(input.note||'').trim();if(o){delivered=integer(Number(input.qty),0);bad=integer(Number(input.defective||0),0);if(bad>delivered)throw Error('불량 수량이 전체 수량보다 많습니다.');good=delivered-bad;}else{good=integer(Number(input.qty));if(out&&!note)throw Error('차감 사유를 입력하세요.');}}
-const targetVersion=!remove&&o?version(mid(d,t.mid),input.vid||t.vid):v;
+if(!remove&&o&&input.vid&&input.vid!==o.vid)throw Error('발주한 버전으로만 입고할 수 있습니다.');
+const targetVersion=!remove&&o?version(mid(d,t.mid),o.vid):v;
 const oldSigned=out?-oldGood:oldGood,newSigned=remove?0:(out?-good:good),next=v.qty-oldSigned+(targetVersion===v?newSigned:0);
 if(!Number.isSafeInteger(next)||next<0)throw Error('이미 사용된 재고가 있어 이 수량으로 수정하거나 삭제할 수 없습니다.');
 if(targetVersion!==v){const targetQty=targetVersion.qty+newSigned;if(!Number.isSafeInteger(targetQty)||targetQty<0)throw Error('입고 버전의 재고를 확인하세요.');targetVersion.qty=targetQty;}v.qty=next;

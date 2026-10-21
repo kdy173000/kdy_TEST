@@ -42,7 +42,7 @@
     $('stockVersions').innerHTML=UI.versionCards('material',m,{hideStopped:$('hideStoppedVersions').checked,pending});
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>{const t=r.t,type=$('historyType').value,q=$('historySearch').value.trim().toLowerCase();return t.mid===id&&(!type||(type==='입고'?['입고','불량 입고'].includes(t.type):type==='생산'?!!t.production:UI.minus(t.type)&&!t.production))&&[t.vid,t.person,t.note,t.date,transactionSupplier(t)].join(' ').toLowerCase().includes(q);}).reverse().map(({t,index})=>{
 const editable=!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
-return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionSupplier(t))||'—'}</td><td>${t.order?`발주 ${esc(FB.data.orders.find(o=>o.id===t.order)?.vid||t.vid)}<br>입고 ${esc(t.vid)}`:esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>수정</button><button class="delete-button" data-delete-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
+return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionSupplier(t))||'—'}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>수정</button><button class="delete-button" data-delete-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
 }).join('')||'<tr><td colspan="8" class="empty">조건에 맞는 내역이 없습니다.</td></tr>';}
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
@@ -78,9 +78,9 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     $('transactionTitle').textContent=receipt?'입고 내역 수정':'입출고 내역 수정';
     $('transactionDialog').classList.toggle('receipt-dialog',receipt);$('transactionForm').classList.toggle('receipt-fields',receipt);
     $('transactionQuantities').className=receipt?'receipt-quantities receipt-wide':'';
-    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary','transactionOrderedVersionField','transactionReceiptVersionField'])$(id).hidden=!receipt;
+    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary','transactionReceiptVersionField'])$(id).hidden=!receipt;
     $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고':'사유 · 비고';
-    if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionOrderedVersion').value=o?.vid||t.vid;$('transactionReceiptVersion').innerHTML=UI.options(material(t.mid).versions.filter(v=>v.state==='사용'||v.id===t.vid).map(v=>[v.id,v.id]),t.vid);}
+    if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionReceiptVersion').value=o?.vid||t.vid;}
     $('transactionQtyLabel').textContent=receipt?'입고 수량':'수량';
     $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
     $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
