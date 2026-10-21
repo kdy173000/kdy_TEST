@@ -21,7 +21,7 @@
 .order-card-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .order-card-heading>strong{font-size:15px;color:#24272c}
 .order-meta,.order-dates,.order-note{font-size:13px;color:#46505e;margin:8px 0 0;overflow-wrap:anywhere}
-.order-quantities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0;background:#f6f7f9;padding:12px;border-radius:8px}
+.order-quantities{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0;background:#f6f7f9;padding:12px;border-radius:8px}
 .order-quantities div{text-align:center}.order-quantities span{display:block;font-size:12px;color:#46505e}.order-quantities strong{font-size:21px;display:block;margin-top:5px;font-variant-numeric:tabular-nums}.order-quantities small{font-size:12px;margin-left:4px;font-weight:400}
 .order-quantities div:last-child strong{color:#9b1b30}
 .order-actions{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;flex-shrink:0}
@@ -41,7 +41,7 @@
 .receipt-fields textarea{min-height:66px}
 .receipt-fields .modalfoot{margin-top:0;padding-top:16px}
 #closeReceiptSummary,#transactionReceiptSummary{padding:12px 14px;border-radius:8px;background:#f6f7f9;color:#303640}
-@media(max-width:700px){.workspace>aside{display:block}.purchase-list{display:flex;gap:8px;height:auto;max-height:none;overflow-x:auto}.purchase-list .product{flex:0 0 190px}.action-group{gap:6px}.order-card{padding:14px;gap:12px;flex-direction:column}.order-actions{align-items:flex-end}.order-quantities{gap:6px;padding:10px}.order-quantities strong{font-size:19px}}
+@media(max-width:700px){.workspace>aside{display:block}.purchase-list{display:flex;gap:8px;height:auto;max-height:none;overflow-x:auto}.purchase-list .product-list-row{flex:0 0 240px;min-width:0}.action-group{gap:6px}.order-card{padding:14px;gap:12px;flex-direction:column}.order-actions{align-items:flex-end}.order-quantities{gap:6px;padding:10px}.order-quantities strong{font-size:19px}}
 @media(max-width:600px){.receipt-quantities{grid-template-columns:1fr;gap:14px}.receipt-fields{grid-template-columns:1fr;gap:14px}.receipt-dialog .stats{padding:14px}.receipt-dialog .stats div{padding-left:10px}.receipt-dialog .stats strong{font-size:22px}}
 
 .heading{align-items:flex-start;gap:24px}

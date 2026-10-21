@@ -233,6 +233,7 @@ function toggleChat() {
   if (!open) showRoomList();
 }
 function showRoomList() {
+  const aiView=document.getElementById('aiChatView');if(aiView)aiView.hidden=true;
   _chatRoomId = null;
   document.getElementById('chatRoomsView').style.display = 'flex';
   document.getElementById('chatRoomView').style.display = 'none';
@@ -252,6 +253,7 @@ function renderRoomList() {
   }).join('');
 }
 function openRoom(rid) {
+  const aiView=document.getElementById('aiChatView');if(aiView)aiView.hidden=true;
   _chatRoomId = rid;
   const r = getRooms().find(r => r.id === rid);
   document.getElementById('chatRoomsView').style.display = 'none';

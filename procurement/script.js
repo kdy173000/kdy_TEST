@@ -9,22 +9,22 @@
     const items=filtered();
     if(!items.some(m=>m.id===selected))selected=items[0]?.id||'';
     $('stockCount').textContent=items.length+'종';
-    $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" aria-pressed="${m.id===selected}" data-select="${esc(m.id)}">${Photos.markup('material',m.id,m.name,'list')}<strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
+    $('purchaseMaterials').innerHTML=items.map(m=>`<div class="product-list-row"><button class="product ${m.id===selected?'active':''}" aria-pressed="${m.id===selected}" data-select="${esc(m.id)}">${Photos.markup('material',m.id,m.name,'list')}<strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button><button type="button" class="product-info-edit management-button" data-edit-material="${esc(m.id)}" aria-label="${esc(m.name)} 정보 수정" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>정보 수정</button></div>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
     if(selected)detail(selected);
     const orders=FB.data.orders.filter(o=>o.mid===selected&&FB.orderIsPending(o));
     $('pendingOrderCount').textContent=orders.length+'건';
     $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<article class="order-card"><div class="order-card-main"><div class="order-card-heading"><strong>${esc(o.supplier)}</strong><span class="badge">${o.manualPending===true||o.received?'입고중':'입고 전'}</span></div><p class="order-meta">${esc(o.id)} · 발주 버전 <strong>${esc(o.vid)}</strong></p><div class="order-quantities"><div><span>발주 수량</span><strong>${fmt(o.qty)}<small>개</small></strong></div><div><span>정상 입고</span><strong>${fmt(o.received)}<small>개</small></strong></div></div><p class="order-dates">발주 ${esc(o.date)} · 입고 예정 <strong>${esc(o.due)||'미정'}</strong></p>${o.note?`<p class="order-note">${esc(o.note)}</p>`:''}</div></article>`).join('')||'<p class="empty">입고 대기 중인 발주가 없습니다.<br>발주 등록과 입고 처리는 발주 관리에서 진행하세요.</p>';
-    UI.applyAccess();if(selected){const m=material(selected),blocked=!FB.canAdmin()||!!m.archived;$('orderMaterial').disabled=blocked;$('adjustMaterial').disabled=blocked;$('addMaterialVersion').disabled=blocked;}
+    UI.applyAccess();if(selected){const m=material(selected),blocked=!FB.canAdmin()||!!m.archived;$('addMaterialVersion').disabled=blocked;}
 
 
 
   }
   const field=(label,html)=>`<label class="field"><span>${label}</span>${html}</label>`;
-  function openAdjustment(id){if(!UI.allowWrite())return;target=id;const m=material(id);if(!m||m.archived)return;if(!m.versions.some(v=>!v.deleted&&v.state==='사용')){UI.toast('사용 가능한 버전이 없습니다. 버전 수정에서 공용 사용·국내 전용·해외 전용 중 하나를 선택하세요.');return;}
-    $('purchaseHint').textContent='선택한 버전의 재고에서 입력한 수량을 차감합니다. 사유를 함께 기록하세요.';$('purchaseDialog').classList.add('task-dialog');$('purchaseTitle').textContent='수기 재고 차감';$('purchaseTarget').textContent=m.name;
+  function openAdjustment(id,vid){if(!UI.allowWrite())return;target=id;const m=material(id);if(!m||m.archived)return;const v=m.versions.find(v=>v.id===vid&&!v.deleted&&v.state==='사용');if(!v){UI.toast('사용 가능한 버전이 없습니다. 버전 수정에서 공용 사용·국내 전용·해외 전용 중 하나를 선택하세요.');return;}
+    $('purchaseHint').textContent='선택한 버전의 재고에서 입력한 수량을 차감합니다. 사유를 함께 기록하세요.';$('purchaseDialog').classList.add('task-dialog');$('purchaseTitle').textContent='수기 재고 차감';$('purchaseTarget').textContent=m.name+' · '+vid;
     let fields='';
-    fields+=field('차감 버전',`<select name="vid">${UI.options(m.versions.filter(v=>v.state==='사용').map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),'')}</select>`);
+    fields+=field('차감 버전',`<input name="vid" value="${esc(vid)}" readonly aria-readonly="true">`);
     fields+=field('차감 수량',`<input name="qty" type="number" min="1" step="1" required>`);
     fields+=field('차감 날짜',`<input name="date" type="date" value="${FB.day()}" required>`);
     fields+=field('담당자',`<input name="person" maxlength="30" value="${esc(FB.user()?.name||'')}" required>`);
@@ -46,8 +46,8 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
 }).join('')||'<tr><td colspan="8" class="empty">조건에 맞는 내역이 없습니다.</td></tr>';}
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
-  $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
-  $('orderMaterial').onclick=()=>{if(!UI.allowWrite())return;location.href='../orders/index.html?material='+encodeURIComponent(selected);};$('adjustMaterial').onclick=()=>openAdjustment(selected);
+  $('purchaseMaterials').onclick=e=>{const edit=e.target.closest('[data-edit-material]');if(edit){if(!UI.allowWrite())return;selected=edit.dataset.editMaterial;render();CatalogEditor.open(selected);return;}const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
+  $('stockVersions').addEventListener('click',e=>{const b=e.target.closest('[data-material-workflow]');if(!b||b.disabled||!UI.allowWrite())return;const m=material(selected),v=m?.versions.find(v=>v.id===b.dataset.vid&&!v.deleted);if(!m||m.archived||!v||FB.versionStatus(v)==='중단')return;if(b.dataset.materialWorkflow==='order')location.href='../orders/index.html?material='+encodeURIComponent(m.id)+'&version='+encodeURIComponent(v.id);else if(b.dataset.materialWorkflow==='adjust')openAdjustment(m.id,v.id);});
 
   $('closePurchase').onclick=()=>$('purchaseDialog').close();
   $('purchaseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),input=Object.fromEntries(f.entries());input.qty=Number(input.qty);try{FB.stockMovement({...input,mid:target,type:'재고 조정',note:input.reason+' · '+input.note});$('purchaseDialog').close();UI.toast('차감 사유와 재고를 기록했습니다.');}catch(err){$('purchaseError').textContent=err.message;render();}};

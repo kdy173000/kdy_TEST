@@ -53,7 +53,7 @@ UI.allowShipping=function(){if(FB.canShip())return true;UI.toast('출고팀 권�
 
 UI.versionCards=function(kind,item,{hideStopped=false,pending}={}){
  const versions=item.versions.filter(v=>!v.deleted&&(!hideStopped||v.state==='사용'));
- return versions.map(v=>'<article class="version compact-version"><div class="version-card-header"><h4>'+this.esc(v.id)+'</h4><div class="version-card-badges"><span class="state '+(v.state==='사용'?'':'blocked')+'">'+this.esc(FB.versionStatus(v))+'</span></div></div><div class="version-card-body"><div class="version-card-stock"><strong>'+this.fmt(v.qty)+'<small> 개</small></strong>'+(pending?'<p>입고 대기 '+this.fmt(pending(v.id))+'개</p>':'')+'</div>'+this.versionActions(kind,item.id,v.id)+'</div>'+(kind==='product'?this.productVersionActions(item,v):'')+'</article>').join('')||'<p class="empty">표시할 버전이 없습니다.'+(hideStopped?' 중단 숨기기를 해제하면 중단된 버전을 볼 수 있습니다.':'')+'</p>';
+ return versions.map(v=>'<article class="version compact-version"><div class="version-card-header"><h4>'+this.esc(v.id)+'</h4><div class="version-card-badges"><span class="state '+(v.state==='사용'?'':'blocked')+'">'+this.esc(FB.versionStatus(v))+'</span></div></div><div class="version-card-body"><div class="version-card-stock"><strong>'+this.fmt(v.qty)+'<small> 개</small></strong>'+(pending?'<p>입고 대기 '+this.fmt(pending(v.id))+'개</p>':'')+'</div>'+this.versionActions(kind,item.id,v.id)+'</div>'+(kind==='product'?this.productVersionActions(item,v):this.materialVersionActions(item,v))+'</article>').join('')||'<p class="empty">표시할 버전이 없습니다.'+(hideStopped?' 중단 숨기기를 해제하면 중단된 버전을 볼 수 있습니다.':'')+'</p>';
 };
 
 UI.productVersionActions=function(item,v){
@@ -62,3 +62,5 @@ UI.productVersionActions=function(item,v){
  const shippingReason=!FB.canShip()?'출고팀 권한이 필요합니다.':blocked?'단종된 제품입니다.':stopped?'중단된 버전입니다.':'이 버전으로 출고 등록';
  return '<div class="version-workflow-actions"><button type="button" class="primary" data-version-workflow="bom" data-vid="'+this.esc(v.id)+'">BOM</button><button type="button" class="management-button" data-version-workflow="produce" data-vid="'+this.esc(v.id)+'"'+(!FB.canAdmin()||blocked?' disabled':'')+' title="'+productionReason+'">생산 등록</button><button type="button" class="primary" data-version-workflow="ship" data-vid="'+this.esc(v.id)+'"'+(!FB.canShip()||blocked||stopped?' disabled':'')+' title="'+shippingReason+'">출고 등록</button></div>';
 };
+
+UI.materialVersionActions=function(item,v){const reason=!FB.canAdmin()?'발주팀 권한이 필요합니다.':item.archived?'단종된 부자재입니다.':FB.versionStatus(v)==='중단'?'중단된 버전입니다.':'';const attrs=(reason?' disabled':'')+' title="'+(reason||'이 버전으로 등록')+'"';return '<div class="version-workflow-actions"><button type="button" class="management-button" data-material-workflow="order" data-vid="'+this.esc(v.id)+'"'+attrs+'>발주 등록</button><button type="button" class="management-button" data-material-workflow="adjust" data-vid="'+this.esc(v.id)+'"'+attrs+'>수기 차감</button></div>';};

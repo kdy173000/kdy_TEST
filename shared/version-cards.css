@@ -17,3 +17,9 @@
 
 .version-workflow-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line,#e5e7eb)}
 .version-workflow-actions button{flex:1;margin:0;padding:7px 10px;font-size:12px;white-space:nowrap}
+
+/* Shared placement for catalog item editing on both stock pages. */
+.product-list-row{position:relative}
+.product-list-row:has(.product-info-edit) .product{padding-right:92px}
+.product-info-edit{position:absolute;right:10px;top:13px;padding:5px 7px;font-size:11px;line-height:1.6;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text2)}
+.product-info-edit:hover{background:var(--hover);color:var(--text)}

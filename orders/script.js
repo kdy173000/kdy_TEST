@@ -22,11 +22,11 @@ function renderDraft(){
  });
  $('orderError').textContent=suppliers().length?'':'먼저 업체 관리에서 업체를 등록하세요.';
 }
-function addRow(mid=''){
+function addRow(mid='',vid=''){
  const m=materials().find(m=>m.id===mid),last=draft[draft.length-1];
- draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',spec:'',unitPrice:'',qty:'',supplierId:last?.supplierId||'',note:'',due:''});renderDraft();
+ draft.push({date:last?.date||FB.day(),mid:m?.id||'',vid:m?.versions.find(v=>!v.deleted&&v.state==='사용'&&v.id===vid)?.id||m?.versions.find(v=>!v.deleted&&v.state==='사용')?.id||'',spec:'',unitPrice:'',qty:'',supplierId:last?.supplierId||'',note:'',due:''});renderDraft();
 }
-function start(mid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;deliveryPlaceId='fireball';$('deliveryAddress').value=FB.defaultDeliveryAddress;renderDeliveryPresets();$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';$('orderPersonPhone').value=FB.user()?.phone||'';addRow(mid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
+function start(mid='',vid=''){if(!UI.allowWrite())return;if(draft.length){$('orderEditor').hidden=false;return;}$('orderEditor').hidden=false;deliveryPlaceId='fireball';$('deliveryAddress').value=FB.defaultDeliveryAddress;renderDeliveryPresets();$('orderPerson').value=FB.user()?.name||FB.user()?.id||'';$('orderPersonPhone').value=FB.user()?.phone||'';addRow(mid,vid);$('orderEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function deliveryPlaces(){
  return [{id:'fireball',label:'파이어볼',address:FB.defaultDeliveryAddress},...FB.data.suppliers.filter(s=>!s.archived&&s.name.replace(/주식회사|\(주\)|㈜|\s/g,'')!=='파이어볼').map(s=>({id:'supplier:'+s.id,label:s.name,address:s.address||''}))];
 }
@@ -104,5 +104,5 @@ $('previewDraft').onclick=()=>{if(!UI.allowWrite())return;
 };
 $('previewSelected').onclick=()=>{if(!UI.allowWrite())return;const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast(OrderDocument.errorMessage(e));}};
 window.addEventListener('fb-data',render);render();
-const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial);
+const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial,new URLSearchParams(location.search).get('version')||'');
 })();
