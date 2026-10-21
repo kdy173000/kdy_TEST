@@ -12,9 +12,9 @@
     $('purchaseMaterials').innerHTML=items.map(m=>`<button class="product ${m.id===selected?'active':''}" aria-pressed="${m.id===selected}" data-select="${esc(m.id)}">${Photos.markup('material',m.id,m.name,'list')}<strong>${esc(m.name)}</strong><span>${esc(['전면 라벨','후면 라벨'].includes(m.slot)?'라벨':m.slot)} · ${esc(m.id)}${m.archived?' · 단종':''}</span></button>`).join('')||'<p class="empty">검색 결과가 없습니다.</p>';
     $('stockContent').hidden=!selected;$('stockEmpty').hidden=!!selected;
     if(selected)detail(selected);
-    const orders=FB.data.orders.filter(o=>o.mid===selected&&!o.closed&&o.received<o.qty);
+    const orders=FB.data.orders.filter(o=>o.mid===selected&&FB.orderIsPending(o));
     $('pendingOrderCount').textContent=orders.length+'건';
-    $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<article class="order-card"><div class="order-card-main"><div class="order-card-heading"><strong>${esc(o.supplier)}</strong><span class="badge">${o.received?'부분 입고':'입고 전'}</span></div><p class="order-meta">${esc(o.id)} · 발주 버전 <strong>${esc(o.vid)}</strong></p><div class="order-quantities"><div><span>발주 수량</span><strong>${fmt(o.qty)}<small>개</small></strong></div><div><span>정상 입고</span><strong>${fmt(o.received)}<small>개</small></strong></div><div><span>추가 입고 필요</span><strong>${fmt(UI.remaining(o))}<small>개</small></strong></div></div><p class="order-dates">발주 ${esc(o.date)} · 입고 예정 <strong>${esc(o.due)||'미정'}</strong></p>${o.note?`<p class="order-note">${esc(o.note)}</p>`:''}</div></article>`).join('')||'<p class="empty">입고 대기 중인 발주가 없습니다.<br>발주 등록과 입고 처리는 발주 관리에서 진행하세요.</p>';
+    $('purchaseOrders').innerHTML=orders.slice().reverse().map(o=>`<article class="order-card"><div class="order-card-main"><div class="order-card-heading"><strong>${esc(o.supplier)}</strong><span class="badge">${o.manualPending===true||o.received?'입고중':'입고 전'}</span></div><p class="order-meta">${esc(o.id)} · 발주 버전 <strong>${esc(o.vid)}</strong></p><div class="order-quantities"><div><span>발주 수량</span><strong>${fmt(o.qty)}<small>개</small></strong></div><div><span>정상 입고</span><strong>${fmt(o.received)}<small>개</small></strong></div></div><p class="order-dates">발주 ${esc(o.date)} · 입고 예정 <strong>${esc(o.due)||'미정'}</strong></p>${o.note?`<p class="order-note">${esc(o.note)}</p>`:''}</div></article>`).join('')||'<p class="empty">입고 대기 중인 발주가 없습니다.<br>발주 등록과 입고 처리는 발주 관리에서 진행하세요.</p>';
     UI.applyAccess();if(selected){const m=material(selected),blocked=!FB.canAdmin()||!!m.archived;$('orderMaterial').disabled=blocked;$('adjustMaterial').disabled=blocked;$('addMaterialVersion').disabled=blocked;}
 
 
@@ -34,12 +34,12 @@
     $('purchaseFields').innerHTML=fields;$('purchaseFields').lastElementChild.classList.add('wide');$('purchaseError').textContent='';$('purchaseDialog').showModal();
   }
   function detail(id){const m=material(id);
-    const pending=vid=>FB.data.orders.filter(o=>o.mid===id&&(!vid||o.vid===vid)).reduce((n,o)=>n+UI.remaining(o),0);
+    const pending=()=>FB.data.orders.filter(o=>o.mid===id&&FB.orderIsPending(o)).length;
     $('materialPhoto').innerHTML=Photos.markup('material',m.id,m.name,'summary');Photos.refresh();
     $('stockTitle').textContent=m.name;$('stockKind').textContent=m.slot;$('stockCode').textContent=m.id+(m.archived?' · 단종':'');
-    $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'개';
+    $('stockTotal').textContent=fmt(UI.quantity(m))+'개';$('stockAvailable').textContent=fmt(UI.quantity(m,true))+'개';$('stockPending').textContent=fmt(pending())+'건';
     $('stockMemo').textContent=m.memo||'발주 입고와 생산 사용 내역이 같은 재고에 반영됩니다.';
-    $('stockVersions').innerHTML=UI.versionCards('material',m,{hideStopped:$('hideStoppedVersions').checked,pending});
+    $('stockVersions').innerHTML=UI.versionCards('material',m,{hideStopped:$('hideStoppedVersions').checked});
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>{const t=r.t,type=$('historyType').value,q=$('historySearch').value.trim().toLowerCase();return t.mid===id&&(!type||(type==='입고'?['입고','불량 입고'].includes(t.type):type==='생산'?!!t.production:UI.minus(t.type)&&!t.production))&&[t.vid,t.person,t.note,t.date,transactionSupplier(t)].join(' ').toLowerCase().includes(q);}).reverse().map(({t,index})=>{
 const editable=!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
 return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionSupplier(t))||'—'}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>수정</button><button class="delete-button" data-delete-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
@@ -56,12 +56,10 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
   function previewTransactionReceipt(){
     const t=FB.data.transactions[transactionIndex],o=FB.data.orders.find(o=>o.id===t?.order);if(!o)return;
     const actual=Number($('transactionQty').value),bad=Number($('transactionDefective').value),good=Math.max(0,actual-bad);
-    const otherGood=o.received-t.qty,otherDelivered=(o.delivered??o.received)-(t.delivered??t.qty+(t.defective||0));
     $('transactionOrdered').value=o.qty;
-    $('transactionRemaining').value=Math.max(0,o.qty-otherDelivered-actual);
-    $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'정상 입고 '+fmt(good)+'개 · 추가 정상 입고 필요 '+fmt(Math.max(0,o.qty-otherGood-good))+'개'+(otherGood+good>o.qty?' · 초과 정상 입고 '+fmt(otherGood+good-o.qty)+'개':'');
+    $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'이번 정상 입고 '+fmt(good)+'개 · 발주 상태는 '+($('transactionKeepOpen').checked?'입고중':'처리 완료');
   }
-  $('transactionQty').oninput=previewTransactionReceipt;$('transactionDefective').oninput=previewTransactionReceipt;
+  $('transactionKeepOpen').onchange=previewTransactionReceipt;$('transactionQty').oninput=previewTransactionReceipt;$('transactionDefective').oninput=previewTransactionReceipt;
   $('historyType').onchange=()=>selected&&detail(selected);$('historySearch').oninput=()=>selected&&detail(selected);
   $('resetCatalog').onclick=()=>{$('purchaseSearch').value='';$('purchaseCategory').value='';category='';$('purchaseArchived').checked=false;render();};
   $('stockHistory').onclick=e=>{if(!UI.allowWrite())return;
@@ -78,9 +76,9 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     $('transactionTitle').textContent=receipt?'입고 내역 수정':'입출고 내역 수정';
     $('transactionDialog').classList.toggle('receipt-dialog',receipt);$('transactionForm').classList.toggle('receipt-fields',receipt);
     $('transactionQuantities').className=receipt?'receipt-quantities receipt-wide':'';
-    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionRemainingField','transactionReceiptSummary','transactionReceiptVersionField'])$(id).hidden=!receipt;
+    for(const id of ['transactionOrderStats','transactionQtyHelp','transactionKeepOpenField','transactionReceiptSummary','transactionReceiptVersionField'])$(id).hidden=!receipt;
     $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고':'사유 · 비고';
-    if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionReceiptVersion').value=o?.vid||t.vid;}
+    if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionReceiptVersion').value=o?.vid||t.vid;$('transactionKeepOpen').checked=!!o&&FB.orderIsPending(o);}
     $('transactionQtyLabel').textContent=receipt?'입고 수량':'수량';
     $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
     $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
@@ -88,7 +86,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
   };
   $('closeTransaction').onclick=$('cancelTransaction').onclick=()=>$('transactionDialog').close();
   $('transactionForm').onsubmit=e=>{e.preventDefault();try{
-    FB.updateMaterialTransaction({index:transactionIndex,revision:transactionRevision,vid:$('transactionReceiptVersion').value,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
+    FB.updateMaterialTransaction({keepOpen:$('transactionKeepOpen').checked,index:transactionIndex,revision:transactionRevision,vid:$('transactionReceiptVersion').value,qty:Number($('transactionQty').value),defective:Number($('transactionDefective').value),date:$('transactionDate').value,person:$('transactionPerson').value,note:$('transactionNote').value});
     $('transactionDialog').close();UI.toast('기록과 재고를 수정했습니다.');
   }catch(err){$('transactionError').textContent=err.message;}};
   CatalogEditor.bind({kind:'material',selected:()=>material(selected),saved:id=>{$('purchaseSearch').value='';$('purchaseCategory').value='';category='';$('purchaseArchived').checked=!!material(id)?.archived;selected=id;render();}});

@@ -2,7 +2,7 @@
 (()=>{
 const {$,esc,fmt}=UI;if(!FB.user()){location.replace('../login/index.html');return;}
 let selected=new URLSearchParams(location.search).get('supplier')||'',editing='';
-const state=o=>o.closed?'잔량 마감':o.received>=o.qty?'입고 완료':o.received?'부분 입고':'입고 전';
+const state=o=>!FB.orderIsPending(o)?'처리 완료':o.manualPending===true||o.received?'입고중':'입고 전';
 function render(){
  $('newSupplier').hidden=false;$('newSupplier').disabled=!FB.canAdmin();$('newSupplier').title=FB.canAdmin()?'':'발주팀 권한이 필요합니다.';
  const q=$('supplierSearch').value.trim().toLowerCase(),items=FB.data.suppliers.filter(s=>(!s.archived||$('showArchived').checked)&&(!q||(s.name+' '+s.contact+' '+(s.businessNumber||'')+' '+(s.representative||'')).toLowerCase().includes(q)));

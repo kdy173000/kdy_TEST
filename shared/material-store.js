@@ -98,10 +98,12 @@ d.orders.push({id,batch,deliveryAddress,spec,unitPrice,supplyAmount,taxAmount,ta
 return ids;
 });}
 function createOrder(input){return createOrders([input])[0];}
+function orderIsPending(o){return !o.closed&&(o.manualPending===true||(o.manualPending===undefined&&o.received<o.qty));}
+function setOrderPending(d,o,keepOpen){if(typeof keepOpen!=='boolean')return;const before={closed:!!o.closed,manualPending:o.manualPending};o.closed=!keepOpen;o.manualPending=keepOpen;d.orderStateEdits=d.orderStateEdits||[];d.orderStateEdits.push({id:o.id,date:day(),person:user()?.name||'',before,after:{closed:o.closed,manualPending:o.manualPending}});}
 function receiveOrder(input){return mutate(d=>{
 const order=d.orders.find(o=>o.id===input.id);
-if(!order||order.closed||order.received>=order.qty)throw Error('입고 가능한 발주가 아닙니다.');
-const delivered=integer(Number(input.qty),0),defective=integer(Number(input.defective||0),0),finish=input.finish===true;
+if(!order||!orderIsPending(order))throw Error('입고 가능한 발주가 아닙니다.');
+const delivered=integer(Number(input.qty),0),defective=integer(Number(input.defective||0),0),finish=input.keepOpen!==true&&input.finish!==false;
 if(defective>delivered)throw Error('불량 수량은 이번에 받은 전체 수량보다 많을 수 없습니다.');
 if(!delivered&&!finish)throw Error('이번에 받은 수량을 입력하거나 남은 수량 취소를 선택하세요.');
 if(input.vid&&input.vid!==order.vid)throw Error('발주한 버전으로만 입고할 수 있습니다.');
@@ -113,6 +115,7 @@ order.delivered=(order.delivered??prior)+delivered;order.defective=(order.defect
 if(!Number.isSafeInteger(order.delivered)||!Number.isSafeInteger(order.defective))throw Error('수량이 너무 큽니다.');
 order.receipts=order.receipts||[];order.receipts.push({vid:v.id,orderedVid:order.vid,date,person,delivered,defective,good,note,finish});
 if(delivered)transaction(d,{mid:m.id,vid:v.id,qty:good,type:good?'입고':'불량 입고',date,person,note:order.id+' · 전체 '+delivered+'개 / 정상 '+good+'개 / 불량 '+defective+'개'+(note?' · '+note:''),order:order.id,orderedVid:order.vid,delivered,defective,receiptIndex:order.receipts.length-1});
+setOrderPending(d,order,!finish);
 if(finish){order.closed=true;order.closedDate=date;order.closedPerson=person;order.closeNote=note;}
 });}
 function changeMaterialTransaction(input,remove=false){return mutate(d=>{
@@ -130,6 +133,7 @@ const oldSigned=out?-oldGood:oldGood,newSigned=remove?0:(out?-good:good),next=v.
 if(!Number.isSafeInteger(next)||next<0)throw Error('이미 사용된 재고가 있어 이 수량으로 수정하거나 삭제할 수 없습니다.');
 if(targetVersion!==v){const targetQty=targetVersion.qty+newSigned;if(!Number.isSafeInteger(targetQty)||targetQty<0)throw Error('입고 버전의 재고를 확인하세요.');targetVersion.qty=targetQty;}v.qty=next;
 if(o){
+if(!remove)setOrderPending(d,o,input.keepOpen);
 const nextReceived=o.received-oldGood+good;if(!Number.isSafeInteger(nextReceived)||nextReceived<0)throw Error('발주 입고 수량을 확인하세요.');
 o.delivered=integer((o.delivered??o.received)-oldDelivered+delivered,0);o.defective=integer((o.defective||0)-oldBad+bad,0);o.received=nextReceived;
 let receiptIndex=Number.isInteger(t.receiptIndex)?t.receiptIndex:(o.receipts||[]).findIndex(r=>!r.deleted&&r.good===oldGood&&r.delivered===oldDelivered&&r.defective===oldBad&&r.date===t.date&&r.person===t.person);
@@ -149,7 +153,7 @@ function updateOrder(input){return mutate(d=>{
  if(changed&&hasReceipts)throw Error('입고 기록이 있는 발주의 제품·버전은 변경할 수 없습니다. 입고 내역을 먼저 확인하세요.');
  if(changed){usable(m,v);if(m.deleted||v.deleted)throw Error('삭제된 제품·버전은 선택할 수 없습니다.');}
  const qty=integer(Number(input.qty));if(qty<o.received)throw Error('발주 수량은 이미 정상 입고한 '+o.received+'개보다 적을 수 없습니다.');
- if(o.closed&&qty!==o.qty)throw Error('잔량 마감된 발주의 수량은 변경할 수 없습니다.');
+ 
  const supplier=d.suppliers.find(s=>s.id===input.supplierId);if(!supplier||(supplier.archived&&supplier.id!==o.supplierId))throw Error('등록된 사용 중인 업체를 선택하세요.');
  const date=required(input.date,'발주 날짜'),due=String(input.due||'');
  for(const value of [date,due].filter(Boolean))if(!/^\d{4}-\d{2}-\d{2}$/.test(value)||Number.isNaN(Date.parse(value))||new Date(value).toISOString().slice(0,10)!==value)throw Error('올바른 날짜를 입력하세요.');
@@ -160,10 +164,11 @@ function updateOrder(input){return mutate(d=>{
  else if(o.unitPrice!==null&&o.unitPrice!==undefined)throw Error('단가를 입력하세요.');
  const personPhone=String(input.personPhone===undefined?(o.personPhone||''):input.personPhone).trim();if(personPhone.length>40)throw Error('담당자 전화번호는 40자 이내로 입력하세요.');
  const before=structuredClone(o);
+ setOrderPending(d,o,input.keepOpen);
  Object.assign(o,{mid:m.id,vid:v.id,name:m.name,qty,supplierId:supplier.id,supplier:supplier.name,date,due,spec,note,deliveryAddress,person,personPhone,unitPrice,supplyAmount,taxAmount,taxRate:0.1});
  d.orderEdits=d.orderEdits||[];d.orderEdits.push({id:o.id,date:day(),person:user()?.name||'',before,after:structuredClone(o)});
 });}
-function updateOrderDue(input){return mutate(d=>{const o=d.orders.find(o=>o.id===input.id);if(!o||o.closed||o.received>=o.qty)throw Error('입고 대기 발주만 예정일을 수정할 수 있습니다.');const due=String(input.due||'');if(due&&(!/^\d{4}-\d{2}-\d{2}$/.test(due)||Number.isNaN(Date.parse(due))||new Date(due).toISOString().slice(0,10)!==due))throw Error('올바른 입고 예정일을 입력하세요.');o.due=due;});}
+function updateOrderDue(input){return mutate(d=>{const o=d.orders.find(o=>o.id===input.id);if(!o||!orderIsPending(o))throw Error('입고 대기 발주만 예정일을 수정할 수 있습니다.');const due=String(input.due||'');if(due&&(!/^\d{4}-\d{2}-\d{2}$/.test(due)||Number.isNaN(Date.parse(due))||new Date(due).toISOString().slice(0,10)!==due))throw Error('올바른 입고 예정일을 입력하세요.');o.due=due;});}
 function closeOrder(id){return mutate(d=>{const o=d.orders.find(o=>o.id===id);if(!o||o.closed||o.received===o.qty)throw Error('마감 가능한 미입고 발주가 없습니다.');o.closed=true;});}
 function saveProduct(input){admin();return mutate(d=>{const name=required(input.name,'완제품명'),family=Number(input.family),category=input.category||'파이어볼';if(!d.productCategories.includes(category))throw Error('완제품 분류를 확인하세요.');if(name.length>80)throw Error('완제품명은 80자 이내로 입력하세요.');if(!Number.isInteger(family)||family<0||family>=families.length)throw Error('포장 유형을 확인하세요.');if(d.products.some(p=>p.id!==input.id&&p.name===name))throw Error('같은 이름의 완제품이 있습니다.');if(input.id){const p=d.products.find(p=>p.id===input.id);if(!p)throw Error('완제품을 찾을 수 없습니다.');Object.assign(p,{name,family,category,sample:input.sample===true});return p.id;}const id='PROD-'+String(d.products.length+1).padStart(4,'0');d.products.push({id,name,family,category,sample:input.sample===true,archived:false,finished:0,versions:[{id:'V01',qty:0,state:'사용',bomIndex:0}],boms:[{name:'BOM 01',locked:false,rows:[]}]});return id;});}
 function deleteProduct(id){return mutate(d=>{
@@ -188,7 +193,7 @@ function manageVersion(input){return mutate(d=>{
 const product=input.kind==='product',entity=(product?d.products:d.materials).find(x=>x.id===input.id);if(!entity)throw Error('항목을 찾을 수 없습니다.');const v=version(entity,input.vid);if(v.deleted)throw Error('삭제된 버전입니다.');
 if(input.remove){
 if(v.qty!==0)throw Error('재고가 0개인 버전만 삭제할 수 있습니다.');
-if(!product&&d.orders.some(o=>o.mid===entity.id&&o.vid===v.id&&!o.closed&&o.received<o.qty))throw Error('입고 대기 발주가 있는 버전입니다. 입고를 먼저 처리하세요.');
+if(!product&&d.orders.some(o=>o.mid===entity.id&&o.vid===v.id&&orderIsPending(o)))throw Error('입고 대기 발주가 있는 버전입니다. 입고를 먼저 처리하세요.');
 if(!product&&d.products.some(p=>p.boms.some(b=>!b.locked&&b.rows.some(r=>r.mid===entity.id&&r.vid===v.id))))throw Error('현재 BOM에 연결된 버전입니다. BOM을 다른 버전으로 변경한 뒤 삭제하세요.');
 v.deleted=true;v.state='중단';return;}
 const name=required(input.name,'버전명');if(name.length>20||entity.versions.some(x=>x!==v&&x.id.toLowerCase()===name.toLowerCase()))throw Error('20자 이내의 중복되지 않는 버전명을 입력하세요.');
@@ -206,5 +211,5 @@ d.versionEdits=d.versionEdits||[];d.versionEdits.push({kind:input.kind,id:entity
 const slots=['캡','용기','스웨이드','어플리케이터','전면 라벨','후면 라벨','속지','케이스'];
 const families=['유리막 50ml','유리막 105ml','뿌리막 200ml','뿌리막 100ml','케미컬 500ml','케미컬 4L'];
 window.addEventListener('storage',e=>{if(e.key===KEY){state=read();window.dispatchEvent(new Event('fb-data'));}});
-return {get data(){return state;},slots,families,day,user,versionStatus,canAdmin,canShip,canPhoto,productBomIndex,defaultDeliveryAddress:DEFAULT_DELIVERY_ADDRESS,saveDeliveryAddress,removeDeliveryAddress,saveSupplier,toggleSupplier,createOrders,addProductCategory,saveProduct,deleteProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
+return {get data(){return state;},slots,families,day,user,versionStatus,canAdmin,canShip,canPhoto,productBomIndex,orderIsPending,defaultDeliveryAddress:DEFAULT_DELIVERY_ADDRESS,saveDeliveryAddress,removeDeliveryAddress,saveSupplier,toggleSupplier,createOrders,addProductCategory,saveProduct,deleteProduct,toggleProduct,addProductVersion,shipProduct,manageVersion,saveMaterial,deleteMaterial,toggleMaterial,addVersion,toggleVersion,stockMovement,updateMaterialTransaction,deleteMaterialTransaction,createOrder,receiveOrder,updateOrder,updateOrderDue,closeOrder,copyBom,updateBom,addBomRow,removeBomRow,requirements:(pid,index,q)=>requirements(state,pid,index,q),produce,cancelProduction};
 })();

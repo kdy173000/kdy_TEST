@@ -6,14 +6,13 @@ let draft=[],visible=[],selected=new Set(),deliveryPlaceId='fireball';
 const materials=()=>FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.versions.some(v=>!v.deleted&&v.state==='사용'));
 const suppliers=()=>FB.data.suppliers.filter(s=>!s.archived);
 const supplierName=o=>FB.data.suppliers.find(s=>s.id===o.supplierId)?.name||o.supplier;
-const status=o=>o.closed?'closed':o.received>=o.qty?'done':o.received?'partial':'pending';
-const statusLabel=o=>({closed:'잔량 마감',done:'입고 완료',partial:'부분 입고',pending:'입고 전'})[status(o)];
+const status=o=>!FB.orderIsPending(o)?'done':o.manualPending===true||o.received?'partial':'pending';
+const statusLabel=o=>({closed:'처리 완료',done:'처리 완료',partial:'입고중',pending:'입고 전'})[status(o)];
 function receivedOn(order,date){
  if(!date)return true;
  if((order.receipts||[]).some(r=>!r.deleted&&r.date===date&&(r.delivered??r.good??0)>0))return true;
  return FB.data.transactions.some(t=>t.order===order.id&&t.date===date&&['입고','불량 입고'].includes(t.type)&&(t.delivered??t.qty??0)>0);
 }
-const remaining=o=>o.closed?0:Math.max(0,o.qty-o.received);
 function renderDraft(){
  $('draftRows').innerHTML=draft.map((r,i)=>'<tr data-row="'+i+'"><td><input data-field="date" type="date" required value="'+esc(r.date)+'"></td><td>'+SearchPicker.markup(materials().find(m=>m.id===r.mid)?materials().find(m=>m.id===r.mid).name+' · '+r.mid:'','제품명')+'</td><td><select data-field="vid" aria-label="버전" required>'+UI.options((FB.data.materials.find(m=>m.id===r.mid)?.versions||[]).filter(v=>!v.deleted&&v.state==='사용').map(v=>[v.id,v.id+' · '+(v.market||'공용 사용')]),r.vid)+'</select></td><td><input data-field="spec" aria-label="규격" maxlength="80" placeholder="예: 44.5 × 49.5 mm" required value="'+esc(r.spec)+'"></td><td><input data-field="qty" aria-label="발주 수량" type="number" min="1" step="1" required value="'+esc(r.qty)+'"></td><td><input data-field="unitPrice" aria-label="단가 원 부가세 별도" type="number" min="0" step="1" required value="'+esc(r.unitPrice)+'"></td><td>'+SearchPicker.markup(suppliers().find(s=>s.id===r.supplierId)?.name||'','업체')+'</td><td><input data-field="note" aria-label="메모" maxlength="200" value="'+esc(r.note)+'"></td><td><button type="button" data-remove="'+i+'">삭제</button></td></tr>').join('');
  document.querySelectorAll('#draftRows tr').forEach(row=>{
@@ -54,7 +53,7 @@ function render(){
  const q=$('orderSearch').value.trim().toLowerCase(),supplier=$('supplierFilter').value,state=$('statusFilter').value,orderDate=$('orderDateFilter').value,receiptDate=$('receiptDateFilter').value;
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!orderDate||o.date===orderDate)&&receivedOn(o,receiptDate)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
- $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+' / '+fmt(remaining(o))+'개</td><td class="order-receipt-cell">'+(o.closed||o.received>=o.qty?'<span class="receipt-control page-note">처리 완료</span>':'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>입고 완료</button>')+'</td><td class="order-edit-cell">'+('<button type="button" data-edit-order="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>수정</button>')+'</td></tr>').join('')||'<tr><td colspan="12" class="empty">발주 내역이 없습니다.</td></tr>';
+ $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+'개</td><td class="order-receipt-cell">'+(!FB.orderIsPending(o)?'<span class="receipt-control page-note">처리 완료</span>':'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>입고 완료</button>')+'</td><td class="order-edit-cell">'+('<button type="button" data-edit-order="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>수정</button>')+'</td></tr>').join('')||'<tr><td colspan="12" class="empty">발주 내역이 없습니다.</td></tr>';
  const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!FB.canAdmin()||!selected.size;$('previewSelected').title=FB.canAdmin()?(selected.size?'':'인쇄할 발주를 선택하세요.'):'발주팀 권한이 필요합니다.';
 }
 let editingOrder=null,editingRevision=0,editingMid='',editingSupplier='';
@@ -66,7 +65,7 @@ $('orderRows').addEventListener('click',e=>{
  const received=FB.data.transactions.some(t=>t.order===o.id)||(o.receipts||[]).some(r=>!r.deleted);
  $('editOrderName').textContent=o.id+' · '+o.name;
  for(const [id,key] of [['editOrderDate','date'],['editOrderDue','due'],['editOrderSpec','spec'],['editOrderQty','qty'],['editOrderPrice','unitPrice'],['editOrderPerson','person'],['editOrderPhone','personPhone'],['editOrderNote','note'],['editOrderAddress','deliveryAddress']])$(id).value=o[key]??'';
- $('editOrderQty').min=Math.max(1,o.received);$('editOrderQty').readOnly=!!o.closed;
+ $('editOrderQty').min=Math.max(1,o.received);$('editOrderQty').readOnly=false;$('editOrderKeepOpen').checked=FB.orderIsPending(o);
  $('editOrderMaterial').innerHTML=SearchPicker.markup(o.name,'제품명');
  const materialPicker=$('editOrderMaterial').querySelector('.search-picker');
  if(received){materialPicker.querySelectorAll('input,button').forEach(el=>el.disabled=true);}else SearchPicker.bind(materialPicker,FB.data.materials.filter(m=>m.id===o.mid||(!m.deleted&&!m.archived)).map(m=>({id:m.id,label:m.name+' · '+m.id})),id=>{editingMid=id;editVersions('');});
@@ -80,7 +79,7 @@ $('closeOrderEdit').onclick=$('cancelOrderEdit').onclick=()=>$('orderEditDialog'
 $('orderEditForm').onsubmit=e=>{
  e.preventDefault();if(!UI.allowWrite())return;
  const button=$('saveOrderEdit');button.disabled=true;
- try{FB.updateOrder({id:editingOrder.id,revision:editingRevision,mid:editingMid,vid:$('editOrderVersion').value,supplierId:editingSupplier,date:$('editOrderDate').value,due:$('editOrderDue').value,spec:$('editOrderSpec').value,qty:Number($('editOrderQty').value),unitPrice:$('editOrderPrice').value,person:$('editOrderPerson').value,personPhone:$('editOrderPhone').value,note:$('editOrderNote').value,deliveryAddress:$('editOrderAddress').value});$('orderEditDialog').close();UI.toast('발주 정보를 수정했습니다.');}catch(err){$('orderEditError').textContent=err.message;}finally{button.disabled=false;}
+ try{FB.updateOrder({keepOpen:$('editOrderKeepOpen').checked,id:editingOrder.id,revision:editingRevision,mid:editingMid,vid:$('editOrderVersion').value,supplierId:editingSupplier,date:$('editOrderDate').value,due:$('editOrderDue').value,spec:$('editOrderSpec').value,qty:Number($('editOrderQty').value),unitPrice:$('editOrderPrice').value,person:$('editOrderPerson').value,personPhone:$('editOrderPhone').value,note:$('editOrderNote').value,deliveryAddress:$('editOrderAddress').value});$('orderEditDialog').close();UI.toast('발주 정보를 수정했습니다.');}catch(err){$('orderEditError').textContent=err.message;}finally{button.disabled=false;}
 };
 $('startOrder').onclick=()=>start();
 $('addRow').onclick=()=>{if(UI.allowWrite())addRow();};
