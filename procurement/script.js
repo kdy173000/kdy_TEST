@@ -42,8 +42,8 @@
     $('stockVersions').innerHTML=UI.versionCards('material',m,{hideStopped:$('hideStoppedVersions').checked,pending});
     $('stockHistory').innerHTML=FB.data.transactions.map((t,index)=>({t,index})).filter(r=>{const t=r.t,type=$('historyType').value,q=$('historySearch').value.trim().toLowerCase();return t.mid===id&&(!type||(type==='입고'?['입고','불량 입고'].includes(t.type):type==='생산'?!!t.production:UI.minus(t.type)&&!t.production))&&[t.vid,t.person,t.note,t.date,transactionSupplier(t)].join(' ').toLowerCase().includes(q);}).reverse().map(({t,index})=>{
 const editable=!t.production&&!t.pid&&['입고','불량 입고','출고','재고 조정'].includes(t.type);
-return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionSupplier(t))||'—'}</td><td>${esc(t.vid)}</td><td class="num">${t.order&&FB.data.orders.find(o=>o.id===t.order)?fmt(FB.data.orders.find(o=>o.id===t.order).qty)+'개':'—'}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>수정</button><button class="delete-button" data-delete-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
-}).join('')||'<tr><td colspan="9" class="empty">조건에 맞는 내역이 없습니다.</td></tr>';}
+return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionSupplier(t))||'—'}</td><td>${esc(t.vid)}</td><td class="num">${UI.minus(t.type)?'−':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td><td>${editable?`<div class="history-actions"><button data-edit-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>수정</button><button class="delete-button" data-delete-transaction="${index}" ${FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."'}>삭제</button></div>`:`<small>${t.production?'생산 내역에서 관리':'조회 전용'}</small>`}</td></tr>`;
+}).join('')||'<tr><td colspan="8" class="empty">조건에 맞는 내역이 없습니다.</td></tr>';}
   $('purchaseCategory').innerHTML=UI.options([['','전체 구성품'],...['캡','용기','스웨이드','어플리케이터','라벨','속지','케이스'].map(s=>[s,s])],'');
   $('purchaseCategory').onchange=()=>{category=$('purchaseCategory').value;render();};$('purchaseSearch').oninput=render;$('purchaseArchived').onchange=render;
   $('purchaseMaterials').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
@@ -57,7 +57,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     const t=FB.data.transactions[transactionIndex],o=FB.data.orders.find(o=>o.id===t?.order);if(!o)return;
     const actual=Number($('transactionQty').value),bad=Number($('transactionDefective').value),good=Math.max(0,actual-bad);
     const otherGood=o.received-t.qty,otherDelivered=(o.delivered??o.received)-(t.delivered??t.qty+(t.defective||0));
-    $('transactionOrdered').textContent=fmt(o.qty)+'개';$('transactionReceived').textContent=fmt(otherGood)+'개';
+    $('transactionOrdered').value=o.qty;
     $('transactionRemaining').value=Math.max(0,o.qty-otherDelivered-actual);
     $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'정상 입고 '+fmt(good)+'개 · 추가 정상 입고 필요 '+fmt(Math.max(0,o.qty-otherGood-good))+'개'+(otherGood+good>o.qty?' · 초과 정상 입고 '+fmt(otherGood+good-o.qty)+'개':'');
   }
