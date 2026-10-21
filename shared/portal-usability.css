@@ -96,3 +96,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .portal-with-nav button:is(.management-button,[data-write-action],[data-shipping-action],[data-version-workflow="ship"],#newSupplier,#editSupplier,#archiveSupplier,#supplierForm [type="submit"],#addRow,[data-remove],[data-photo-choose],[data-photo-remove],[data-catalog-action],[data-version-edit],[data-version-delete],[data-edit-product],[data-edit-transaction],[data-delete-transaction],[data-catalog-version],[data-cancel],#toggleBomEdit,#copyBom,#bomAddRow,[data-remove-row],#archiveProduct,#archiveMaterial,#startOrder,#saveOrders,#previewSelected,#previewDraft,#previewSave,#previewPrint,#confirmPreviewSave,#saveOrderEdit,[data-edit-order],[data-receive-order],[data-receive],#confirmCloseOrder,[form="productionForm"],#productForm [type="submit"],#materialForm [type="submit"],#categoryForm [type="submit"],#productVersionForm [type="submit"],#addVersionForm [type="submit"],#transactionForm [type="submit"],#purchaseForm [type="submit"]):hover:not(:disabled){background:#52637A;border-color:#52637A;color:#fff}
 
 .manual-receipt-status{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.6;margin:12px 0}.manual-receipt-status input{width:16px;height:16px;margin:0;flex:0 0 auto;accent-color:#62738b}
+
+/* Compact controls for adding catalog classifications. */
+.portal-with-nav #catalogDialog .catalog-classification-form{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 10px;margin-top:12px}
+#catalogDialog .catalog-classification-form>.field{flex:1 1 180px;min-width:0}
+#catalogDialog .catalog-classification-form>button{flex:0 0 auto;align-self:flex-end;justify-self:start;width:auto;min-height:34px;padding:6px 11px;font-size:12px;line-height:1.5;white-space:nowrap}
+#catalogDialog .catalog-classification-form>[role="alert"]{flex-basis:100%;margin:0}
+
+.catalog-classification-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;max-height:160px;overflow:auto}
+.catalog-classification-item{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 9px;border:1px solid var(--border,#e4e7eb);border-radius:7px;font-size:12px}
+#catalogDialog .catalog-classification-item>button{width:auto;min-height:26px;padding:3px 7px;font-size:11px;line-height:1.5}
