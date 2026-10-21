@@ -3,6 +3,15 @@
 (()=>{
   const {$,esc,fmt}=UI;let category='',target='',selected=new URLSearchParams(location.search).get('material')||'cap';
   const material=id=>FB.data.materials.find(m=>m.id===id);
+  function receiptMemo(t,order){
+    if(!order)return t.note||'';
+    const receipt=order.receipts?.[t.receiptIndex]||(order.receipts||[]).find(r=>!r.deleted&&r.date===t.date&&r.person===t.person&&r.good===t.qty&&r.delivered===(t.delivered??t.qty+(t.defective||0))&&r.defective===(t.defective||0));
+    if(typeof receipt?.note==='string')return receipt.note;
+    const note=String(t.note||''),prefix=order.id+' · ';
+    if(!note.startsWith(prefix))return note;
+    const summary=note.slice(prefix.length).match(/^전체 \d+개 \/ 정상 \d+개 \/ 불량 \d+개(?: · ([\s\S]*))?$/);
+    return summary?(summary[1]||''):note;
+  }
   function transactionSupplier(t){const order=t.order?FB.data.orders.find(o=>o.id===t.order):null;return t.supplier||order?.supplier||FB.data.suppliers.find(s=>s.id===(t.supplierId||order?.supplierId))?.name||'';}
   function filtered(){const q=$('purchaseSearch').value.toLowerCase();return FB.data.materials.filter(m=>!m.deleted&&(!m.archived||$('purchaseArchived').checked)&&(!category||(category==='라벨'?['전면 라벨','후면 라벨'].includes(m.slot):m.slot===category))&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q)));}
   function render(){
@@ -57,7 +66,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     const t=FB.data.transactions[transactionIndex],o=FB.data.orders.find(o=>o.id===t?.order);if(!o)return;
     const actual=Number($('transactionQty').value),bad=Number($('transactionDefective').value),good=Math.max(0,actual-bad);
     $('transactionOrdered').value=o.qty;
-    $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'이번 정상 입고 '+fmt(good)+'개 · 발주 상태는 '+($('transactionKeepOpen').checked?'입고중':'처리 완료');
+    $('transactionReceiptSummary').textContent=bad>actual?'불량 수량은 입고 수량을 넘을 수 없습니다.':'요약 · 정상 입고 '+fmt(good)+'개 · 발주 상태 '+($('transactionKeepOpen').checked?'입고중':'처리 완료');
   }
   $('transactionKeepOpen').onchange=previewTransactionReceipt;$('transactionQty').oninput=previewTransactionReceipt;$('transactionDefective').oninput=previewTransactionReceipt;
   $('historyType').onchange=()=>selected&&detail(selected);$('historySearch').oninput=()=>selected&&detail(selected);
@@ -77,12 +86,12 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     $('transactionDialog').classList.toggle('receipt-dialog',receipt);$('transactionForm').classList.toggle('receipt-fields',receipt);
     $('transactionQuantities').className=receipt?'receipt-quantities receipt-wide':'';
     for(const id of ['transactionOrderStats','transactionQtyHelp','transactionKeepOpenField','transactionReceiptSummary','transactionReceiptVersionField'])$(id).hidden=!receipt;
-    $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고':'사유 · 비고';
+    $('transactionDateLabel').textContent=receipt?'입고 · 처리 날짜':'날짜';$('transactionNoteLabel').textContent=receipt?'비고 · 직접 입력':'사유 · 비고';$('transactionNote').placeholder=receipt?'예: 불량 5개는 다음 배송에 교환 예정':'차감 사유나 참고 내용을 입력하세요.';
     if(receipt){const o=FB.data.orders.find(o=>o.id===t.order);$('transactionReceiptVersion').value=o?.vid||t.vid;$('transactionKeepOpen').checked=!!o&&FB.orderIsPending(o);}
     $('transactionQtyLabel').textContent=receipt?'입고 수량':'수량';
     $('transactionQty').min=t.order?'0':'1';$('transactionQty').value=t.order?(t.delivered??t.qty+(t.defective||0)):t.qty;
     $('transactionDefectField').hidden=!t.order;$('transactionDefective').value=t.defective||0;
-    $('transactionDate').value=t.date;$('transactionPerson').value=t.person;const order=t.order?FB.data.orders.find(o=>o.id===t.order):null,receiptNote=order?.receipts?.[t.receiptIndex]?.note;$('transactionNote').value=receiptNote??t.note??'';$('transactionError').textContent='';previewTransactionReceipt();$('transactionDialog').showModal();
+    $('transactionDate').value=t.date;$('transactionPerson').value=t.person;const order=t.order?FB.data.orders.find(o=>o.id===t.order):null;$('transactionNote').value=receiptMemo(t,order);$('transactionError').textContent='';previewTransactionReceipt();$('transactionDialog').showModal();
   };
   $('closeTransaction').onclick=$('cancelTransaction').onclick=()=>$('transactionDialog').close();
   $('transactionForm').onsubmit=e=>{e.preventDefault();try{
