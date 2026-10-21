@@ -13,12 +13,12 @@
     const productions=FB.data.productions.filter(x=>x.pid===p.id),shipments=FB.data.transactions.filter(t=>t.pid===p.id&&t.type==='완제품 출고');
     $('available').textContent=fmt(productions.filter(x=>!x.cancelled).reduce((n,x)=>n+x.q,0))+'개';$('versionCount').textContent=fmt(shipments.reduce((n,x)=>n+x.qty,0))+'개';
     const rows=[...productions.map(x=>({date:x.date,type:x.cancelled?'생산 취소':'생산 완료',vid:(x.vid||'V01')+' · '+x.lot,qty:x.q,person:x.person,note:x.id+' · '+(x.note||'')})),...shipments].sort((a,b)=>a.date.localeCompare(b.date));
-    $('history').innerHTML=rows.filter(t=>(!$('historyType').value||t.type===$('historyType').value)&&[t.vid,t.person,t.note,t.date].join(' ').toLowerCase().includes($('historySearch').value.trim().toLowerCase())).reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td><td class="num">${t.type==='완제품 출고'?'−':t.type==='생산 취소'?'':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">생산·출고 기록이 없습니다.</td></tr>';
+    $('history').innerHTML=rows.filter(t=>(!$('historyType').value||t.type===$('historyType').value)).reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(t.vid)}</td><td class="num">${t.type==='완제품 출고'?'−':t.type==='생산 취소'?'':'＋'}${fmt(t.qty)}</td><td>${esc(t.person)}</td><td>${esc(t.note)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">생산·출고 기록이 없습니다.</td></tr>';
     $('productPhoto').innerHTML=Photos.markup('product',p.id,p.name,'summary');Photos.refresh();
     UI.applyAccess();$('addProductVersion').disabled=!FB.canAdmin()||!!p.archived;
   }
   function openOut(vid){if(!UI.allowShipping())return;const p=selected();$('outProduct').textContent=p.name+' · '+vid;$('outVersion').innerHTML=UI.options(p.versions.filter(v=>!v.deleted&&v.state==='사용'&&v.id===vid).map(v=>[v.id,v.id+' · '+fmt(v.qty)+'개']),vid);$('outVersion').disabled=true;$('outQty').value='';$('outNote').value='';$('outDate').value=FB.day();$('outPerson').value=FB.user()?.name||'';$('outError').textContent='';$('outDialog').showModal();}
-  $('historyType').onchange=render;$('historySearch').oninput=render;$('resetCatalog').onclick=()=>{$('search').value='';$('categoryFilter').value='';$('inventoryArchived').checked=false;render();};
+  $('historyType').onchange=render;$('resetCatalog').onclick=()=>{$('search').value='';$('categoryFilter').value='';$('inventoryArchived').checked=false;render();};
   $('inventoryArchived').onchange=render;$('search').oninput=render;$('categoryFilter').onchange=render;
   $('products').onclick=e=>{const edit=e.target.closest('[data-edit-product]');if(edit){if(!UI.allowWrite())return;selectedId=edit.dataset.editProduct;render();CatalogEditor.open(selectedId);return;}const b=e.target.closest('[data-material]');if(b){selectedId=b.dataset.material;render();}};
   $('closeOut').onclick=()=>$('outDialog').close();
