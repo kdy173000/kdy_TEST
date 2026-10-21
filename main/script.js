@@ -30,7 +30,7 @@ const ALL_TZ = [
   {v:'America/New_York',l:'미국 / 뉴욕'},
   {v:'America/Chicago', l:'미국 / 시카고'},
   {v:'America/Denver',  l:'미국 / 덴버'},
-  {v:'America/Los_Angeles',l:'미국 / 로스앤젤레스'},
+  {v:'America/Los_Angeles',l:'미국 / LA (로스앤젤레스)'},
   {v:'America/Toronto', l:'캐나다 / 토론토'},
   {v:'America/Puerto_Rico',l:'푸에르토리코'},
   {v:'America/Sao_Paulo',l:'브라질 / 상파울루'},
