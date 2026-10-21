@@ -67,7 +67,7 @@ return `<tr><td>${esc(t.date)}</td><td>${esc(t.type)}</td><td>${esc(transactionS
     const index=Number(button.dataset.editTransaction??button.dataset.deleteTransaction),t=FB.data.transactions[index];if(!t)return;
     if(button.dataset.deleteTransaction!==undefined){
       const revision=FB.data.revision;
-      if(!confirm(t.date+' · '+t.type+' '+fmt(t.qty)+'개 기록을 삭제할까요?\n이 기록의 재고 반영을 되돌리고, 연결 발주 수량도 수정합니다.'))return;
+      if(!confirm('정말 삭제하시겠습니까?\n\n'+t.date+' · '+t.type+' · '+fmt(t.qty)+'개\n이 기록의 재고 반영을 되돌리고, 연결 발주 수량도 수정합니다.'))return;
       try{FB.deleteMaterialTransaction({index,revision});UI.toast('기록을 삭제하고 재고를 다시 계산했습니다.');}catch(err){UI.toast(err.message);}return;
     }
     transactionIndex=index;transactionRevision=FB.data.revision;
