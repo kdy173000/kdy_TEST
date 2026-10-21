@@ -38,7 +38,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:800px){.section-toolbar{align-items:flex-start;flex-direction:column;gap:10px}.history-filters{width:100%}.history-filters input{flex:1;min-width:120px}.dialog-grid{grid-template-columns:1fr}.home-shortcuts a{flex:1;text-align:center}.portal-with-nav .detail td{padding:12px 8px}}
 
 /* Editors opened from the selected stock item. */
-#newCatalogItem{margin:12px 0 4px;width:100%}
+.workspace .listhead{gap:10px;flex-wrap:wrap;padding:0}
+.catalog-list-title{display:flex;align-items:center;gap:8px;min-width:0}
+#newCatalogItem{flex:0 0 auto;margin:0 0 0 auto;width:auto;min-height:32px;padding:5px 9px;font-size:12px;line-height:1.5;white-space:nowrap}
 #catalogDialog .field{margin:0;min-width:0}
 #catalogDialog .workflow-guide{margin:20px 0 0}
 #catalogDialog h3{margin:22px 0 12px}
