@@ -1,6 +1,7 @@
 'use strict';
 (()=>{
 const {$,esc,fmt}=UI;if(!FB.user()){location.replace('../login/index.html');return;}
+const orderLink=document.querySelector('a[href="../orders/index.html"]');if(orderLink&&!window.OrderAccess?.canManageOrders()){const disabled=document.createElement('button');disabled.type='button';disabled.className='plain-link';disabled.textContent=orderLink.textContent;disabled.disabled=true;disabled.title='발주팀 권한이 필요합니다.';disabled.setAttribute('aria-disabled','true');orderLink.replaceWith(disabled);}
 let selected=new URLSearchParams(location.search).get('supplier')||'',editing='';
 const state=o=>!FB.orderIsPending(o)?'처리 완료':o.manualPending===true||o.received?'입고중':'입고 전';
 function render(){

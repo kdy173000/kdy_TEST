@@ -2,6 +2,7 @@
 (()=>{
 const {$,esc,fmt}=UI;
 if(!FB.user()){location.replace('../login/index.html');return;}
+if(!FB.canAdmin()){location.replace('../main/index.html?access=orders');return;}
 let draft=[],visible=[],selected=new Set(),deliveryPlaceId='fireball';
 const materials=()=>FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.versions.some(v=>!v.deleted&&v.state==='사용'));
 const suppliers=()=>FB.data.suppliers.filter(s=>!s.archived);
