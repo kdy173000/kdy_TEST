@@ -8,12 +8,12 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=home-dashboard127">
+<link rel="stylesheet" href="style.css?v=home-favorites128">
 
 <script defer src="../shared/notices.js?v=notices36"></script>
-<script defer src="script.js?v=home-dashboard127"></script>
+<script defer src="script.js?v=home-favorites128"></script>
 <link rel="stylesheet" href="../shared/portal-nav.css?v=product-families123">
-<script defer src="../shared/order-access.js?v=order-access126"></script><script defer src="../shared/portal-nav.js?v=order-access126"></script>
+<script defer src="../shared/order-access.js?v=order-access126"></script><script defer src="../shared/portal-nav.js?v=home-favorites128"></script>
 <link rel="stylesheet" href="../shared/searchable-select.css?v=search-all93"><script defer src="../shared/searchable-select.js?v=search-all93"></script><link rel="stylesheet" href="../shared/ai-chat-preview.css?v=ai-layout114"><script defer src="../shared/ai-chat-preview.js?v=ai-layout114"></script></head>
 <body class="portal-home">
 
@@ -93,12 +93,11 @@
     <h1 class="page-h1">사내 운영 포털</h1>
     <p class="page-desc">직원 일정과 공지사항을 한눈에 확인하세요.</p>
   </div>
-  <div class="home-summary" aria-label="사내 운영 현황">
-<section class="home-summary-card"><h2>오늘 일정</h2><p>오늘 기준</p><dl><div><dt>전체 일정</dt><dd><strong data-home-stat="today">0</strong><span>건</span></dd></div><div><dt>연차·휴가</dt><dd><strong data-home-stat="leave">0</strong><span>건</span></dd></div><div><dt>출장</dt><dd><strong data-home-stat="trip">0</strong><span>건</span></dd></div></dl></section>
-<section class="home-summary-card"><h2>이번 달 일정</h2><p>당월 기준</p><dl><div><dt>전체 일정</dt><dd><strong data-home-stat="month">0</strong><span>건</span></dd></div><div><dt>연차·휴가</dt><dd><strong data-home-stat="monthLeave">0</strong><span>건</span></dd></div><div><dt>출장</dt><dd><strong data-home-stat="monthTrip">0</strong><span>건</span></dd></div></dl></section>
-<section class="home-summary-card"><h2>예정 일정</h2><p>내일부터</p><dl><div><dt>전체 일정</dt><dd><strong data-home-stat="upcoming">0</strong><span>건</span></dd></div><div><dt>연차·휴가</dt><dd><strong data-home-stat="upcomingLeave">0</strong><span>건</span></dd></div><div><dt>출장</dt><dd><strong data-home-stat="upcomingTrip">0</strong><span>건</span></dd></div></dl></section>
-<section class="home-summary-card"><h2>공지 현황</h2><p>등록된 공지 기준</p><dl><div><dt>전체 공지</dt><dd><strong data-home-stat="notices">0</strong><span>건</span></dd></div><div><dt>제품 공지</dt><dd><strong data-home-stat="productNotices">0</strong><span>건</span></dd></div><div><dt>사내 공지</dt><dd><strong data-home-stat="internalNotices">0</strong><span>건</span></dd></div></dl></section>
-  </div>
+  <section class="home-favorites" aria-labelledby="favoritesTitle">
+    <div class="sec-title"><h2 id="favoritesTitle">즐겨찾는 업무</h2><span>자주 쓰는 페이지를 빠르게 열어보세요.</span></div>
+    <div id="portalFavorites"></div>
+    <p id="portalFavoriteStatus" class="favorite-status" role="status"></p>
+  </section>
   <div class="home-grid">
     <div class="home-calendar" id="calendar">
       <div class="sec-title">
