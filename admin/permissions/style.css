@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=round-panels139');
+@import url('../../shared/admin-settings.css?v=round15-140');
 .container{max-width:1000px;margin:0 auto;padding:38px var(--page-gutter) 64px;}
 .page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}

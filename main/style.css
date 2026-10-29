@@ -1,4 +1,4 @@
-@import url('../shared/portal.css?v=round-panels139');
+@import url('../shared/portal.css?v=round15-140');
 
 /* Home typography: title 30/700, section 18/700, content 14–15/500. */
 .portal-home{--text:#24272c;--text2:#46505e;--text3:#596371;font-size:14px;font-weight:500;}
@@ -331,7 +331,7 @@ font-weight:500;}
 .home-stock{margin-bottom:24px}
 .home-calendar h2{font-size:18px;font-weight:500;margin:0}
 .home-stock-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
-.home-stock-metrics>section{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:var(--panel-radius,20px);padding:26px 28px;min-height:220px}
+.home-stock-metrics>section{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:var(--panel-radius,15px);padding:26px 28px;min-height:220px}
 .stock-metric-title{display:flex;align-items:center;justify-content:center;gap:8px;font-size:18px;font-weight:600;padding-bottom:16px;margin-bottom:14px;border-bottom:1px solid var(--border)}
 .stock-metric-title>span{color:var(--text3);font-size:13px}
 .stock-metric-number{display:flex;justify-content:center;align-items:baseline;gap:6px;margin:10px 0 4px;font-variant-numeric:tabular-nums}
@@ -353,7 +353,7 @@ font-weight:500;}
 .home-dashboard .sec-title{font-size:18px;font-weight:500;margin-bottom:16px}
 .home-calendar .sec-title{flex-wrap:wrap}
 .home-calendar .cal-cell{min-height:88px}
-.home-calendar .cal-wrap{border-radius:var(--panel-radius,20px)}
+.home-calendar .cal-wrap{border-radius:var(--panel-radius,15px)}
 .home-calendar .cal-nav{padding:10px 14px;background:var(--bg2)}
 .home-calendar .cal-nav-title{font-size:16px;font-weight:600}
 
