@@ -1,7 +1,7 @@
-@import url('../shared/portal.css?v=title-favorites138');
-@import url('../shared/inventory.css?v=title-favorites138');
-@import url('../shared/materials.css?v=portal-compact136');
-@import url('../shared/item-overview.css?v=portal-compact136');
+@import url('../shared/portal.css?v=round-panels139');
+@import url('../shared/inventory.css?v=round-panels139');
+@import url('../shared/materials.css?v=round-panels139');
+@import url('../shared/item-overview.css?v=round-panels139');
 
 .workspace{margin-bottom:24px}
 .workspace>aside{display:flex;flex-direction:column;min-height:0}
@@ -25,7 +25,7 @@
 .order-quantities div{min-width:0;text-align:center}.order-quantities span{display:block;font-size:12px;color:#46505e;white-space:nowrap}.order-quantities strong{display:block;margin-top:7px;font-size:32px;font-weight:700;line-height:1.2;letter-spacing:-.6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.order-quantities small{font-size:13px;margin-left:5px;font-weight:400;letter-spacing:0}
 .order-quantities div:first-child strong{color:#9b1b30}
 .order-actions{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;flex-shrink:0}
-.pending-orders button,.history-actions button{font-size:var(--button-font-size,12px);padding:5px 10px;border-radius:var(--panel-radius,3px);min-height:28px;line-height:1.4;white-space:nowrap}
+.pending-orders button,.history-actions button{font-size:var(--button-font-size,12px);padding:5px 10px;border-radius:var(--control-radius,3px);min-height:28px;line-height:1.4;white-space:nowrap}
 .history-actions{display:flex;justify-content:flex-end;gap:5px}
 .history-actions .delete-button{color:#9b1b30}
 .receipt-dialog{width:760px;max-width:calc(100vw - 32px)}

@@ -1,7 +1,7 @@
-@import url('../shared/portal.css?v=title-favorites138');
-@import url('../shared/inventory.css?v=title-favorites138');
-@import url('../shared/materials.css?v=portal-compact136');
-@import url('../shared/item-overview.css?v=portal-compact136');
+@import url('../shared/portal.css?v=round-panels139');
+@import url('../shared/inventory.css?v=round-panels139');
+@import url('../shared/materials.css?v=round-panels139');
+@import url('../shared/item-overview.css?v=round-panels139');
 .workspace>aside{display:flex;flex-direction:column;min-height:0}
 .workspace>aside>.listhead,.workspace>aside>input,.workspace>aside>select,.workspace>aside>.archive-toggle,.workspace>aside>.filter-reset{flex-shrink:0}
 .workspace>aside #products{flex:1 1 0;height:0;min-height:0;max-height:none;overflow-y:auto}

@@ -61,7 +61,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .zone-icon{font-size:16px;}
 .zone-name{font-size:13px;font-weight:600;}
 .zone-addr{font-size:11px;color:var(--text2);margin-top:1px;}
-.zone-badge{font-size:11px;padding:2px 8px;border-radius:var(--panel-radius,3px);font-weight:600;}
+.zone-badge{font-size:11px;padding:2px 8px;border-radius:var(--control-radius,3px);font-weight:600;}
 .zone-badge.in{background:rgba(82,168,116,.15);color:#52a874;border:1px solid rgba(82,168,116,.3);}
 .zone-badge.out{background:transparent;color:var(--text3);border:1px solid var(--border);}
 .zone-dist{font-size:11px;color:var(--text2);margin-top:3px;text-align:right;}

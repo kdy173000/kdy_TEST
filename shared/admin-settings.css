@@ -1,11 +1,11 @@
-@import url('../main/style.css?v=title-favorites138');
+@import url('../main/style.css?v=round-panels139');
 :root{--input-bg:var(--bg2);--input-border:var(--border2);--drag-over:var(--accent-soft)}
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px}
 .eyebrow{margin:0 0 8px;color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.04em}
 .page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8}
 .field label{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:0}
-.field input,.field select{min-height:var(--control-height,34px);background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:var(--panel-radius,3px);padding:6px 10px;font:inherit;width:100%}
+.field input,.field select{min-height:var(--control-height,34px);background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:var(--control-radius,3px);padding:6px 10px;font:inherit;width:100%}
 .field input:focus,.field select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
 .modal-overlay{padding:20px}.modal{background:var(--bg2);color:var(--text);border-radius:var(--panel-radius,3px);width:460px;max-width:100%;max-height:calc(100dvh - 40px);overflow-y:auto;box-shadow:0 20px 60px #18202c30;padding:28px}
 .modal-title{font-size:var(--page-title-size,20px);letter-spacing:-.4px}.modal-btn{min-height:var(--button-height,30px)}

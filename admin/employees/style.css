@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=title-favorites138');
+@import url('../../shared/admin-settings.css?v=round-panels139');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;}
 .page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
@@ -6,7 +6,7 @@
 .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .section-badge {
   display:inline-flex; align-items:center;
-  padding:3px 14px; border-radius:var(--panel-radius,3px);
+  padding:3px 14px; border-radius:var(--control-radius,3px);
   font-size:12px; font-weight:700; letter-spacing:.04em;
 }
 .section-badge.office { background:rgba(74,138,244,.15); color:#4a8af4; border:1px solid rgba(74,138,244,.3); }
@@ -65,7 +65,7 @@
 .field input:focus, .field select:focus { border-color:#9b1b30; }
 .modal-actions { display:flex; gap:8px; margin-top:18px; }
 .modal-btn {
-  flex:1; padding:5px 10px; border-radius:var(--panel-radius,3px); border:none;
+  flex:1; padding:5px 10px; border-radius:var(--control-radius,3px); border:none;
   background:#9b1b30; color:#fff;
   font-size:var(--button-font-size,12px); font-weight:700; font-family:inherit; cursor:pointer;
   transition:background .15s;

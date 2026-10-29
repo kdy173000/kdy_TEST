@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=title-favorites138');
+@import url('../../shared/admin-settings.css?v=round-panels139');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:32px;align-items:start;}
 .clock-section{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);position:sticky;top:calc(var(--header-height) + 30px);}
 .settings-section{min-width:0;}
@@ -10,7 +10,7 @@
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);padding:26px;margin-bottom:20px;}
 .card-title{font-size:17px;font-weight:600;margin-bottom:8px;}
 .field { display:flex; flex-direction:column; gap:5px; }
-.field select { padding:9px 12px; border-radius:var(--panel-radius,3px); border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:var(--body-font-size,13px); font-family:inherit; outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none; cursor:pointer; }
+.field select { padding:9px 12px; border-radius:var(--control-radius,3px); border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:var(--body-font-size,13px); font-family:inherit; outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none; cursor:pointer; }
 .field select:focus { border-color:#9b1b30; }
 .field-help{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;}
 .tz-list { border:1px solid var(--border); border-radius:var(--panel-radius,3px); max-height:300px; overflow-y:auto; background:var(--bg3); }

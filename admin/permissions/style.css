@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=title-favorites138');
+@import url('../../shared/admin-settings.css?v=round-panels139');
 .container{max-width:1000px;margin:0 auto;padding:38px var(--page-gutter) 64px;}
 .page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
@@ -9,13 +9,13 @@
 .perm-card-header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--cal-head);}
 .perm-badge {
   display:inline-flex; align-items:center;
-  padding:3px 12px; border-radius:var(--panel-radius,3px);
+  padding:3px 12px; border-radius:var(--control-radius,3px);
   font-size:12px; font-weight:700;
 }
 .perm-card-desc { font-size:12px; color:var(--text2); margin-left:auto; }
 .link-row{display:flex;align-items:center;gap:12px;padding:20px;}
 .link-label { font-size:12px; color:var(--text3); width:80px; flex-shrink:0; }
-.link-input{flex:1;min-width:0;min-height:var(--control-height,34px);padding:6px 10px;border-radius:var(--panel-radius,3px);border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:var(--body-font-size,13px);outline:none;}
+.link-input{flex:1;min-width:0;min-height:var(--control-height,34px);padding:6px 10px;border-radius:var(--control-radius,3px);border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:var(--body-font-size,13px);outline:none;}
 .link-input:focus { border-color:#9b1b30; }
 .link-input::placeholder { color:var(--text3); }
 .link-test {
@@ -40,7 +40,7 @@
   display:flex; align-items:center; gap:10px;
 }
 .add-item-label { font-size:12px; color:var(--text3); white-space:nowrap; }
-.add-item-input{flex:1;min-width:0;min-height:var(--control-height,34px);padding:6px 10px;border-radius:var(--panel-radius,3px);border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:var(--body-font-size,13px);outline:none;}
+.add-item-input{flex:1;min-width:0;min-height:var(--control-height,34px);padding:6px 10px;border-radius:var(--control-radius,3px);border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:var(--body-font-size,13px);outline:none;}
 .add-item-input:focus { border-color:#9b1b30; }
 .add-item-btn {
   padding:5px 10px; border-radius:var(--panel-radius,3px); border:none;

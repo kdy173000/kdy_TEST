@@ -1,4 +1,4 @@
-@import url('../../shared/admin-settings.css?v=title-favorites138');
+@import url('../../shared/admin-settings.css?v=round-panels139');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;}
 .page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
@@ -15,7 +15,7 @@
 .perm-label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.05em; margin-bottom:8px; }
 .perm-group { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
 .perm-btn {
-  padding:5px 14px; border-radius:var(--panel-radius,3px);
+  padding:5px 14px; border-radius:var(--control-radius,3px);
   border:1.5px solid var(--border2);
   background:none; color:var(--text2);
   font-size:var(--body-font-size,13px); font-family:inherit; cursor:pointer;
@@ -24,7 +24,7 @@
 .perm-btn:hover { border-color:#9b1b30; color:var(--text); }
 .perm-btn.on { border-color:transparent; color:#fff; background:#9b1b30; }
 .add-btn {
-  padding:5px 10px; border-radius:var(--panel-radius,3px); border:none;
+  padding:5px 10px; border-radius:var(--control-radius,3px); border:none;
   background:#9b1b30; color:#fff;
   font-size:var(--button-font-size,12px); font-weight:700; font-family:inherit;
   cursor:pointer; transition:background .15s;
@@ -58,12 +58,12 @@
 .perm-tags { display:flex; flex-wrap:wrap; gap:3px; }
 .perm-tag {
   display:inline-flex; align-items:center;
-  padding:2px 8px; border-radius:var(--panel-radius,3px);
+  padding:2px 8px; border-radius:var(--control-radius,3px);
   font-size:11px; font-weight:600;
 }
 .actions { display:flex; gap:5px; }
 .act-btn {
-  padding:5px 10px; border-radius:var(--panel-radius,3px); border:1px solid var(--border);
+  padding:5px 10px; border-radius:var(--control-radius,3px); border:1px solid var(--border);
   background:none; color:var(--text2); font-size:var(--button-font-size,12px);
   font-family:inherit; cursor:pointer; transition:background .1s, color .1s;
 }
@@ -80,7 +80,7 @@
 .modal-fields { display:flex; flex-direction:column; gap:12px; }
 .modal-actions { display:flex; gap:8px; margin-top:18px; }
 .modal-btn {
-  flex:1; padding:5px 10px; border-radius:var(--panel-radius,3px); border:none;
+  flex:1; padding:5px 10px; border-radius:var(--control-radius,3px); border:none;
   background:#9b1b30; color:#fff;
   font-size:var(--button-font-size,12px); font-weight:700; font-family:inherit; cursor:pointer;
   transition:background .15s;
