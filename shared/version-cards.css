@@ -11,15 +11,16 @@
 .version-card-stock>strong small{font-size:12px;font-weight:400;color:var(--text2)}
 .version .version-card-stock p{margin:6px 0 0;font-size:12px;color:var(--text2)}
 .version .version-management-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.version .version-management-actions button{display:inline-flex;align-items:center;justify-content:center;margin:0;padding:6px 9px;font-size:12px;line-height:1.4}
+.version .version-management-actions button{display:inline-flex;align-items:center;justify-content:center;margin:0;padding:5px 10px;font-size:var(--button-font-size,12px);line-height:1.4}
 .versions>.empty{flex:1 1 100%;margin:0;padding:24px}
 @media(max-width:600px){.version-section-actions{gap:8px}.version-hide-stopped{font-size:12px}.versions .compact-version{padding:14px}.version-card-header{gap:8px;flex-wrap:wrap}.version-card-badges{margin-left:auto}.version-card-badges .state{font-size:11px}.version-card-stock>strong{font-size:23px}}
 
 .version-workflow-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line,#e5e7eb)}
-.version-workflow-actions button{flex:1;margin:0;padding:7px 10px;font-size:12px;white-space:nowrap}
+.version-workflow-actions button{flex:1;margin:0;padding:5px 10px;font-size:var(--button-font-size,12px);white-space:nowrap}
 
 /* Shared placement for catalog item editing on both stock pages. */
 .product-list-row{position:relative}
 .product-list-row:has(.product-info-edit) .product{padding-right:92px}
-.product-info-edit{position:absolute;right:10px;top:13px;padding:5px 7px;font-size:11px;line-height:1.6;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text2)}
+.product-info-edit{position:absolute;right:10px;top:13px;padding:5px 7px;font-size:11px;line-height:1.6;border:1px solid var(--border2);border-radius:var(--panel-radius,3px);background:var(--bg2);color:var(--text2)}
 .product-info-edit:hover{background:var(--hover);color:var(--text)}
+

@@ -1,4 +1,4 @@
-@import url('../shared/portal.css?v=direct-logo31');
+@import url('../shared/portal.css?v=portal-compact136');
 
 /* Home typography: title 30/700, section 18/700, content 14–15/500. */
 .portal-home{--text:#24272c;--text2:#46505e;--text3:#596371;font-size:14px;font-weight:500;}
@@ -377,3 +377,4 @@ font-weight:500;}
 @media(max-width:1100px){.home-grid{grid-template-columns:minmax(0,1fr) 280px;gap:18px}.home-calendar,.home-notices,.home-status{padding:18px}.home-calendar .cal-legend{width:100%;margin-left:0!important}}
 @media(max-width:850px){.home-grid{grid-template-columns:minmax(0,1fr)}.home-side{display:block}}
 @media(max-width:600px){.home-stock-metrics{grid-template-columns:1fr;gap:18px}.home-stock-metrics>section{padding:22px 20px;min-height:0}.home-notice-row{grid-template-columns:65px minmax(0,1fr);gap:10px}.home-notice-author{display:none}.home-heading{margin-bottom:18px}.home-heading .page-h1{font-size:20px}.home-calendar,.home-notices,.home-status{padding:18px 14px}.home-side{display:flex}.home-calendar .cal-cell{min-height:72px}.home-calendar .cal-legend{gap:8px;font-size:11px}}
+

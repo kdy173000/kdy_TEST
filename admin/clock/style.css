@@ -1,20 +1,20 @@
-@import url('../../shared/admin-settings.css?v=direct-logo31');
+@import url('../../shared/admin-settings.css?v=portal-compact136');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:32px;align-items:start;}
-.clock-section{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;position:sticky;top:calc(var(--header-height) + 30px);}
+.clock-section{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);position:sticky;top:calc(var(--header-height) + 30px);}
 .settings-section{min-width:0;}
 .preview-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
 .preview-tz-label { font-size:12px; color:var(--text2); text-align:center; min-height:18px; letter-spacing:.02em; }
 .preview-note { font-size:11px; color:var(--text3); text-align:center; line-height:1.6; margin-top:4px; }
-.page-title{font-size:30px;font-weight:700;letter-spacing:-.8px;margin:0 0 8px;}
-.page-sub{font-size:14px;color:var(--text2);margin:0 0 28px;line-height:1.8;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:20px;}
+.page-title{font-size:var(--page-title-size,20px);font-weight:500;letter-spacing:-.4px;margin:0 0 8px;}
+.page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);padding:26px;margin-bottom:20px;}
 .card-title{font-size:17px;font-weight:600;margin-bottom:8px;}
 .field { display:flex; flex-direction:column; gap:5px; }
-.field select { padding:9px 12px; border-radius:8px; border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none; cursor:pointer; }
+.field select { padding:9px 12px; border-radius:var(--panel-radius,3px); border:1px solid var(--sel-border); background:var(--bg3); color:var(--text); font-size:var(--body-font-size,13px); font-family:inherit; outline:none; transition:border-color .15s; appearance:none; -webkit-appearance:none; cursor:pointer; }
 .field select:focus { border-color:#9b1b30; }
 .field-help{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;}
-.tz-list { border:1px solid var(--border); border-radius:8px; max-height:300px; overflow-y:auto; background:var(--bg3); }
-.tz-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2);}
+.tz-list { border:1px solid var(--border); border-radius:var(--panel-radius,3px); max-height:300px; overflow-y:auto; background:var(--bg3); }
+.tz-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);font-size:var(--body-font-size,13px);color:var(--text2);}
 .tz-item:last-child { border-bottom:none; }
 .tz-item:hover { background:var(--hover); }
 .tz-item input[type=checkbox] { accent-color:#9b1b30; flex-shrink:0; }
@@ -23,7 +23,7 @@
 .live-msg.show { opacity:1; }
 /* clock — main.html과 동일 디자인 */
 .clock-face { position:relative; width:170px; height:170px; border-radius:50%; background:transparent; }
-.c-hand { position:absolute; left:50%; bottom:50%; transform-origin:bottom center; border-radius:999px; background:var(--hand); will-change:transform; backface-visibility:hidden; }
+.c-hand { position:absolute; left:50%; bottom:50%; transform-origin:bottom center; border-radius:var(--panel-radius,3px); background:var(--hand); will-change:transform; backface-visibility:hidden; }
 .c-hand.hour   { width:3px; height:48px; margin-left:-1.5px; }
 .c-hand.minute { width:2px; height:70px; margin-left:-1px; }
 .c-hand.second { width:1px; height:78px; margin-left:-.5px; }
@@ -33,3 +33,4 @@
 .c-date-str { margin-top:5px; font-size:11px; color:var(--text2); font-weight:400; }
 
 @media(max-width:800px){.container{grid-template-columns:1fr}.clock-section{position:static}.settings-section{min-width:0}}
+

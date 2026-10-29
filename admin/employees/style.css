@@ -1,12 +1,12 @@
-@import url('../../shared/admin-settings.css?v=direct-logo31');
+@import url('../../shared/admin-settings.css?v=portal-compact136');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;}
-.page-title{font-size:30px;font-weight:700;letter-spacing:-.8px;margin:0 0 8px;}
-.page-sub{font-size:14px;color:var(--text2);margin:0 0 28px;line-height:1.8;}
+.page-title{font-size:var(--page-title-size,20px);font-weight:500;letter-spacing:-.4px;margin:0 0 8px;}
+.page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
 .section-wrap { margin-bottom:8px; }
 .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .section-badge {
   display:inline-flex; align-items:center;
-  padding:3px 14px; border-radius:20px;
+  padding:3px 14px; border-radius:var(--panel-radius,3px);
   font-size:12px; font-weight:700; letter-spacing:.04em;
 }
 .section-badge.office { background:rgba(74,138,244,.15); color:#4a8af4; border:1px solid rgba(74,138,244,.3); }
@@ -14,16 +14,16 @@
 .section-count { font-size:12px; color:var(--text3); }
 .section-divider { border:none; border-top:2px solid var(--border2); margin:28px 0 24px; }
 .teams-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
-.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-width:0;transition:box-shadow .15s,border-color .15s;}
+.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);overflow:hidden;min-width:0;transition:box-shadow .15s,border-color .15s;}
 .team-card.drag-over-team { border-color:#9b1b30; box-shadow:0 0 0 2px rgba(155,27,48,.25); }
 .team-card.dragging-team { opacity:0.35; }
 .team-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--cal-head);border-bottom:1px solid var(--border);cursor:grab;user-select:none;}
 .team-header:active { cursor:grabbing; }
 .team-header-left { display:flex; align-items:center; gap:6px; }
-.team-drag-icon { font-size:14px; opacity:.4; }
+.team-drag-icon { font-size:var(--body-font-size,13px); opacity:.4; }
 .team-name { font-size:13px; font-weight:700; }
 .team-count { font-size:11px; color:var(--text3); }
-.team-add-btn{background:var(--accent-soft);border:0;color:var(--accent);font-size:20px;cursor:pointer;width:30px;height:30px;border-radius:7px;line-height:1;}
+.team-add-btn{background:var(--accent-soft);border:0;color:var(--accent);font-size:var(--button-font-size,12px);cursor:pointer;width:30px;height:30px;border-radius:var(--panel-radius,3px);line-height:1;}
 .team-add-btn:hover { color:#9b1b30; }
 .emp-list {
   padding:8px; min-height:56px;
@@ -33,9 +33,9 @@
 .emp-empty {
   padding:14px 8px; text-align:center;
   font-size:12px; color:var(--text3);
-  border:1.5px dashed var(--border); border-radius:8px;
+  border:1.5px dashed var(--border); border-radius:var(--panel-radius,3px);
 }
-.emp-card{display:flex;align-items:center;padding:13px 10px;border-radius:9px;background:var(--bg2);border:1px solid var(--border);cursor:grab;user-select:none;}
+.emp-card{display:flex;align-items:center;padding:13px 10px;border-radius:var(--panel-radius,3px);background:var(--bg2);border:1px solid var(--border);cursor:grab;user-select:none;}
 .emp-card:active { cursor:grabbing; }
 .emp-card:hover { background:var(--hover); }
 .emp-card.dragging { opacity:0.35; }
@@ -46,7 +46,7 @@
 .emp-actions { display:flex; gap:3px; flex-shrink:0; margin-left:6px; }
 .emp-act-btn {
   background:none; border:none; color:var(--text3);
-  font-size:12px; cursor:pointer; padding:2px 5px; border-radius:4px;
+  font-size:var(--button-font-size,12px); cursor:pointer; padding:5px 10px; border-radius:var(--panel-radius,3px);
   transition:background .1s, color .1s;
 }
 .emp-act-btn:hover { background:var(--hover); color:var(--text); }
@@ -65,9 +65,9 @@
 .field input:focus, .field select:focus { border-color:#9b1b30; }
 .modal-actions { display:flex; gap:8px; margin-top:18px; }
 .modal-btn {
-  flex:1; padding:9px; border-radius:7px; border:none;
+  flex:1; padding:5px 10px; border-radius:var(--panel-radius,3px); border:none;
   background:#9b1b30; color:#fff;
-  font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  font-size:var(--button-font-size,12px); font-weight:700; font-family:inherit; cursor:pointer;
   transition:background .15s;
 }
 .modal-btn:hover { background:#7e1627; }
@@ -82,3 +82,4 @@
 }
 
 @media(max-width:1000px){.teams-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:700px){.teams-grid{grid-template-columns:1fr}}
+

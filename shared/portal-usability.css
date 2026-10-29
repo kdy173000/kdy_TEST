@@ -4,9 +4,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .portal-with-nav input[readonly]{background:var(--bg3,#f0f2f5);color:var(--text2,#46505e)}
 .portal-with-nav .field>span{font-weight:600;color:var(--text,#24272c)}
 .portal-with-nav [role=alert]:empty{display:none}
-.portal-with-nav [role=alert]:not(:empty){padding:10px 12px;border-radius:7px;background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30)}
+.portal-with-nav [role=alert]:not(:empty){padding:10px 12px;border-radius:var(--panel-radius,3px);background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30)}
 .portal-with-nav .materials-nav a[aria-current=page]{background:var(--accent-soft,#fff0f0);color:var(--accent,#9b1b30);border-color:#e2bac1;font-weight:700}
-.workflow-guide{margin:0 0 20px;border:1px solid var(--border,#e4e7eb);border-radius:10px;background:var(--bg2,#fff);padding:12px 16px;color:var(--text2,#46505e);font-size:13px;line-height:1.8}
+.workflow-guide{margin:0 0 20px;border:1px solid var(--border,#e4e7eb);border-radius:var(--panel-radius,3px);background:var(--bg2,#fff);padding:12px 16px;color:var(--text2,#46505e);font-size:13px;line-height:1.8}
 .workflow-guide summary{cursor:pointer;font-weight:600;color:var(--text,#24272c)}
 .workflow-guide p{margin:10px 0 0}
 .access-note{margin:0 0 18px;font-size:13px;color:var(--text2,#46505e)}
@@ -23,17 +23,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .portal-with-nav .detail td{white-space:normal;overflow-wrap:anywhere;line-height:1.7}
 .portal-with-nav .detail th{color:var(--text2,#46505e);font-weight:600}
 .portal-with-nav .detail tbody tr:hover{background:var(--hover,#f3f4f6)}
-.dialog-intro{background:var(--bg3,#f0f2f5);padding:12px 14px;border-radius:8px;margin:0 0 20px;color:var(--text2,#46505e);line-height:1.7;font-size:13px}
+.dialog-intro{background:var(--bg3,#f0f2f5);padding:12px 14px;border-radius:var(--panel-radius,3px);margin:0 0 20px;color:var(--text2,#46505e);line-height:1.7;font-size:13px}
 .dialog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}
 .dialog-grid .field{margin:0;min-width:0}.dialog-grid .wide{grid-column:1/-1}
 .dialog-grid textarea{min-height:68px}
 .portal-with-nav .out-dialog.task-dialog{width:820px}
-.portal-with-nav .out-dialog h2{font-size:22px}
+.portal-with-nav .out-dialog h2{font-size:var(--page-title-size,20px)}
 .portal-with-nav .out-dialog .modalfoot{justify-content:flex-end}
 .portal-with-nav .out-dialog small{font-size:12px;color:var(--text2,#46505e);line-height:1.6}
 .portal-with-nav .production-input{border:1px solid var(--border,#e4e7eb)}
 .home-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
-.home-shortcuts a{padding:10px 16px;border:1px solid var(--border,#e4e7eb);border-radius:8px;text-decoration:none;color:var(--text,#24272c);background:var(--bg2,#fff);font-weight:600;font-size:14px}
+.home-shortcuts a{padding:10px 16px;border:1px solid var(--border,#e4e7eb);border-radius:var(--panel-radius,3px);text-decoration:none;color:var(--text,#24272c);background:var(--bg2,#fff);font-weight:600;font-size:var(--body-font-size,13px)}
 .home-shortcuts a:hover{border-color:var(--accent,#9b1b30);color:var(--accent,#9b1b30)}
 @media(max-width:800px){.section-toolbar{align-items:flex-start;flex-direction:column;gap:10px}.history-filters{width:100%}.history-filters input{flex:1;min-width:120px}.dialog-grid{grid-template-columns:1fr}.home-shortcuts a{flex:1;text-align:center}.portal-with-nav .detail td{padding:12px 8px}}
 
@@ -45,7 +45,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #catalogDialog .workflow-guide{margin:20px 0 0}
 #catalogDialog h3{margin:22px 0 12px}
 .catalog-version{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border,#e4e7eb)}
-.catalog-version span{flex:1;font-size:13px}.catalog-version button{font-size:12px;padding:6px 9px}
+.catalog-version span{flex:1;font-size:13px}.catalog-version button{font-size:var(--button-font-size,12px);padding:5px 10px}
 .bom-settings-mode .production-grid{grid-template-columns:minmax(0,1fr)}
 .bom-settings-mode .production-header p{display:none}
 .bom-settings-mode .bom-table{min-width:850px}
@@ -54,7 +54,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .portal-with-nav .out-dialog{padding:22px;max-height:calc(100dvh - 32px)}
 .portal-with-nav .out-dialog .modalhead{margin-bottom:14px}
 .portal-with-nav .out-dialog .field>span{margin-bottom:5px}
-.portal-with-nav .out-dialog input,.portal-with-nav .out-dialog select{padding:8px 10px}
+.portal-with-nav .out-dialog input,.portal-with-nav .out-dialog select{padding:6px 10px}
 .portal-with-nav .out-dialog textarea{min-height:56px}
 .portal-with-nav .out-dialog .modalfoot{margin-top:8px;padding-top:12px;grid-column:1/-1}
 #catalogDialog form,#outForm,#transactionForm:not(.receipt-fields){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
@@ -100,16 +100,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 /* Compact controls for adding catalog classifications. */
 .portal-with-nav #catalogDialog .catalog-classification-form{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 10px;margin-top:12px}
 #catalogDialog .catalog-classification-form>.field{flex:1 1 180px;min-width:0}
-#catalogDialog .catalog-classification-form>button{flex:0 0 auto;align-self:flex-end;justify-self:start;width:auto;min-height:34px;padding:6px 11px;font-size:12px;line-height:1.5;white-space:nowrap}
+#catalogDialog .catalog-classification-form>button{flex:0 0 auto;align-self:flex-end;justify-self:start;width:auto;min-height:var(--button-height,30px);padding:5px 10px;font-size:var(--button-font-size,12px);line-height:1.5;white-space:nowrap}
 #catalogDialog .catalog-classification-form>[role="alert"]{flex-basis:100%;margin:0}
 
 .catalog-classification-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;max-height:160px;overflow:auto}
-.catalog-classification-item{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 9px;border:1px solid var(--border,#e4e7eb);border-radius:7px;font-size:12px}
-#catalogDialog .catalog-classification-item>button{width:auto;min-height:26px;padding:3px 7px;font-size:11px;line-height:1.5}
+.catalog-classification-item{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 9px;border:1px solid var(--border,#e4e7eb);border-radius:var(--panel-radius,3px);font-size:12px}
+#catalogDialog .catalog-classification-item>button{width:auto;min-height:26px;padding:5px 10px;font-size:var(--button-font-size,12px);line-height:1.5}
 
-.catalog-classification-manager{margin-top:20px;border:1px solid var(--border,#e4e7eb);border-radius:10px;overflow:hidden}
+.catalog-classification-manager{margin-top:20px;border:1px solid var(--border,#e4e7eb);border-radius:var(--panel-radius,3px);overflow:hidden}
 .catalog-classification-tabs{display:flex;border-bottom:1px solid var(--border,#e4e7eb);background:var(--bg3,#f6f7f9)}
 #catalogDialog .catalog-classification-tabs>button{flex:1;min-width:0;margin:0;padding:11px 8px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--text2,#626b78);font-size:12px;line-height:1.5}
 #catalogDialog .catalog-classification-tabs>button[aria-selected="true"]{background:var(--bg2,#fff);border-bottom-color:#9b1b30;color:#9b1b30;font-weight:700}
 .catalog-classification-panel{padding:14px}
 .portal-with-nav #catalogDialog .catalog-classification-panel>.catalog-classification-form{margin-top:0}
+
