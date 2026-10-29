@@ -110,7 +110,24 @@ const EVS=[
 function dk(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
 function getSchedule(){const s=localStorage.getItem('fb_schedule');if(!s){const seed=EVS.map((e,i)=>({...e,id:'d'+i}));localStorage.setItem('fb_schedule',JSON.stringify(seed));return seed;}return JSON.parse(s);}
 function renderTripNow(){const now=new Date();const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');const trips=getSchedule().filter(e=>e.t==='t'&&e.s<=today&&(e.e?e.e>=today:e.s===today));const el=document.getElementById('tripNowList');if(!el)return;if(!trips.length){el.innerHTML='<div class="trip-sub" style="color:var(--text3)">현재 출장 없음</div>';return;}const flag=l=>{if(l.includes('중국')||l.includes('상하이')||l.includes('샤먼'))return'🇨🇳';if(l.includes('인도'))return'🇮🇳';if(l.includes('일본'))return'🇯🇵';if(l.includes('미국'))return'🇺🇸';if(l.includes('싱가포르'))return'🇸🇬';if(l.includes('베트남'))return'🇻🇳';return'✈️';};el.innerHTML=trips.map(e=>'<div class="trip-now">'+flag(e.l)+' '+e.l+'</div><div class="trip-sub">'+e.w+'</div><div class="trip-sub">'+e.s+(e.e?' → '+e.e:'')+'</div>').join('');}
+
+function renderHomeStats(){
+  const now=new Date(),today=dk(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const start=dk(now.getFullYear(),now.getMonth()+1,1),end=dk(now.getFullYear(),now.getMonth()+1,new Date(now.getFullYear(),now.getMonth()+1,0).getDate());
+  const schedule=getSchedule(),active=schedule.filter(e=>e.s<=today&&(e.e||e.s)>=today);
+  const month=schedule.filter(e=>e.s<=end&&(e.e||e.s)>=start),upcoming=schedule.filter(e=>e.s>today);
+  const leave=e=>e.t==='l'||e.t==='h';
+  const stats={today:active.length,leave:active.filter(leave).length,trip:active.filter(e=>e.t==='t').length,
+    month:month.length,monthLeave:month.filter(leave).length,monthTrip:month.filter(e=>e.t==='t').length,
+    upcoming:upcoming.length,upcomingLeave:upcoming.filter(leave).length,upcomingTrip:upcoming.filter(e=>e.t==='t').length};
+  const notices=[...document.querySelectorAll('[data-notice-list] .home-notice-row')];
+  stats.notices=notices.length;stats.productNotices=notices.filter(n=>n.querySelector('.tag')?.textContent==='제품공지').length;
+  stats.internalNotices=notices.filter(n=>n.querySelector('.tag')?.textContent==='사내공지').length;
+  document.querySelectorAll('[data-home-stat]').forEach(el=>el.textContent=String(stats[el.dataset.homeStat]??0));
+}
+
 function renderCal(){
+  renderHomeStats();
   const now=new Date();
   if(cY===undefined){cY=now.getFullYear();cM2=now.getMonth()+1;}
   document.getElementById('cal-title').textContent=`${cY}년 ${cM2}월`;
@@ -361,3 +378,5 @@ document.querySelectorAll('.sb-item').forEach(item=>{if(item.style.pointerEvents
 
 window.addEventListener('DOMContentLoaded',()=>{if(location.hash==='#profile')openProfile();});
 window.addEventListener('hashchange',()=>{if(location.hash==='#profile')openProfile();});
+
+window.addEventListener("storage",event=>{if(event.key==="fb_schedule"){renderCal();renderTripNow();}});
