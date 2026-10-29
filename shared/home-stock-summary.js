@@ -17,7 +17,6 @@
     const message=document.getElementById('stockSummaryMessage');if(!message)return;
     if(!window.FB){message.textContent='재고 기록을 불러오지 못했어요. 재고 페이지에서 저장 데이터를 확인해주세요.';return;}
     const data=FB.data,today=FB.day(),stats=summarize(data,today,FB.orderIsPending);
-    document.getElementById('stockSummaryDate').textContent=today.replaceAll('-','.');
     function fill(map,kind,totalId,listId,empty){
       document.getElementById(totalId).textContent=fmt([...map.values()].reduce((a,b)=>a+b,0));
       const list=document.getElementById(listId);list.replaceChildren();
