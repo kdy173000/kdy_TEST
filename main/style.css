@@ -356,7 +356,7 @@ font-weight:500;}
 .home-calendar .cal-nav{padding:10px 14px;background:var(--bg2)}
 .home-calendar .cal-nav-title{font-size:16px;font-weight:600}
 .home-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-.home-notices{margin-top:24px}
+.home-notices{margin-bottom:24px}
 .home-notices .sec-title{margin-bottom:4px;justify-content:space-between}
 .home-notice-more{font-size:12px;font-weight:400;color:var(--text2);text-decoration:none}
 .home-notice-more:hover{color:var(--accent)}
