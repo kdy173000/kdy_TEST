@@ -1,11 +1,11 @@
-@import url('../../shared/admin-settings.css?v=portal-compact136');
+@import url('../../shared/admin-settings.css?v=title-favorites138');
 .container{max-width:1200px;margin:0 auto;padding:38px var(--page-gutter) 64px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:32px;align-items:start;}
 .clock-section{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);position:sticky;top:calc(var(--header-height) + 30px);}
 .settings-section{min-width:0;}
 .preview-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.05em; }
 .preview-tz-label { font-size:12px; color:var(--text2); text-align:center; min-height:18px; letter-spacing:.02em; }
 .preview-note { font-size:11px; color:var(--text3); text-align:center; line-height:1.6; margin-top:4px; }
-.page-title{font-size:var(--page-title-size,20px);font-weight:500;letter-spacing:-.4px;margin:0 0 8px;}
+.page-title{font-size:var(--page-title-size,20px);font-weight:var(--page-title-weight,500);letter-spacing:-.4px;margin:0 0 8px;font-family:inherit;line-height:1.5;}
 .page-sub{font-size:var(--body-font-size,13px);color:var(--text2);margin:0 0 28px;line-height:1.8;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--panel-radius,3px);padding:26px;margin-bottom:20px;}
 .card-title{font-size:17px;font-weight:600;margin-bottom:8px;}
