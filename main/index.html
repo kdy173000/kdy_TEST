@@ -8,12 +8,14 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=home-favorites128">
+<link rel="stylesheet" href="style.css?v=home-stock130">
 
 <script defer src="../shared/notices.js?v=notices36"></script>
 <script defer src="script.js?v=home-favorites128"></script>
+<script defer src="../shared/material-store.js?v=home-stock130"></script>
+<script defer src="../shared/home-stock-summary.js?v=home-stock130"></script>
 <link rel="stylesheet" href="../shared/portal-nav.css?v=product-families123">
-<script defer src="../shared/order-access.js?v=order-access126"></script><script defer src="../shared/portal-nav.js?v=home-favorites128"></script>
+<script defer src="../shared/order-access.js?v=order-access126"></script><script defer src="../shared/portal-nav.js?v=favorite-rounded131"></script>
 <link rel="stylesheet" href="../shared/searchable-select.css?v=search-all93"><script defer src="../shared/searchable-select.js?v=search-all93"></script><link rel="stylesheet" href="../shared/ai-chat-preview.css?v=ai-layout114"><script defer src="../shared/ai-chat-preview.js?v=ai-layout114"></script></head>
 <body class="portal-home">
 
@@ -91,8 +93,17 @@
 <main class="home-dashboard">
   <div class="home-heading">
     <h1 class="page-h1">사내 운영 포털</h1>
-    <p class="page-desc">직원 일정과 공지사항을 한눈에 확인하세요.</p>
+    <p class="page-desc">재고 확인부터 직원 일정까지, 필요한 업무를 빠르게 찾아보세요.</p>
   </div>
+  <section class="home-stock" aria-labelledby="stockTitle">
+    <div class="sec-title"><h2 id="stockTitle">오늘의 재고</h2><span id="stockSummaryDate"></span></div>
+    <div class="home-stock-metrics">
+      <section><a class="stock-metric-title" href="../inventory/index.html">오늘 자재 입고 <span aria-hidden="true">↗</span></a><p class="stock-metric-number"><strong id="todayProductQty">—</strong><span>개</span></p><p class="stock-metric-hint">생산 등록으로 늘어난 완제품 재고</p><details><summary>품목별 수량</summary><ul id="todayProductList"></ul></details></section>
+      <section><a class="stock-metric-title" href="../procurement/index.html">오늘 부자재 입고 <span aria-hidden="true">↗</span></a><p class="stock-metric-number"><strong id="todayMaterialQty">—</strong><span>개</span></p><p class="stock-metric-hint">정상 입고 수량 · 불량 제외</p><details><summary>품목별 수량</summary><ul id="todayMaterialList"></ul></details></section>
+      <section><span class="stock-metric-title">오늘 입고 예정</span><p class="stock-metric-number"><strong id="todayExpectedQty">—</strong><span>개</span></p><p class="stock-metric-hint" id="todayExpectedHint">오늘 예정인 미완료 발주의 발주 수량</p><details><summary>예정 품목과 발주 수량</summary><ul id="todayExpectedList"></ul></details></section>
+    </div>
+    <p class="stock-summary-note" id="stockSummaryMessage" role="status">이 브라우저의 재고 기록을 확인하고 있어요.</p>
+  </section>
   <section class="home-favorites" aria-labelledby="favoritesTitle">
     <div class="sec-title"><h2 id="favoritesTitle">즐겨찾는 업무</h2><span>자주 쓰는 페이지를 빠르게 열어보세요.</span></div>
     <div id="portalFavorites"></div>
@@ -101,7 +112,7 @@
   <div class="home-grid">
     <div class="home-calendar" id="calendar">
       <div class="sec-title">
-        직원 일정
+        <h2>직원 · 일정 관리</h2>
         <div class="cal-legend" style="margin-left:auto;font-weight:400">
           <div class="leg"><div class="leg-dot" style="background:rgba(82,168,116,.5)"></div>연차</div>
           <div class="leg"><div class="leg-dot" style="background:rgba(74,138,244,.5)"></div>출장</div>
@@ -126,10 +137,6 @@
       </div>
     </div>
     <div class="home-side">
-      <div class="home-notices" id="notices">
-      <div class="sec-title">공지사항 <a class="home-notice-more" href="notices/index.html">전체 보기</a></div>
-      <div class="home-notice-list" data-notice-list></div>
-    </div>
         <aside class="home-status">
 
     <div>
@@ -152,6 +159,10 @@
   </aside>
     </div>
   </div>
+  <div class="home-notices" id="notices">
+      <div class="sec-title">공지사항 <a class="home-notice-more" href="notices/index.html">전체 보기</a></div>
+      <div class="home-notice-list" data-notice-list></div>
+    </div>
 </main>
 </div>
 

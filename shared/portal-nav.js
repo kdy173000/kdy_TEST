@@ -198,7 +198,7 @@
   setupFavorites();
   function setupFavorites() {
     const style=document.createElement('link');
-    style.rel='stylesheet';style.href=to('shared/portal-favorites.css?v=home-favorites128');document.head.append(style);
+    style.rel='stylesheet';style.href=to('shared/portal-favorites.css?v=favorite-rounded131');document.head.append(style);
     let account;
     try{account=JSON.parse(sessionStorage.getItem('fb_user')||'null');}catch{}
     if(!account?.id)return;
@@ -207,6 +207,18 @@
     const pages=new Map(eligible.map(a=>[new URL(a.href).pathname,{label:a.textContent.trim(),href:a.href}]));
     let saved=read();
     function read(){try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?[...new Set(value.filter(p=>typeof p==='string'))]:[];}catch{return [];}}
+    const favoriteButton=document.createElement('button'),favoritePanel=document.createElement('div');
+    favoriteButton.type='button';favoriteButton.className='category-button';favoriteButton.textContent='즐겨찾기';
+    favoritePanel.className='subnav-items';favoritePanel.id='portal-submenu-favorites';favoritePanel.hidden=true;
+    favoriteButton.setAttribute('aria-controls',favoritePanel.id);favoriteButton.setAttribute('aria-expanded','false');
+    const favoriteGroup={button:favoriteButton,panel:favoritePanel};groups.push(favoriteGroup);
+    nav.append(favoriteButton);subnav.append(favoritePanel);
+    favoriteButton.addEventListener('pointerenter',()=>{if(hover.matches)showGroup(favoriteGroup);});
+    favoriteButton.addEventListener('focus',()=>showGroup(favoriteGroup));
+    favoriteButton.addEventListener('click',()=>showGroup(favoriteGroup));
+    function drawStar(button,on){
+      button.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.55 4.43 1.07 6.27L12 17.34l-5.62 2.96 1.07-6.27L2.9 9.6l6.3-.9Z" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+    }
     const stars=[];
     function toggle(path){
       const next=saved.includes(path)?saved.filter(p=>p!==path):[...saved,path];
@@ -214,20 +226,31 @@
       catch{status('즐겨찾기를 저장하지 못했어요. 브라우저 저장 공간을 확인해주세요.');}
     }
     function status(message){const el=document.getElementById('portalFavoriteStatus');if(el)el.textContent=message;}
-    for(const link of eligible){
-      const path=new URL(link.href).pathname,wrap=document.createElement('div'),star=document.createElement('button');
-      wrap.className='subnav-page';star.type='button';star.className='favorite-star';
-      link.before(wrap);wrap.append(link,star);
-      star.addEventListener('click',()=>toggle(path));stars.push({star,path,label:link.textContent.trim()});
+    const currentPath=location.pathname,pageTitle=document.querySelector('main h1, .container h1, .layout h1');
+    if(pageTitle&&pages.has(currentPath)){
+      const star=document.createElement('button');star.type='button';star.className='favorite-star page-favorite-star';
+      pageTitle.append(star);star.addEventListener('click',()=>toggle(currentPath));
+      stars.push({star,path:currentPath,label:pages.get(currentPath).label});
     }
     function render(){
       for(const {star,path,label} of stars){
         const on=saved.includes(path);
-        star.textContent=on?'★':'☆';star.setAttribute('aria-pressed',String(on));
+        drawStar(star,on);star.setAttribute('aria-pressed',String(on));
         star.setAttribute('aria-label',label+' 즐겨찾기 '+(on?'해제':'등록'));star.title=star.getAttribute('aria-label');
       }
+      const visible=saved.filter(path=>pages.has(path));
+      favoritePanel.replaceChildren();
+      if(!visible.length){const empty=document.createElement('span');empty.className='favorite-nav-empty';empty.textContent='서브메뉴의 별표로 자주 쓰는 업무를 등록하세요.';favoritePanel.append(empty);}
+      for(const path of visible){
+        const page=pages.get(path),wrap=document.createElement('div'),link=document.createElement('a'),star=document.createElement('button');
+        wrap.className='subnav-page';link.className='sb-item';link.href=page.href;link.textContent=page.label;
+        if(new URL(page.href).pathname===location.pathname){link.classList.add('active');link.setAttribute('aria-current','page');}
+        star.type='button';star.className='favorite-star';drawStar(star,true);star.setAttribute('aria-pressed','true');
+        star.setAttribute('aria-label',page.label+' 즐겨찾기 해제');star.title=star.getAttribute('aria-label');
+        star.addEventListener('click',()=>toggle(path));wrap.append(link,star);favoritePanel.append(wrap);
+      }
       const host=document.getElementById('portalFavorites');if(!host)return;
-      host.replaceChildren();const visible=saved.filter(path=>pages.has(path));
+      host.replaceChildren();
       if(!visible.length){
         const empty=document.createElement('p');empty.className='favorite-empty';empty.textContent='상단 서브메뉴 옆의 ☆를 누르면 자주 쓰는 업무가 여기에 표시돼요.';host.append(empty);return;
       }

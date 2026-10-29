@@ -1,7 +1,5 @@
 /* Personal shortcuts share the existing horizontal navigation. */
-.subnav-page{display:flex;align-items:center;flex-shrink:0;gap:0}
-.portal-subnav .subnav-page .sb-item{padding-right:5px}
-.favorite-star{display:flex;align-items:center;justify-content:center;width:28px;height:32px;padding:0;border:0;background:transparent;color:#747d89;font-size:18px;line-height:1;cursor:pointer;border-radius:4px}
+.favorite-star{display:flex;align-items:center;justify-content:center;width:24px;height:28px;padding:0;border:0;background:transparent;color:#747d89;font-size:14px;line-height:1;cursor:pointer;border-radius:50%}
 .favorite-star[aria-pressed=true]{color:var(--accent,#9b1b30)}
 .favorite-star:hover{background:#fff0f3}
 .favorite-star:focus-visible,.favorite-remove:focus-visible{outline:2px solid var(--accent,#9b1b30);outline-offset:2px}
@@ -19,3 +17,7 @@
 .favorite-status{font-size:12px;color:var(--text2,#66707d);margin:8px 0 0;min-height:0}
 .favorite-status:empty{display:none}
 @media(max-width:600px){.home-favorites{padding:18px 14px;margin-bottom:18px}.home-favorites .sec-title{align-items:flex-start;flex-direction:column;gap:4px}.favorite-list{gap:8px}.favorite-list a{padding:9px 12px}}
+
+.favorite-star svg{display:block;width:14px;height:14px;overflow:visible}.favorite-nav-empty{font-size:12px;color:var(--text2,#66707d);padding:10px 0}
+
+.subnav-page{display:flex;align-items:center;flex-shrink:0;gap:0}.page-favorite-star{display:inline-flex;vertical-align:middle;margin-left:10px;width:28px;height:28px}.page-favorite-star svg{width:16px;height:16px}
