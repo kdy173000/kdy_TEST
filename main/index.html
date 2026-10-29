@@ -8,9 +8,10 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=portal-compact136">
+<link rel="stylesheet" href="style.css?v=notice-editor137">
 
-<script defer src="../shared/notices.js?v=notices36"></script>
+<link rel="stylesheet" href="../shared/notices.css?v=notice-editor137">
+<script defer src="../shared/notices.js?v=notice-editor137"></script>
 <script defer src="script.js?v=home-favorites128"></script>
 <script defer src="../shared/material-store.js?v=home-stock130"></script>
 <script defer src="../shared/home-stock-summary.js?v=stock-readonly134"></script>
@@ -103,10 +104,32 @@
     </div>
     <p class="stock-summary-note" id="stockSummaryMessage" role="status">이 브라우저의 재고 기록을 확인하고 있어요.</p>
   </section>
-  <div class="home-notices" id="notices">
-      <div class="sec-title">공지사항 <a class="home-notice-more" href="notices/index.html">전체 보기</a></div>
-      <div class="home-notice-list" data-notice-list></div>
+  <div class="home-announcements">
+<div class="home-notices" id="notices">
+      <div class="sec-title"><h2>공지사항</h2><div class="notice-header-actions"><a class="home-notice-more" href="notices/index.html">전체 보기</a><button type="button" class="notice-primary" data-notice-create>+ 공지 작성</button></div></div>
+      <div class="home-notice-list" data-notice-list="home"></div>
     </div>
+        <aside class="home-status">
+
+    <div>
+      <div class="rp-label">현재 출장</div>
+      <div id="tripNowList"></div>
+      
+      
+    </div>
+    <div>
+      <div class="clock-wrapper">
+        <label class="rp-label" for="tzSel">출장 시계 · 나라 선택</label><select id="tzSel" class="clock-tz-select" aria-label="출장 시계 나라 및 도시"></select>
+        <div class="digital-clock">
+          <div class="c-digital-block">
+            <div class="c-time-str" id="timeStr">00:00:00</div>
+            <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  </div>
   <div class="home-grid">
     <div class="home-calendar" id="calendar">
       <div class="sec-title">
@@ -134,28 +157,7 @@
         <div id="cal-body"></div>
       </div>
     </div>
-    <div class="home-side">
-        <aside class="home-status">
 
-    <div>
-      <div class="rp-label">현재 출장</div>
-      <div id="tripNowList"></div>
-      
-      
-    </div>
-    <div>
-      <div class="clock-wrapper">
-        <label class="rp-label" for="tzSel">출장 시계 · 나라 선택</label><select id="tzSel" class="clock-tz-select" aria-label="출장 시계 나라 및 도시"></select>
-        <div class="digital-clock">
-          <div class="c-digital-block">
-            <div class="c-time-str" id="timeStr">00:00:00</div>
-            <div class="c-date-str" id="dateStr">--월 --일 (-)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
-    </div>
   </div>
 
 </main>

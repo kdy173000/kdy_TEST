@@ -347,16 +347,18 @@ font-weight:500;}
 .stock-summary-note{margin-top:16px}
 .home-heading .page-h1{font-size:20px;font-weight:500;letter-spacing:-.4px;line-height:1.5}
 .home-heading .page-desc{font-size:13px;margin-bottom:0;margin-top:4px}
-.home-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
-.home-calendar,.home-notices,.home-status{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:0;padding:20px 24px}
+.home-announcements{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start;margin-bottom:24px}
+.home-grid{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+.home-calendar,.home-notices,.home-status{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:var(--panel-radius,3px);padding:20px 24px}
 .home-dashboard .sec-title{font-size:18px;font-weight:500;margin-bottom:16px}
 .home-calendar .sec-title{flex-wrap:wrap}
 .home-calendar .cal-cell{min-height:88px}
 .home-calendar .cal-wrap{border-radius:0}
 .home-calendar .cal-nav{padding:10px 14px;background:var(--bg2)}
 .home-calendar .cal-nav-title{font-size:16px;font-weight:600}
-.home-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-.home-notices{margin-bottom:24px}
+
+.home-notices{margin:0}
+.home-notices h2{font-size:18px;font-weight:500;margin:0}
 .home-notices .sec-title{margin-bottom:4px;justify-content:space-between}
 .home-notice-more{font-size:12px;font-weight:400;color:var(--text2);text-decoration:none}
 .home-notice-more:hover{color:var(--accent)}
@@ -374,7 +376,7 @@ font-weight:500;}
 .home-status .clock-wrapper{align-items:stretch;gap:8px}
 .home-status .digital-clock{padding:12px 8px}
 .home-status .c-time-str{font-size:32px}
-@media(max-width:1100px){.home-grid{grid-template-columns:minmax(0,1fr) 280px;gap:18px}.home-calendar,.home-notices,.home-status{padding:18px}.home-calendar .cal-legend{width:100%;margin-left:0!important}}
-@media(max-width:850px){.home-grid{grid-template-columns:minmax(0,1fr)}.home-side{display:block}}
-@media(max-width:600px){.home-stock-metrics{grid-template-columns:1fr;gap:18px}.home-stock-metrics>section{padding:22px 20px;min-height:0}.home-notice-row{grid-template-columns:65px minmax(0,1fr);gap:10px}.home-notice-author{display:none}.home-heading{margin-bottom:18px}.home-heading .page-h1{font-size:20px}.home-calendar,.home-notices,.home-status{padding:18px 14px}.home-side{display:flex}.home-calendar .cal-cell{min-height:72px}.home-calendar .cal-legend{gap:8px;font-size:11px}}
+@media(max-width:1100px){.home-announcements{grid-template-columns:minmax(0,1fr) 280px;gap:18px}.home-calendar,.home-notices,.home-status{padding:18px}.home-calendar .cal-legend{width:100%;margin-left:0!important}}
+@media(max-width:850px){.home-announcements{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.home-stock-metrics{grid-template-columns:1fr;gap:18px}.home-stock-metrics>section{padding:22px 20px;min-height:0}.home-notice-row{grid-template-columns:65px minmax(0,1fr);gap:10px}.home-notice-author{display:none}.home-heading{margin-bottom:18px}.home-heading .page-h1{font-size:20px}.home-calendar,.home-notices,.home-status{padding:18px 14px}.home-calendar .cal-cell{min-height:72px}.home-calendar .cal-legend{gap:8px;font-size:11px}}
 
