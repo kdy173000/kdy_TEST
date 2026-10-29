@@ -21,10 +21,8 @@
       document.getElementById(totalId).textContent=fmt([...map.values()].reduce((a,b)=>a+b,0));
       const list=document.getElementById(listId);list.replaceChildren();
       for(const [id,qty] of map){
-        const item=(kind==='product'?data.products:data.materials).find(p=>p.id===id),li=document.createElement('li'),link=document.createElement('a'),amount=document.createElement('span');
-        const url=new URL(kind==='product'?'../inventory/index.html':'../procurement/index.html',location.href);
-        url.searchParams.set(kind==='product'?'product':'material',id);
-        link.href=url.href;link.textContent=item?.name||id;amount.textContent=fmt(qty)+'개';li.append(link,amount);list.append(li);
+        const item=(kind==='product'?data.products:data.materials).find(p=>p.id===id),li=document.createElement('li'),label=document.createElement('span'),amount=document.createElement('span');
+        label.className='stock-item-name';label.textContent=item?.name||id;amount.textContent=fmt(qty)+'개';li.append(label,amount);list.append(li);
       }
       if(!map.size){const li=document.createElement('li');li.textContent=empty;list.append(li);}
     }

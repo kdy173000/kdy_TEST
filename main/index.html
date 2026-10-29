@@ -8,12 +8,12 @@
 
 
 
-<link rel="stylesheet" href="style.css?v=stock-cards132">
+<link rel="stylesheet" href="style.css?v=stock-readonly134">
 
 <script defer src="../shared/notices.js?v=notices36"></script>
 <script defer src="script.js?v=home-favorites128"></script>
 <script defer src="../shared/material-store.js?v=home-stock130"></script>
-<script defer src="../shared/home-stock-summary.js?v=stock-cards132"></script>
+<script defer src="../shared/home-stock-summary.js?v=stock-readonly134"></script>
 <link rel="stylesheet" href="../shared/portal-nav.css?v=header-compact133">
 <script defer src="../shared/order-access.js?v=order-access126"></script><script defer src="../shared/portal-nav.js?v=favorite-rounded131"></script>
 <link rel="stylesheet" href="../shared/searchable-select.css?v=search-all93"><script defer src="../shared/searchable-select.js?v=search-all93"></script><link rel="stylesheet" href="../shared/ai-chat-preview.css?v=ai-layout114"><script defer src="../shared/ai-chat-preview.js?v=ai-layout114"></script></head>
@@ -97,8 +97,8 @@
   </div>
   <section class="home-stock" aria-label="오늘 입고 및 입고 예정 현황">
     <div class="home-stock-metrics">
-      <section><a class="stock-metric-title" href="../inventory/index.html">오늘 자재 입고 <span aria-hidden="true">↗</span></a><p class="stock-metric-number"><strong id="todayProductQty">—</strong><span>개</span></p><p class="stock-metric-hint">생산 등록으로 늘어난 완제품 재고</p><details><summary>품목별 수량</summary><ul id="todayProductList"></ul></details></section>
-      <section><a class="stock-metric-title" href="../procurement/index.html">오늘 부자재 입고 <span aria-hidden="true">↗</span></a><p class="stock-metric-number"><strong id="todayMaterialQty">—</strong><span>개</span></p><p class="stock-metric-hint">정상 입고 수량 · 불량 제외</p><details><summary>품목별 수량</summary><ul id="todayMaterialList"></ul></details></section>
+      <section><span class="stock-metric-title">오늘 자재 입고</span><p class="stock-metric-number"><strong id="todayProductQty">—</strong><span>개</span></p><p class="stock-metric-hint">생산 등록으로 늘어난 완제품 재고</p><details><summary>품목별 수량</summary><ul id="todayProductList"></ul></details></section>
+      <section><span class="stock-metric-title">오늘 부자재 입고</span><p class="stock-metric-number"><strong id="todayMaterialQty">—</strong><span>개</span></p><p class="stock-metric-hint">정상 입고 수량 · 불량 제외</p><details><summary>품목별 수량</summary><ul id="todayMaterialList"></ul></details></section>
       <section><span class="stock-metric-title">오늘 입고 예정</span><p class="stock-metric-number"><strong id="todayExpectedQty">—</strong><span>개</span></p><p class="stock-metric-hint" id="todayExpectedHint">오늘 예정인 미완료 발주의 발주 수량</p><details><summary>예정 품목과 발주 수량</summary><ul id="todayExpectedList"></ul></details></section>
     </div>
     <p class="stock-summary-note" id="stockSummaryMessage" role="status">이 브라우저의 재고 기록을 확인하고 있어요.</p>

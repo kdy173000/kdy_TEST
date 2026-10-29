@@ -333,7 +333,6 @@ font-weight:500;}
 .home-stock-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
 .home-stock-metrics>section{min-width:0;background:var(--bg2,#fff);border:1px solid var(--border);border-radius:3px;padding:26px 28px;min-height:220px}
 .stock-metric-title{display:flex;align-items:center;justify-content:center;gap:8px;font-size:18px;font-weight:600;padding-bottom:16px;margin-bottom:14px;border-bottom:1px solid var(--border)}
-a.stock-metric-title:hover{color:var(--accent)}
 .stock-metric-title>span{color:var(--text3);font-size:13px}
 .stock-metric-number{display:flex;justify-content:center;align-items:baseline;gap:6px;margin:10px 0 4px;font-variant-numeric:tabular-nums}
 .stock-metric-number strong{font-size:30px;font-weight:600;line-height:1.4}
@@ -343,9 +342,8 @@ a.stock-metric-title:hover{color:var(--accent)}
 .home-stock-metrics summary{cursor:pointer;color:var(--text2)}
 .home-stock-metrics ul{list-style:none;padding:0;margin:10px 0 0;max-height:190px;overflow:auto}
 .home-stock-metrics li{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--border);padding:8px 0}
-.home-stock-metrics li a{min-width:0;overflow-wrap:anywhere}
-.home-stock-metrics li a:hover{text-decoration:underline}
-.home-stock-metrics li>span{white-space:nowrap}
+.home-stock-metrics .stock-item-name{min-width:0;overflow-wrap:anywhere;white-space:normal}
+.home-stock-metrics li>span:last-child{white-space:nowrap}
 .stock-summary-note{margin-top:16px}
 .home-heading .page-h1{font-size:20px;font-weight:500;letter-spacing:-.4px;line-height:1.5}
 .home-heading .page-desc{font-size:13px;margin-bottom:0;margin-top:4px}
