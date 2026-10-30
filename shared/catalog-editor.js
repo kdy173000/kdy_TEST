@@ -16,21 +16,25 @@ window.CatalogEditor=(()=>{
   }
   $('catalogDialog').showModal();
  }
+ function remove(id){
+  if(!UI.allowWrite())return;
+  const x=(config.kind==='product'?FB.data.products:FB.data.materials).find(x=>x.id===id&&!x.deleted);if(!x)return;
+  if(!confirm(x.name+'을 목록에서 삭제하시겠습니까? 재고나 연결 기록이 있으면 삭제할 수 없습니다.'))return;
+  try{if(config.kind==='product')FB.deleteProduct(id);else FB.deleteMaterial(id);config.saved('');if($('catalogDialog').open)$('catalogDialog').close();UI.toast('목록에서 삭제했습니다.');}catch(err){UI.toast(err.message);}
+ }
  function bind(options){config=options;document.querySelectorAll('[data-catalog-action]').forEach(b=>{b.hidden=false;b.disabled=!FB.canAdmin();b.title=FB.canAdmin()?'':'발주팀 권한이 필요합니다.';});$('newCatalogItem').onclick=()=>open();if($('editCatalogItem'))$('editCatalogItem').onclick=()=>open(config.selected()?.id);
   if(config.kind==='product'){
    for(const key of ['category','family'])$(key+'Tab').onclick=()=>classificationTab(key);
    $('classificationTabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)||!['categoryTab','familyTab'].includes(e.target.id))return;e.preventDefault();const key=e.key==='Home'?'category':e.key==='End'?'family':e.target.id==='categoryTab'?'family':'category';classificationTab(key,true);};
-   $('deleteProduct').onclick=()=>{if(!UI.allowWrite())return;const p=config.selected();if(!p)return;if(!confirm(p.name+'을 목록에서 삭제할까요? 재고나 연결 기록이 있으면 삭제할 수 없습니다.'))return;try{FB.deleteProduct(p.id);config.saved('');$('catalogDialog').close();UI.toast('자재를 목록에서 삭제했습니다.');}catch(err){UI.toast(err.message);}};
    $('productForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveProduct({id:itemId||undefined,name:$('adminProductName').value,family:$('adminProductFamily').value,category:$('adminProductCategory').value,sample:$('adminProductSample').value==='true'});config.saved(id);$('catalogDialog').close();UI.toast('완제품 정보를 저장했습니다.');}catch(err){$('productError').textContent=err.message;}};
    $('archiveProduct').onclick=()=>{try{FB.toggleProduct(itemId);config.saved(itemId);$('catalogDialog').close();UI.toast('완제품 사용 상태를 변경했습니다.');}catch(err){$('productError').textContent=err.message;}};
    $('familyForm').onsubmit=e=>{e.preventDefault();try{const family=FB.addProductFamily($('newFamilyName').value);$('adminProductFamily').innerHTML=UI.options(familyOptions(),family);$('newFamilyName').value='';$('familyError').textContent='';classificationLists();UI.toast('포장 유형을 추가했습니다.');}catch(err){$('familyError').textContent=err.message;}};
    $('categoryForm').onsubmit=e=>{e.preventDefault();try{const name=FB.addProductCategory($('newCategoryName').value);$('adminProductCategory').innerHTML=UI.options(FB.data.productCategories.map(v=>[v,v]),name);$('newCategoryName').value='';$('categoryError').textContent='';classificationLists();UI.toast('분류를 추가했습니다.');}catch(err){$('categoryError').textContent=err.message;}};
   }else{
    $('materialForm').onsubmit=e=>{e.preventDefault();try{const id=FB.saveMaterial({id:itemId||undefined,name:$('materialName').value,slot:$('materialSlot').value,scope:$('materialScope').value,memo:$('materialMemo').value,vid:$('materialInitialVersion').value,qty:Number($('materialInitialQty').value)});config.saved(id);$('catalogDialog').close();UI.toast('부자재 정보를 저장했습니다.');}catch(err){$('materialError').textContent=err.message;}};
-   $('deleteMaterial').onclick=()=>{if(!UI.allowWrite())return;const m=config.selected();if(!m)return;if(!confirm(m.name+'을 목록에서 삭제할까요? 연결된 기록이나 재고가 있으면 삭제할 수 없습니다.'))return;try{FB.deleteMaterial(m.id);config.saved('');$('catalogDialog').close();UI.toast('부자재를 목록에서 삭제했습니다.');}catch(err){$('materialError').textContent=err.message;}};
    $('archiveMaterial').onclick=()=>{try{FB.toggleMaterial(itemId);config.saved(itemId);$('catalogDialog').close();UI.toast('부자재 사용 상태를 변경했습니다.');}catch(err){$('materialError').textContent=err.message;}};
    $('catalogVersionList').onclick=e=>{const b=e.target.closest('[data-catalog-version]');if(!b)return;try{FB.toggleVersion(itemId,b.dataset.catalogVersion);versions();UI.toast('버전 사용 상태를 변경했습니다.');}catch(err){$('materialError').textContent=err.message;}};
   }
  }
- return {bind,open};
+ return {bind,open,remove};
 })();

@@ -20,7 +20,8 @@
 
 /* Shared placement for catalog item editing on both stock pages. */
 .product-list-row{position:relative}
-.product-list-row:has(.product-info-edit) .product{padding-right:92px}
-.product-info-edit{position:absolute;right:10px;top:13px;padding:5px 7px;font-size:11px;line-height:1.6;border:1px solid var(--border2);border-radius:var(--control-radius,3px);background:var(--bg2);color:var(--text2)}
-.product-info-edit:hover{background:var(--hover);color:var(--text)}
-
+.product-list-row:has(.catalog-list-actions) .product{padding-right:92px;min-height:94px}
+.catalog-list-actions{position:absolute;right:10px;top:12px;display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.portal-with-nav .catalog-list-actions button{position:static;width:auto;min-height:26px;margin:0;padding:3px 7px;font-size:11px;line-height:1.6;border-radius:var(--control-radius,3px)}
+.portal-with-nav .catalog-list-actions .product-info-delete{background:transparent;color:#62738b;border:1px solid var(--border2,#dce0e5)}
+.portal-with-nav .catalog-list-actions .product-info-delete:hover:not(:disabled){background:var(--hover);color:#9b1b30}
