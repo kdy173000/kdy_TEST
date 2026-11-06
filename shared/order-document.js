@@ -11,23 +11,46 @@ window.OrderDocument=(()=>{
   const groups=new Map();
   for(const row of rows){const key=JSON.stringify([row.supplierId||String(row.supplier||'').trim(),row.date]);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(structuredClone(row));}
   const result=[];
-  for(const rows of groups.values()){const supplier=structuredClone(FB.data.suppliers.find(s=>s.id===rows[0].supplierId)||{name:rows[0].supplier});for(let i=0;i<rows.length;i+=15)result.push({supplier,date:rows[0].date,numberStart:i+1,rows:rows.slice(i,i+15)});}
+  const doc=preparePrint();
+  const limit=doc.getElementById('printPageLimit').getBoundingClientRect().height;
+  const layout=doc.getElementById('printLayout');
+  for(const rows of groups.values()){
+   const supplier=structuredClone(FB.data.suppliers.find(s=>s.id===rows[0].supplierId)||{name:rows[0].supplier});
+   let page={supplier,date:rows[0].date,numberStart:1,rows:[]};
+   for(const row of rows){
+    const candidate={...page,rows:[...page.rows,row]};
+    layout.innerHTML=sheet(candidate,0,1);
+    if(page.rows.length&&(candidate.rows.length>15||layout.firstElementChild.getBoundingClientRect().height>limit)){
+     result.push(page);
+     page={...page,numberStart:page.numberStart+page.rows.length,rows:[row]};
+    }else page=candidate;
+   }
+   result.push(page);
+  }
   return result;
  }
  function sheet(page,index,pageCount){
   const s=page.supplier,rows=page.rows;
   const addresses=[...new Set(rows.map(r=>String(r.deliveryAddress||'').trim()).filter(Boolean))];
-  const body=rows.map((r,i)=>'<tr><td>'+String((page.numberStart||1)+i)+'</td><td>'+esc(r.name)+'<br><small>'+esc(r.vid)+'</small></td><td>'+esc(r.spec||'')+'</td><td class="num">'+esc(r.qty)+'</td><td class="num">'+money(r.unitPrice)+'</td><td class="num">'+money(r.supplyAmount)+'</td><td class="num">'+money(r.taxAmount)+'</td><td>'+esc([r.requestDate?'납품 요청일: '+r.requestDate:'',r.note,addresses.length>1?'납품: '+(r.deliveryAddress||'미입력'):''].filter(Boolean).join(' · '))+'</td></tr>').join('')+Array.from({length:Math.max(0,15-rows.length)},()=>'<tr>'+Array.from({length:8},()=>'<td>&nbsp;</td>').join('')+'</tr>').join('');
+  const body=rows.map((r,i)=>'<tr><td>'+String((page.numberStart||1)+i)+'</td><td>'+esc(r.name)+'<br><small>'+esc(r.vid)+'</small></td><td>'+esc(r.spec||'')+'</td><td class="num">'+esc(r.qty)+'</td><td class="num">'+money(r.unitPrice)+'</td><td class="num">'+money(r.supplyAmount)+'</td><td class="num">'+money(r.taxAmount)+'</td><td>'+esc([r.requestDate?'납품 요청일: '+r.requestDate:'',r.note,addresses.length>1?'납품: '+(r.deliveryAddress||'미입력'):''].filter(Boolean).join(' · '))+'</td></tr>').join('');
 
   const due=[...new Set(rows.map(r=>r.due).filter(Boolean))].join(', ')||'미정',person=[...new Set(rows.map(r=>[r.person,r.personPhone?'('+r.personPhone+')':''].filter(Boolean).join(' ')).filter(Boolean))].join(', ');
   return '<article class="invoice-sheet"><h1>발 주 서</h1><div class="invoice-info"><div><strong>공급자 · '+esc(s.name||'')+'</strong><br>발행일자: '+esc(page.date)+'<br>사업자등록번호: '+esc(s.businessNumber||'')+'<br>대표자: '+esc(s.representative||'')+'<br>사업장: '+esc(s.address||'')+'<br>업태 / 종목: '+esc(s.businessType||'')+' / '+esc(s.businessItem||'')+'<br>연락처: '+esc(s.phone||'')+'</div><div><strong>공급받는 자 · '+esc(BUYER.name)+'</strong><br>등록번호: '+esc(BUYER.businessNumber)+'<br>성명: '+esc(BUYER.representative)+'<br>사업장: '+esc(BUYER.address)+'<br>업태: '+esc(BUYER.businessType)+'<br>종목: '+esc(BUYER.businessItem)+'<br>전화번호: '+esc(BUYER.phone)+'</div></div><table><thead><tr><th>번호</th><th>품명 · 버전</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>'+body+'</tbody></table><div class="invoice-total">합계 수량: '+rows.reduce((n,r)=>n+Number(r.qty),0).toLocaleString('ko-KR')+'개 &nbsp; 공급가액: '+money(sumAmounts(rows,'supplyAmount'))+'원 &nbsp; 세액: '+money(sumAmounts(rows,'taxAmount'))+'원<br>총금액: '+money(grand(rows))+'원</div><div class="invoice-footer">입고 예정일: '+esc(due)+'<br>납품장소: '+esc(addresses.length?addresses.join(' / '):'미입력')+'<br>담당자: '+esc(person)+'</div><div class="invoice-page-number">'+(index+1)+' / '+pageCount+'</div></article>';
  }
  function render(){if(!pages.length)return;$('previewPaper').innerHTML=sheet(pages[current],current,pages.length);$('pageNumber').textContent=(current+1)+' / '+pages.length;$('previousPage').disabled=current===0;$('nextPage').disabled=current===pages.length-1;}
  function selectedPages(){const range=$('previewRange').value;if(range==='current')return [pages[current]];if(range==='all')return pages;const from=Number($('pageFrom').value),to=Number($('pageTo').value);if(!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to>pages.length)throw Error('1~'+pages.length+' 범위의 페이지를 입력하세요.');return pages.slice(from-1,to);}
- function print(selected){requirePrintPermission();
-  const frame=$('orderPrintFrame'),doc=frame.contentDocument;
+ function preparePrint(){
+  const doc=$('orderPrintFrame').contentDocument;
   const css=[...document.styleSheets].filter(s=>{try{return s.href?.includes('order-pages.css')}catch{return false}}).flatMap(s=>{try{return [...s.cssRules].filter(r=>r.cssText.includes('invoice-')).map(r=>r.cssText)}catch{return []}}).join('\n');
-  doc.open();doc.write('<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>발주서</title><style>'+css+'\n@page{size:A4 portrait;margin:10mm}body{margin:0}*{box-sizing:border-box}.invoice-sheet{width:190mm;min-height:270mm;margin:0;padding:6mm;font-family:Arial,sans-serif;break-after:page;box-shadow:none}.invoice-sheet:last-child{break-after:auto}.invoice-info{display:grid;grid-template-columns:1fr 1fr}.num{text-align:right}</style></head><body>'+selected.map((p,i)=>sheet(p,i,selected.length)).join('')+'</body></html>');doc.close();frame.contentWindow.focus();setTimeout(()=>frame.contentWindow.print(),100);
+  doc.open();
+  doc.write('<!doctype html><html lang="ko"><head><meta charset="UTF-8"><title>발주서</title><style>'+css+'\n@page{size:A4 portrait;margin:10mm}body{margin:0}*{box-sizing:border-box}.invoice-sheet{width:190mm;min-height:0;margin:0;padding:6mm;font-family:Arial,sans-serif;break-after:page;box-shadow:none}.invoice-sheet:last-child{break-after:auto}.invoice-sheet tr{break-inside:avoid}.invoice-sheet th,.invoice-sheet td{padding:5px 4px}.invoice-sheet th:first-child{width:4%}.invoice-sheet th:nth-child(2){width:21%}.invoice-sheet th:nth-child(3){width:11%}.invoice-sheet th:nth-child(4){width:7%}.invoice-sheet th:last-child{width:25%}.invoice-info{display:grid;grid-template-columns:1fr 1fr}.num{text-align:right}#printPageLimit{position:absolute;height:270mm;visibility:hidden}@media print{#printPageLimit{display:none}}</style></head><body><div id="printPageLimit"></div><div id="printLayout"></div></body></html>');
+  doc.close();
+  return doc;
+ }
+ function print(selected){requirePrintPermission();
+  const frame=$('orderPrintFrame'),doc=preparePrint();
+  doc.getElementById('printLayout').innerHTML=selected.map((p,i)=>sheet(p,i,selected.length)).join('');
+  frame.contentWindow.focus();setTimeout(()=>frame.contentWindow.print(),100);
  }
  const xml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
  const enc=new TextEncoder();
