@@ -39,67 +39,21 @@ function toggleTheme(){
   h.dataset.theme=dark?'light':'dark';
   const ico=document.getElementById('pf-t-ico');
   if(ico) ico.textContent=dark?'🌙':'☀️';
-  if(window._applyTickColors) window._applyTickColors();
 }
 document.addEventListener('DOMContentLoaded',function(){
   buildTzDropdown();
-  const face=document.getElementById('clockFace');
   const tzSel=document.getElementById('tzSel');
   const timeStr=document.getElementById('timeStr');
   const dateStr=document.getElementById('dateStr');
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;';
-  face.appendChild(svg);
-  function applyTickColors(){
-    const styles=getComputedStyle(document.documentElement);
-    const major=styles.getPropertyValue('--tick-major').trim();
-    const minor=styles.getPropertyValue('--tick-minor').trim();
-    [...svg.querySelectorAll('line')].forEach((line,i)=>{ line.setAttribute('stroke',i%3===0?major:minor); });
-  }
-  window._applyTickColors=applyTickColors;
-  function drawTicks(){
-    const SIZE=face.clientWidth,CX=SIZE/2,CY=SIZE/2;
-    svg.setAttribute('width',SIZE); svg.setAttribute('height',SIZE); svg.innerHTML='';
-    for(let i=0;i<12;i++){
-      const rad=(i*30-90)*Math.PI/180;
-      const outerR=CX-(SIZE*0.033);
-      const len=i%3===0?SIZE*0.047:SIZE*0.03;
-      const innerR=outerR-len;
-      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',CX+outerR*Math.cos(rad));
-      line.setAttribute('y1',CY+outerR*Math.sin(rad));
-      line.setAttribute('x2',CX+innerR*Math.cos(rad));
-      line.setAttribute('y2',CY+innerR*Math.sin(rad));
-      line.setAttribute('stroke-width',i%3===0?'2':'1.5');
-      line.setAttribute('stroke-linecap','round');
-      svg.appendChild(line);
-    }
-    applyTickColors();
-  }
-  ['hour','minute','second'].forEach(cls=>{
-    const d=document.createElement('div'); d.className='c-hand '+cls; face.appendChild(d); face['_'+cls]=d;
-  });
-  face.appendChild(Object.assign(document.createElement('div'),{className:'c-center-dot'}));
-  function getTimeParts(tz){
-    const now=new Date();
-    const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
-    const map={};
-    fmt.formatToParts(now).forEach(p=>{map[p.type]=p.value;});
-    return { month:Number(map.month),day:Number(map.day),weekday:map.weekday,hour:Number(map.hour),minute:Number(map.minute),second:Number(map.second),ms:now.getMilliseconds() };
-  }
   function tick(){
-    const t=getTimeParts(tzSel.value||getDefaultTz());
-    const ss=t.second+(t.ms/1000),mm=t.minute+(ss/60),hh=(t.hour%12)+(mm/60);
-    face._hour.style.transform=`rotate(${hh*30}deg)`;
-    face._minute.style.transform=`rotate(${mm*6}deg)`;
-    face._second.style.transform=`rotate(${ss*6}deg)`;
-    timeStr.textContent=[t.hour,t.minute,t.second].map(x=>String(x).padStart(2,'0')).join(':');
-    dateStr.textContent=`${String(t.month).padStart(2,'0')}월 ${String(t.day).padStart(2,'0')}일 (${t.weekday})`;
-    requestAnimationFrame(tick);
+    const tz=tzSel.value||getDefaultTz();
+    const now=new Date();
+    timeStr.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
+    dateStr.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:tz,month:'long',day:'numeric',weekday:'short'}).format(now);
   }
-  tzSel.addEventListener('change',()=>{ localStorage.setItem(KEY_TZ,tzSel.value); });
-  window.addEventListener('resize',drawTicks);
-  drawTicks(); tick();
+  tzSel.addEventListener('change',()=>{localStorage.setItem(KEY_TZ,tzSel.value);tick();});
+  tick();
+  setInterval(tick,1000);
 });
 
 const me = JSON.parse(sessionStorage.getItem('fb_user') || 'null');
