@@ -34,3 +34,14 @@ function doLogin() {
     err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
   }
 }
+
+{
+  const input = document.getElementById('userPw');
+  const button = document.getElementById('passwordVisibility');
+  if (input && button) button.addEventListener('click', () => {
+    const visible = input.type === 'password';
+    input.type = visible ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(visible));
+    button.title = visible ? '비밀번호 숨기기' : '비밀번호 보기';
+  });
+}
