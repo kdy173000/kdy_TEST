@@ -1,6 +1,6 @@
 'use strict';
 window.OrderDocument=(()=>{
- function requirePrintPermission(){if(!FB.canAdmin())throw Error('발주팀 권한이 있어야 발주서를 인쇄하거나 저장할 수 있습니다.');}
+ function requirePrintPermission(){if(!window.OrderAccess?.canManageOrders())throw Error('발주팀 권한이 있어야 발주서를 인쇄하거나 저장할 수 있습니다.');}
  const $=id=>document.getElementById(id),esc=UI.esc;
  const sumAmounts=(rows,key)=>rows.some(r=>r[key]===null||r[key]===undefined)?null:rows.reduce((n,r)=>n+Number(r[key]),0);
  const grand=rows=>rows.some(r=>r.supplyAmount==null||r.taxAmount==null)?null:rows.reduce((n,r)=>n+r.supplyAmount+r.taxAmount,0);

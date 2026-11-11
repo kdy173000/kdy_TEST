@@ -2,7 +2,7 @@
 (()=>{
 const {$,esc,fmt}=UI;
 if(!FB.user()){location.replace('../login/index.html');return;}
-if(!FB.canAdmin()){location.replace('../main/index.html?access=orders');return;}
+if(!window.OrderAccess.canManageOrders()){location.replace('../main/index.html?access=orders');return;}
 let draft=[],visible=[],selected=new Set(),deliveryPlaceId='fireball';
 const materials=()=>FB.data.materials.filter(m=>!m.deleted&&!m.archived&&m.versions.some(v=>!v.deleted&&v.state==='사용'));
 const suppliers=()=>FB.data.suppliers.filter(s=>!s.archived);
@@ -45,7 +45,7 @@ function renderDeliveryPresets(){
 $('deliveryAddress').oninput=()=>{deliveryPlaceId='';renderDeliveryPresets();};
 function render(){
  renderDeliveryPresets();
- $('startOrder').hidden=false;$('startOrder').disabled=!FB.canAdmin();$('startOrder').title=FB.canAdmin()?'':'발주팀 권한이 필요합니다.';
+ $('startOrder').hidden=false;$('startOrder').disabled=!window.OrderAccess.canManageOrders();$('startOrder').title=window.OrderAccess.canManageOrders()?'':'발주팀 권한이 필요합니다.';
  const chosen=$('supplierFilter').value;$('supplierFilter').innerHTML='<option value="">전체 업체</option>'+UI.options(FB.data.suppliers.map(s=>[s.id,s.name+(s.archived?' · 거래 중단':'')]),chosen);
  $('productFilterPicker').innerHTML=SearchPicker.markup(FB.data.materials.find(m=>m.id===$('orderSearch').value)?.name||'','제품명');
  SearchPicker.bind($('productFilterPicker').querySelector('.search-picker'),[{id:'',label:'전체 제품'},...FB.data.materials.filter(m=>!m.deleted).map(m=>({id:m.id,label:m.name+' · '+m.id}))],id=>{$('orderSearch').value=id;render();});
@@ -54,8 +54,8 @@ function render(){
  const q=$('orderSearch').value.trim().toLowerCase(),supplier=$('supplierFilter').value,state=$('statusFilter').value,orderDate=$('orderDateFilter').value,receiptDate=$('receiptDateFilter').value;
  visible=FB.data.orders.filter(o=>(!supplier||o.supplierId===supplier)&&(!state||status(o)===state)&&(!orderDate||o.date===orderDate)&&receivedOn(o,receiptDate)&&(!q||[o.name,o.mid,o.id,o.note].join(' ').toLowerCase().includes(q))).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
  $('orderCount').textContent=visible.length+'건';
- $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td>'+esc(o.requestDate||'—')+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+'개</td><td class="order-receipt-cell">'+(!FB.orderIsPending(o)?'<span class="receipt-control page-note">처리 완료</span>':'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>입고 완료</button>')+'</td><td class="order-edit-cell">'+('<button type="button" data-edit-order="'+esc(o.id)+'" '+(FB.canAdmin()?'':'disabled title="발주팀 권한이 필요합니다."')+'>수정</button>')+'</td></tr>').join('')||'<tr><td colspan="13" class="empty">발주 내역이 없습니다.</td></tr>';
- const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!FB.canAdmin()||!selected.size;$('previewSelected').title=FB.canAdmin()?(selected.size?'':'인쇄할 발주를 선택하세요.'):'발주팀 권한이 필요합니다.';
+ $('orderRows').innerHTML=visible.map(o=>'<tr><td><input type="checkbox" data-select="'+esc(o.id)+'" aria-label="'+esc(o.id)+' 선택" '+(selected.has(o.id)?'checked':'')+'></td><td>'+esc(o.date)+'<small>'+esc(o.id)+'</small></td><td>'+esc(FB.data.materials.find(m=>m.id===o.mid)?.name||o.name)+'</td><td>'+esc(o.vid)+'</td><td class="num">'+fmt(o.qty)+'개</td><td><a href="../suppliers/index.html?supplier='+encodeURIComponent(o.supplierId)+'">'+esc(supplierName(o))+'</a></td><td>'+esc(o.note)+'</td><td>'+esc(o.requestDate||'—')+'</td><td><span>'+esc(o.due||'미정')+'</span>'+'</td><td><span class="badge">'+statusLabel(o)+'</span></td><td>'+fmt(o.received)+'개</td><td class="order-receipt-cell">'+(!FB.orderIsPending(o)?'<span class="receipt-control page-note">처리 완료</span>':'<button class="receipt-control primary" type="button" data-receive="'+esc(o.id)+'" '+(window.OrderAccess.canManageOrders()?'':'disabled title="발주팀 권한이 필요합니다."')+'>입고 완료</button>')+'</td><td class="order-edit-cell">'+('<button type="button" data-edit-order="'+esc(o.id)+'" '+(window.OrderAccess.canManageOrders()?'':'disabled title="발주팀 권한이 필요합니다."')+'>수정</button>')+'</td></tr>').join('')||'<tr><td colspan="13" class="empty">발주 내역이 없습니다.</td></tr>';
+ const n=visible.filter(o=>selected.has(o.id)).length;$('selectAll').checked=!!visible.length&&n===visible.length;$('selectAll').indeterminate=n>0&&n<visible.length;$('previewSelected').disabled=!window.OrderAccess.canManageOrders()||!selected.size;$('previewSelected').title=window.OrderAccess.canManageOrders()?(selected.size?'':'인쇄할 발주를 선택하세요.'):'발주팀 권한이 필요합니다.';
 }
 let editingOrder=null,editingRevision=0,editingMid='',editingSupplier='';
 function editVersions(value){const m=FB.data.materials.find(m=>m.id===editingMid);$('editOrderVersion').innerHTML=UI.options((m?.versions||[]).filter(v=>v.id===value||(!v.deleted&&v.state==='사용')).map(v=>[v.id,v.id]),value);}
@@ -105,5 +105,5 @@ $('previewDraft').onclick=()=>{if(!UI.allowWrite())return;
 };
 $('previewSelected').onclick=()=>{if(!UI.allowWrite())return;const rows=FB.data.orders.filter(o=>selected.has(o.id));if(!rows.length){UI.toast('인쇄할 발주를 선택하세요.');return;}try{OrderDocument.open(rows);}catch(e){UI.toast(OrderDocument.errorMessage(e));}};
 window.addEventListener('fb-data',render);render();
-const initial=new URLSearchParams(location.search).get('material');if(initial&&FB.canAdmin())start(initial,new URLSearchParams(location.search).get('version')||'');
+const initial=new URLSearchParams(location.search).get('material');if(initial&&window.OrderAccess.canManageOrders())start(initial,new URLSearchParams(location.search).get('version')||'');
 })();
