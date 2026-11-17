@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>출고 폼 · 파이어볼</title>
+<link rel="stylesheet" href="../../shared/portal.css?v=round15-140"><link rel="stylesheet" href="../../shared/portal-nav.css?v=inventory-navy146"><link rel="stylesheet" href="style.css">
+<script src="../../shared/session.js?v=order-role147"></script><script defer src="../../shared/order-access.js?v=order-role147"></script><script defer src="../../shared/portal-nav.js?v=shipping-forms148"></script><script defer src="script.js"></script></head>
+<body><header class="portal-header"><a class="portal-brand" href="../../main/index.html"><img class="portal-logo" src="../../shared/assets/fireball-logo.png" alt="FIREBALL" width="209" height="38"></a><div class="portal-header-actions"></div></header>
+<main id="workspace" hidden><h1>출고 폼</h1><p>질문을 준비하고 외부 응답 링크를 관리하세요.</p>
+<div class="forms-layout"><aside class="form-card"><h2>내 폼</h2><button id="newForm" type="button">+ 새 폼</button><div id="formList"></div></aside>
+<div><form class="form-card" id="editor" hidden><label>폼 제목<input id="title" required maxlength="100"></label><label>설명<textarea id="description" maxlength="1000"></textarea></label><h2>질문</h2><div id="questions"></div><button type="button" id="addQuestion">+ 질문 추가</button><h2>외부 응답 링크</h2><p>구글폼·네이버폼에 질문을 옮긴 뒤, 로그인 없이 응답할 수 있도록 설정한 참여 링크를 붙여 넣으세요. 포털에서 수정한 질문은 외부 폼에 자동 반영되지 않습니다.</p>
+<label>참여 링크<input type="url" id="publicLink" placeholder="https://"></label><div class="actions"><button type="submit">저장</button><button type="button" id="copyOutline">질문 복사</button><button type="button" id="copyLink">참여 링크 복사</button><a id="openLink" target="_blank" rel="noopener noreferrer" hidden>외부 폼 열기</a></div></form>
+<p id="status" role="status"></p><p class="local-note">폼 초안과 링크는 이 브라우저에 저장되고, 제출된 답변은 연결한 서비스에 저장됩니다.</p></div></div></main></body></html>

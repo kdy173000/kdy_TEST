@@ -15,14 +15,15 @@
     const groups = [
       ['사내 운영 관리', [['공지사항','main/notices/index.html'],['조직도','main/index.html#org'],['내부 일정 관리','main/leave/index.html']]],
       ['제품 관리', [['자재','inventory/index.html','재고조회'],['부자재','procurement/index.html','재고관리자'],['발주 관리','orders/index.html','발주팀'],['원료',null,'원료관리'],['제품 신고',null,'제품 신고 관리']]],
+      ['출고팀', [['출고 폼','shipping/forms/index.html','출고팀']]],
       ['디자인팀', [['디자인 업무분배',null],['회의록',null]]],
       ['개인 업무관리', [['김다영',null],['최혜선',null],['송나겸',null]]]
     ];
     for (const [name, items] of groups) {
       const title = document.createElement('div'); title.className = 'sb-group-label'; title.textContent = name; nav.append(title);
       for (const [label, path, perm] of items) {
-        const custom = path !== 'orders/index.html' && perm && (links[perm] || (perm === '재고관리자' && links['입출고관리']));
-        const permitted = path === 'orders/index.html' ? !!window.OrderAccess?.canManageOrders() : (!perm || (perm === '재고조회' && (user.perms || []).some(p=>['발주팀','재고관리팀','재고관리자'].includes(p))) || user.role === 'manager' || user.role === 'admin' || ((user.perms || []).includes(perm) || (perm === '재고관리자' && (user.perms || []).some(p => ['발주팀','재고관리팀','입출고관리','입출고 관리자'].includes(p)))));
+        const custom = !['orders/index.html','shipping/forms/index.html'].includes(path) && perm && (links[perm] || (perm === '재고관리자' && links['입출고관리']));
+        const permitted = path === 'shipping/forms/index.html' ? !!user?.id && (user.role === 'admin' || (user.perms || []).includes('출고팀')) : path === 'orders/index.html' ? !!window.OrderAccess?.canManageOrders() : (!perm || (perm === '재고조회' && (user.perms || []).some(p=>['발주팀','재고관리팀','재고관리자'].includes(p))) || user.role === 'manager' || user.role === 'admin' || ((user.perms || []).includes(perm) || (perm === '재고관리자' && (user.perms || []).some(p => ['발주팀','재고관리팀','입출고관리','입출고 관리자'].includes(p)))));
         let url = path && to(path);
         if (custom) { try { const parsed = new URL(custom); if (['http:','https:'].includes(parsed.protocol)) url = parsed.href; } catch {} }
         const item = document.createElement(url && permitted ? 'a' : 'button');
