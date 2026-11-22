@@ -102,7 +102,7 @@ return ids;
 function createOrder(input){return createOrders([input])[0];}
 function orderIsPending(o){return !o.closed&&(o.manualPending===true||(o.manualPending===undefined&&o.received<o.qty));}
 function setOrderPending(d,o,keepOpen){if(typeof keepOpen!=='boolean')return;const before={closed:!!o.closed,manualPending:o.manualPending};o.closed=!keepOpen;o.manualPending=keepOpen;d.orderStateEdits=d.orderStateEdits||[];d.orderStateEdits.push({id:o.id,date:day(),person:user()?.name||'',before,after:{closed:o.closed,manualPending:o.manualPending}});}
-function receiveOrder(input){return mutate(d=>{
+function receiveOrder(input){const u=user();if(!u||(u.role!=='admin'&&!(u.perms||[]).includes('발주팀')))throw Error('발주팀 권한이 있어야 입고 완료를 처리할 수 있습니다.');return mutate(d=>{
 const order=d.orders.find(o=>o.id===input.id);
 if(!order||!orderIsPending(order))throw Error('입고 가능한 발주가 아닙니다.');
 const delivered=integer(Number(input.qty),0),defective=integer(Number(input.defective||0),0),finish=input.keepOpen!==true&&input.finish!==false;
